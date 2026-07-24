@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { MaskySession } from './lib/masky';
+import VideoFrame from './VideoFrame';
 
 const API = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8787';
 
@@ -64,7 +65,7 @@ export default function Inbox({ session }: { session: MaskySession }) {
             <p>{c.turns[c.turns.length - 1]?.text.slice(0, 160)}…</p>
           </blockquote>
           {c.renderedUrl ? (
-            <iframe className="clip" src={c.renderedUrl} title={c.id} allow="autoplay" />
+            <VideoFrame src={c.renderedUrl} title={c.id} />
           ) : (
             <button className="ghost" disabled={busy === c.id} onClick={() => renderConvo(c.id)}>
               {busy === c.id ? 'Rendering…' : '🎬 Render as video (your credits)'}

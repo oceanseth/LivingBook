@@ -21,6 +21,7 @@
   --shadow-md: 0 4px 16px -4px rgba(20, 18, 45, 0.1), 0 1px 3px rgba(20, 18, 45, 0.05);
   --shadow-lg: 0 18px 40px -18px rgba(20, 18, 45, 0.28);
 
+  --shimmer: rgba(255, 255, 255, 0.7);
   --radius: 14px;
   --radius-sm: 10px;
   --gutter: clamp(1rem, 4vw, 2rem);
@@ -47,6 +48,8 @@
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
     --shadow-md: 0 4px 16px -4px rgba(0, 0, 0, 0.5);
     --shadow-lg: 0 18px 40px -18px rgba(0, 0, 0, 0.7);
+
+    --shimmer: rgba(255, 255, 255, 0.06);
   }
 }
 
@@ -432,13 +435,95 @@ button:disabled {
   text-wrap: pretty;
 }
 
+/* ---------- video frames (see VideoFrame.tsx) ---------- */
+
+/* .clip / .player are the *box*; the iframe inside fills it absolutely so the
+   loading skeleton can sit underneath at the same size. */
+.clip,
 .player {
+  position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface-2);
+}
+
+.player {
+  aspect-ratio: 16 / 9;
+}
+
+.clip {
+  aspect-ratio: 16 / 10;
+}
+
+.frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
   display: block;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.frame.ready {
+  opacity: 1;
+}
+
+.frameload {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.65rem;
+  padding: 1rem;
+  text-align: center;
+  background:
+    linear-gradient(100deg, transparent 25%, var(--shimmer) 50%, transparent 75%),
+    var(--surface-2);
+  background-size: 250% 100%;
+  animation: shimmer 1.8s linear infinite;
+  transition: opacity 0.3s ease;
+}
+
+.frameload.gone {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.frameload small {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--muted);
+  max-width: 24ch;
+}
+
+.frameload a {
+  color: var(--accent);
+}
+
+.spinner {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2.5px solid var(--border-strong);
+  border-top-color: var(--accent);
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -250% 0;
+  }
 }
 
 .passages {
@@ -724,5 +809,15 @@ button:disabled {
   * {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+
+  /* The spinner reports progress — frozen, it reads as hung. Keep it turning
+     (slower), and drop the purely decorative shimmer sweep. */
+  .spinner {
+    animation-duration: 1.4s !important;
+  }
+
+  .frameload {
+    animation-name: none;
   }
 }

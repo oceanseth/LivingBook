@@ -11,6 +11,7 @@ import AskBible from './AskBible';
 import Books from './Books';
 import News from './News';
 import Talk from './Talk';
+import VideoFrame from './VideoFrame';
 import './App.css';
 
 type Tab = 'ask' | 'news' | 'talk' | 'books';
@@ -121,13 +122,14 @@ export default function App() {
             podcast — the LivingBook Host interviewing the Bible itself.
           </p>
           <div className="clips">
-            <iframe className="clip" src="https://masky.ai/live/t-26-07-wdej" title="Bible on today's lawsuit" allow="autoplay" />
-            <iframe className="clip" src="https://masky.ai/live/t-26-07-angu" title="Marketing agent: Red Sea chokepoint" allow="autoplay" />
-            <iframe
-              className="clip"
+            <VideoFrame src="https://masky.ai/live/t-26-07-wdej" title="Bible on today's lawsuit" />
+            <VideoFrame
+              src="https://masky.ai/live/t-26-07-angu"
+              title="Marketing agent: Red Sea chokepoint"
+            />
+            <VideoFrame
               src="https://masky.ai/live/c-26-07-icn4?token=2f6ea719864ecdab7cae0af20dc0dc99353aebb900b1194c"
               title="Generated podcast episode"
-              allow="autoplay"
             />
           </div>
         </section>

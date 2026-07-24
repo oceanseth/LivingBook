@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { MaskySession } from './lib/masky';
+import VideoFrame from './VideoFrame';
 
 // Default to the app's own origin: the ask server is proxied under /api (see
 // vite.config.ts). An absolute http:// default would be blocked as mixed
@@ -108,12 +109,7 @@ export default function AskBible({ session }: { session: MaskySession | null }) 
         <div className="answer">
           <p className="spoken">{result.spoken}</p>
           {result.conversation?.liveUrl && (
-            <iframe
-              className="player"
-              src={result.conversation.liveUrl}
-              title="Narrator"
-              allow="autoplay"
-            />
+            <VideoFrame className="player" src={result.conversation.liveUrl} title="Narrator" />
           )}
           {result.passages.length > 0 && (
             <ul className="passages">
