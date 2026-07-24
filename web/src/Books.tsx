@@ -29,6 +29,7 @@ export default function Books({ session }: { session: MaskySession | null }) {
   const { books, reload } = useBooks();
   const [title, setTitle] = useState('');
   const [upload, setUpload] = useState({ slug: '', title: '', sourceType: 'podcast', text: '' });
+  const [pdf, setPdf] = useState<{ name: string; base64: string } | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -114,16 +115,37 @@ export default function Books({ session }: { session: MaskySession | null }) {
               rows={6}
               value={upload.text}
               onChange={(e) => setUpload({ ...upload, text: e.target.value })}
-              placeholder="Paste the exact text/transcript. Your book will only ever quote it word-for-word."
+              placeholder="Paste the exact text/transcript — or upload a PDF below. Your book will only ever quote it word-for-word."
             />
+            <label className="pdfrow">
+              📄 Or upload a PDF:{' '}
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (!f) return setPdf(null);
+                  const reader = new FileReader();
+                  reader.onload = () =>
+                    setPdf({ name: f.name, base64: String(reader.result).split(',')[1] ?? '' });
+                  reader.readAsDataURL(f);
+                }}
+              />
+              {pdf && <span className="notice">{pdf.name} ready</span>}
+            </label>
             <button
               className="cta"
-              disabled={busy || !upload.slug || upload.text.length < 40}
+              disabled={busy || !upload.slug || (upload.text.length < 40 && !pdf)}
               onClick={() =>
-                post(`/api/books/${upload.slug}/content`, upload)
+                post(`/api/books/${upload.slug}/content`, {
+                  ...upload,
+                  title: upload.title || pdf?.name || 'untitled',
+                  ...(pdf ? { pdfBase64: pdf.base64 } : {}),
+                })
                   .then((d) => {
                     setMsg(`Ingested ${d.unitsAdded} unit(s) — ${d.totalUnits} total`);
                     setUpload({ ...upload, text: '', title: '' });
+                    setPdf(null);
                     reload();
                   })
                   .catch((err) => setMsg(err.message))
