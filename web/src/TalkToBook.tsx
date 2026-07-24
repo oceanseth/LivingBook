@@ -13,10 +13,16 @@ interface Msg {
 
 // One place to talk to any public book or author. Signed-in users keep their
 // history and can render the conversation as shareable video on THEIR credits.
-export default function TalkToBook({ session }: { session: MaskySession | null }) {
-  const { books } = useBooks();
+export default function TalkToBook({
+  session,
+  fixedSlug,
+}: {
+  session: MaskySession | null;
+  fixedSlug?: string;
+}) {
+  const { books } = useBooks(session?.accessToken);
   const [query, setQuery] = useState('');
-  const [slug, setSlug] = useState('');
+  const [slug, setSlug] = useState(fixedSlug ?? '');
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
@@ -31,11 +37,12 @@ export default function TalkToBook({ session }: { session: MaskySession | null }
 
   // Resolve typed text to a book; support exact label match or unique prefix.
   useEffect(() => {
+    if (fixedSlug) return;
     const exact = options.find((o) => o.label === query);
     if (exact) return setSlug(exact.slug);
     const matches = options.filter((o) => o.label.toLowerCase().includes(query.toLowerCase()));
     setSlug(query.length > 1 && matches.length === 1 ? matches[0].slug : '');
-  }, [query, options]);
+  }, [query, options, fixedSlug]);
 
   // Load saved history when a book is picked (signed-in users only).
   useEffect(() => {
@@ -124,21 +131,23 @@ export default function TalkToBook({ session }: { session: MaskySession | null }
 
   return (
     <section className="panel">
-      <h2>Talk to a book or author</h2>
-      <div className="askrow">
-        <input
-          list="livingbooks"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by book title or author…"
-        />
-        <datalist id="livingbooks">
-          {options.map((o) => (
-            <option key={o.slug} value={o.label} />
-          ))}
-        </datalist>
-      </div>
-      {book && (
+      {!fixedSlug && <h2>Talk to a book or author</h2>}
+      {!fixedSlug && (
+        <div className="askrow">
+          <input
+            list="livingbooks"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by book title or author…"
+          />
+          <datalist id="livingbooks">
+            {options.map((o) => (
+              <option key={o.slug} value={o.label} />
+            ))}
+          </datalist>
+        </div>
+      )}
+      {book && !fixedSlug && (
         <p className="sub">
           {book.avatarImage && <img className="avatar" src={book.avatarImage} alt="" />} Talking to{' '}
           <strong>{book.title}</strong>

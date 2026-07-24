@@ -49,6 +49,17 @@ video of a narrator — or the characters — reading that exact section. **This
 today**: our KJV Narrator answers that question with Psalms 82 / Romans 2, verbatim,
 on video.
 
+### Every book gets a home: `/b/{book}`
+
+Each living book has its own page — `livingbook.masky.ai/b/out-of-focus` — showing the
+book's title and its author avatar front and center with an ask-a-question interface.
+Authors link or embed it anywhere; every answer quotes the author's exact words. Answers
+draw on **every source the author attaches to the book**: the text itself, plus podcasts,
+interviews, fan Q&A, and VoiceCert-attested spoken sessions uploaded over time — so a
+book keeps getting better at answering long after publication. **Coming for authors
+(paid):** render the *entire* book and play it as an audio book or video book, narrated
+by the book's own avatar.
+
 ### The scout: your books watch the world for you
 
 Say you've published a paper on vector embeddings and uploaded a book about an esoteric

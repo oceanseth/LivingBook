@@ -11,6 +11,7 @@ import NotificationMenu from './NotificationMenu';
 import TalkToBook from './TalkToBook';
 import Books from './Books';
 import News from './News';
+import BookPage from './BookPage';
 import './App.css';
 
 type Tab = 'talk' | 'news' | 'books';
@@ -42,6 +43,9 @@ export default function App() {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  const bookMatch = window.location.pathname.match(/^\/b\/([a-z0-9-]+)\/?$/);
+  if (bookMatch) return <BookPage slug={bookMatch[1]} session={session} />;
 
   return (
     <div className="page">

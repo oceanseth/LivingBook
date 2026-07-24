@@ -995,3 +995,60 @@ button:disabled {
   opacity: 0.8;
   margin: 0.2rem 0 0.35rem;
 }
+
+.bookpage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.2rem;
+}
+
+.bookpage-home {
+  align-self: flex-start;
+  text-decoration: none;
+  color: inherit;
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+.bookpage-center {
+  max-width: 640px;
+  width: 100%;
+  margin: auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 2rem 0;
+}
+
+.bookpage-center h1 {
+  margin: 0.4rem 0 0;
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+}
+
+.bookpage-avatar {
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 12px 40px #7c3aed44;
+}
+
+.bookpage-author {
+  opacity: 0.7;
+  margin: 0;
+}
+
+.bookpage-center .panel {
+  text-align: left;
+  width: 100%;
+}
+
+.bookpage-soon {
+  font-size: 0.8rem;
+  opacity: 0.55;
+  margin-top: 1.5rem;
+}

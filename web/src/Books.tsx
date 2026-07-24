@@ -110,6 +110,16 @@ export default function Books({ session }: { session: MaskySession | null }) {
                 </span>
                 <button
                   className="ghost small"
+                  title="Copy this book's page link"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/b/${b.slug}`);
+                    setMsg(`Link copied: /b/${b.slug}`);
+                  }}
+                >
+                  🔗
+                </button>
+                <button
+                  className="ghost small"
                   onClick={() =>
                     post(`/api/books/${b.slug}/visibility`, {
                       visibility: b.visibility === 'private' ? 'public' : 'private',
@@ -152,6 +162,9 @@ export default function Books({ session }: { session: MaskySession | null }) {
                 <span>
                   <strong>{b.title}</strong> — {b.author} · {b.units} verbatim units
                 </span>
+                <a className="ghost small" href={`/b/${b.slug}`}>
+                  open
+                </a>
               </li>
             ))}
         </ul>
