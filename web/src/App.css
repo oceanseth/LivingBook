@@ -910,3 +910,88 @@ button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+.notifwrap {
+  position: relative;
+}
+
+.notifbtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+}
+
+.notifbadge {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  background: #dc2626;
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  padding: 0 3px;
+}
+
+.notifmenu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 340px;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: #fff;
+  color: #1c1a22;
+  border-radius: 14px;
+  box-shadow: 0 18px 50px #0004;
+  padding: 0.8rem 1rem;
+  z-index: 90;
+  text-align: left;
+}
+
+@media (prefers-color-scheme: dark) {
+  .notifmenu {
+    background: #1c1a22;
+    color: #eee;
+  }
+}
+
+.notifhead {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin: 0 0 0.4rem;
+}
+
+.notifitem {
+  border-top: 1px solid #9993;
+  padding: 0.55rem 0;
+}
+
+.notifkind {
+  font-size: 0.72rem;
+  opacity: 0.65;
+  margin: 0;
+}
+
+.notiftitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #7c3aed;
+  text-decoration: none;
+  display: block;
+  margin: 0.15rem 0;
+}
+
+.notifreply {
+  font-size: 0.8rem;
+  font-style: italic;
+  opacity: 0.8;
+  margin: 0.2rem 0 0.35rem;
+}

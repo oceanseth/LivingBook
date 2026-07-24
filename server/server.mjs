@@ -379,12 +379,25 @@ async function scoutBook(slug) {
       candidates.push({ url: m[2].trim(), title: m[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim(), summary: '', source: 'news' });
     }
   } catch { /* ignore */ }
+  // Direct mention hunt: the book's title or the author's name in the news.
+  for (const phrase of [book.title.replace(/\s*\(.*\)$/, ''), book.author]) {
+    if (!phrase || phrase === 'Public Domain') continue;
+    try {
+      const rss = await fetch(`https://news.google.com/rss/search?q=${encodeURIComponent('"' + phrase + '"')}&hl=en-US&gl=US&ceid=US:en`).then((r) => r.text());
+      for (const m of [...rss.matchAll(/<item>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<link>([\s\S]*?)<\/link>/g)].slice(0, 3)) {
+        const t = m[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim();
+        if (t.toLowerCase().includes(phrase.toLowerCase())) {
+          candidates.unshift({ url: m[2].trim(), title: t, summary: '', source: 'news', kind: 'mention', phrase });
+        }
+      }
+    } catch { /* ignore */ }
+  }
   const created = [];
   for (const c of candidates) {
     const key = `${slug}~${c.url}`;
     if (Object.values(alerts).some((a) => a.key === key)) continue;
     const { passages } = await ask(slug, `${c.title}. ${c.summary}`.slice(0, 400), 0.3);
-    if (!passages.length) continue;
+    if (!passages.length && c.kind !== 'mention') continue;
     const suggestion = await guildSuggestReply(book, c, passages.slice(0, 3));
     if (!suggestion.reply) continue;
     const id = 'al_' + Math.random().toString(36).slice(2, 10);
@@ -392,10 +405,13 @@ async function scoutBook(slug) {
       id,
       key,
       slug,
+      kind: c.kind ?? 'related',
       bookTitle: book.title,
       signal: c,
-      passage: { ref: passages[0].ref, text: passages[0].text.replace(/\s*\{[^}]*\}/g, '') },
-      score: passages[0].score,
+      passage: passages[0]
+        ? { ref: passages[0].ref, text: passages[0].text.replace(/\s*\{[^}]*\}/g, '') }
+        : { ref: book.title.toUpperCase(), text: '' },
+      score: passages[0]?.score ?? 1,
       suggestedReply: suggestion.reply,
       suggestedVia: suggestion.via,
       status: 'pending',

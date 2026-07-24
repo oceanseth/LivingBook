@@ -7,6 +7,7 @@ import {
   logout,
   type MaskySession,
 } from './lib/masky';
+import NotificationMenu from './NotificationMenu';
 import TalkToBook from './TalkToBook';
 import Books from './Books';
 import News from './News';
@@ -49,9 +50,7 @@ export default function App() {
           <span className="logo">📖 LivingBook</span>
           {session ? (
             <div className="account">
-              {session.picture && (
-                <img className="avatar" src={session.picture} alt={session.name} />
-              )}
+              <NotificationMenu session={session} />
               <span>{session.name}</span>
               <button
                 className="ghost"
@@ -107,7 +106,7 @@ export default function App() {
         </div>
 
         {tab === 'talk' && <TalkToBook session={session} />}
-        {tab === 'news' && <News />}
+        {tab === 'news' && <News session={session} />}
         {tab === 'books' && <Books session={session} />}
 
         <section className="panel showcase">

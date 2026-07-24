@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { MaskySession } from './lib/masky';
 import { useBooks } from './Books';
 
 const API = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8787';
@@ -17,8 +18,12 @@ interface Take {
   model?: string;
 }
 
-export default function News() {
-  const { books } = useBooks();
+export default function News({ session }: { session: MaskySession | null }) {
+  const { books: allBooks } = useBooks(session?.accessToken);
+  // Default to the reader's world: their own books + followed books. Fall back
+  // to all public books when signed out or nothing followed yet.
+  const mine = allBooks.filter((b) => (session && b.ownerSub === session.sub) || b.followed);
+  const books = mine.length > 0 ? mine : allBooks;
   const [stories, setStories] = useState<Story[]>([]);
   const [takes, setTakes] = useState<Record<string, Record<string, Take>>>({});
   const [busy, setBusy] = useState<string | null>(null);
