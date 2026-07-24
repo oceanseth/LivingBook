@@ -15,7 +15,7 @@ import { createServer } from 'node:http';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { VectorAIClient } from '@actian/vectorai-client';
-const pdfParse = createRequire(import.meta.url)('pdf-parse');
+const { PDFParse } = createRequire(import.meta.url)('pdf-parse');
 import { pipeline } from '@xenova/transformers';
 
 const PORT = process.env.PORT ?? 8787;
@@ -454,8 +454,10 @@ const server = createServer(async (req, res) => {
       }
       let { title = 'untitled', sourceType = 'book', text, voicecertSessionId } = data;
       if (!text && data.pdfBase64) {
-        const parsed = await pdfParse(Buffer.from(data.pdfBase64, 'base64'));
-        text = parsed.text.replace(/\u0000/g, ' ');
+        const parser = new PDFParse({ data: Buffer.from(data.pdfBase64, 'base64') });
+        const parsed = await parser.getText();
+        await parser.destroy();
+        text = (parsed.text ?? '').replace(/\u0000/g, ' ');
       }
       if (!text || text.length < 40) return res.writeHead(400, headers).end('{"error":"text too short (or PDF had no extractable text)"}');
       let voicecert = null;
