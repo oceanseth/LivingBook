@@ -114,7 +114,12 @@ async function ask(slug, question, minScore = SCORE_THRESHOLD) {
     .filter((r) => r.score >= minScore)
     .map((r) => {
       const p = { ...r.payload, score: r.score };
-      if (p.source_type === 'book' && slug !== 'bible-kjv') {
+      // Filenames must never surface: any unit whose stored title looks like a
+      // file (legacy uploads) is treated as book text titled by the BOOK TITLE.
+      const fileLike = /\.(pdf|docx?|txt|md|epub)\s*$/i.test(p.source_title ?? '');
+      if ((p.source_type === 'book' || fileLike) && slug !== 'bible-kjv') {
+        if (fileLike) p.source_type = 'book';
+        delete p.source_title;
         const part = String(p.ref ?? '').match(/§\d+$/)?.[0] ?? '';
         p.ref = `${book.title.toUpperCase()}${part ? ' ' + part : ''}`;
       }
@@ -506,7 +511,7 @@ const server = createServer(async (req, res) => {
         }
         voicecert = { sessionId: voicecertSessionId, method: vc.method, attestedAt: vc.issuedAt };
       }
-      if (sourceType === 'book') title = book.title;
+      if (sourceType === 'book' || data.pdfBase64 || /\.(pdf|docx?|txt|md|epub)\s*$/i.test(title)) title = book.title;
       const chunks = chunkText(text, title);
       const points = [];
       for (const c of chunks) {
