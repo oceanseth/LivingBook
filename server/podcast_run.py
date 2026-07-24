@@ -21,7 +21,7 @@ from band_rest.types.participant_request import ParticipantRequest
 
 ASK = "http://localhost:8787"
 MASKY = "https://masky.ai/api"
-HOST_AVATAR = "MawrR7V3Hg5PiYvyy9wC"      # LivingBook Host
+HOST_AVATAR = "ZzIRJNYyYn0A0N6x4oFA"      # LivingBook Host (studio mic, American Lead Actress voice)
 NARRATOR_AVATAR = "H7NjYDjQYYZh5FuuqBB6"  # KJV Narrator
 OWNER = "twitch:11867613"
 
