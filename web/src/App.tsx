@@ -7,18 +7,16 @@ import {
   logout,
   type MaskySession,
 } from './lib/masky';
-import AskBible from './AskBible';
+import TalkToBook from './TalkToBook';
 import Books from './Books';
 import News from './News';
-import Talk from './Talk';
 import './App.css';
 
-type Tab = 'ask' | 'news' | 'talk' | 'books';
+type Tab = 'talk' | 'news' | 'books';
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'ask', label: 'Ask the Bible' },
+  { id: 'talk', label: 'Talk to a book or author' },
   { id: 'news', label: 'News' },
-  { id: 'talk', label: 'Talk' },
   { id: 'books', label: 'Books' },
 ];
 
@@ -26,7 +24,7 @@ export default function App() {
   const [session, setSession] = useState<MaskySession | null>(() => currentSession());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [tab, setTab] = useState<Tab>('ask');
+  const [tab, setTab] = useState<Tab>('talk');
   const [stuck, setStuck] = useState(false);
 
   useEffect(() => {
@@ -108,9 +106,8 @@ export default function App() {
           </nav>
         </div>
 
-        {tab === 'ask' && <AskBible session={session} />}
+        {tab === 'talk' && <TalkToBook session={session} />}
         {tab === 'news' && <News />}
-        {tab === 'talk' && <Talk session={session} />}
         {tab === 'books' && <Books session={session} />}
 
         <section className="panel showcase">

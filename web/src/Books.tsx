@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { MaskySession } from './lib/masky';
+import AvatarModal, { type PickedAvatar } from './AvatarModal';
 import RecordSpoken from './RecordSpoken';
 import Inbox from './Inbox';
 
@@ -10,6 +11,7 @@ export interface Book {
   title: string;
   author: string;
   units: number;
+  visibility?: string;
   authorAvatarId?: string | null;
   avatarImage?: string | null;
   ownerSub?: string | null;
@@ -23,26 +25,28 @@ interface MaskyAvatar {
   imageUrl?: string;
 }
 
-export function useBooks() {
+export function useBooks(token?: string) {
   const [books, setBooks] = useState<Book[]>([]);
   const reload = () =>
-    fetch(`${API}/api/books`)
+    fetch(`${API}/api/books`, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => r.json())
       .then((d) => setBooks(d.books ?? []))
       .catch(() => {});
   useEffect(() => {
     reload();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
   return { books, reload };
 }
 
 export default function Books({ session }: { session: MaskySession | null }) {
-  const { books, reload } = useBooks();
+  const { books, reload } = useBooks(session?.accessToken);
   const [title, setTitle] = useState('');
   const [upload, setUpload] = useState({ slug: '', title: '', sourceType: 'podcast', text: '' });
   const [pdf, setPdf] = useState<{ name: string; base64: string } | null>(null);
   const [avatars, setAvatars] = useState<MaskyAvatar[]>([]);
   const [avatarSlug, setAvatarSlug] = useState('');
+  const [picked, setPicked] = useState<PickedAvatar | null>(null);
 
   useEffect(() => {
     if (!session) return;
@@ -86,6 +90,20 @@ export default function Books({ session }: { session: MaskySession | null }) {
             <span>
               <strong>{b.title}</strong> — {b.author} · {b.units} verbatim units
             </span>
+            {session && b.ownerSub === session.sub && (
+              <button
+                className="ghost small"
+                onClick={() =>
+                  post(`/api/books/${b.slug}/visibility`, {
+                    visibility: b.visibility === 'private' ? 'public' : 'private',
+                  })
+                    .then(() => reload())
+                    .catch((err) => setMsg(err.message))
+                }
+              >
+                {b.visibility === 'private' ? '🔒 private' : '🌐 public'}
+              </button>
+            )}
           </li>
         ))}
       </ul>
@@ -205,17 +223,12 @@ export default function Books({ session }: { session: MaskySession | null }) {
                 className="avatarcard"
                 disabled={busy || !avatarSlug}
                 onClick={() =>
-                  post(`/api/books/${avatarSlug}/avatar`, {
+                  setPicked({
                     avatarId: av.avatarId,
                     avatarOwnerUserId: av.avatarOwnerUserId,
-                    avatarImage: av.avatarImageUrl ?? av.imageUrl ?? null,
-                    avatarName: av.displayName,
+                    displayName: av.displayName,
+                    imageUrl: av.avatarImageUrl ?? av.imageUrl ?? '',
                   })
-                    .then(() => {
-                      setMsg(`"${av.displayName}" now represents that book`);
-                      reload();
-                    })
-                    .catch((err) => setMsg(err.message))
                 }
               >
                 {(av.avatarImageUrl ?? av.imageUrl) && (
@@ -226,6 +239,29 @@ export default function Books({ session }: { session: MaskySession | null }) {
             ))}
           </div>
         </>
+      )}
+      {picked && session && (
+        <AvatarModal
+          session={session}
+          avatar={picked}
+          bookTitle={books.find((bk) => bk.slug === avatarSlug)?.title ?? avatarSlug}
+          saving={busy}
+          onClose={() => setPicked(null)}
+          onSave={(imageUrl) =>
+            post(`/api/books/${avatarSlug}/avatar`, {
+              avatarId: picked.avatarId,
+              avatarOwnerUserId: picked.avatarOwnerUserId,
+              avatarImage: imageUrl,
+              avatarName: picked.displayName,
+            })
+              .then(() => {
+                setMsg(`"${picked.displayName}" now represents that book`);
+                setPicked(null);
+                reload();
+              })
+              .catch((err) => setMsg(err.message))
+          }
+        />
       )}
       {msg && <p className="notice">{msg}</p>}
       {session && (

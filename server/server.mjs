@@ -54,6 +54,7 @@ const books = existsSync(BOOKS_FILE)
         createdAt: 0,
       },
     };
+for (const b of Object.values(books)) b.visibility ??= 'public';
 const saveBooks = () => writeFileSync(BOOKS_FILE, JSON.stringify(books, null, 1));
 saveBooks();
 
@@ -92,10 +93,10 @@ function frameFor(book, p) {
   const clean = p.text.replace(/\s*\{[^}]*\}/g, '');
   let frame;
   if (p.source_type === 'podcast') frame = `I've answered this before, on ${p.source_title ?? p.ref}, and I said: `;
-  else if (p.source_type === 'qa') frame = `A reader once asked me this. From ${p.source_title ?? p.ref}, I said: `;
-  else if (p.source_type === 'spoken') frame = `I spoke these words myself, on the record${p.voicecert ? ' — VoiceCert-attested' : ''} (${p.source_title ?? p.ref}): `;
+  else if (p.source_type === 'qa') frame = `A reader once asked me this, and I said: `;
+  else if (p.source_type === 'spoken') frame = `I spoke these words myself, on the record${p.voicecert ? ' — VoiceCert-attested' : ''}: `;
   else if (book.slug === 'bible-kjv') frame = `Hear the word, from ${p.ref}: `;
-  else frame = `From ${p.ref}: `;
+  else frame = `In ${book.title.toUpperCase()}, I wrote: `;
   let quote = '';
   for (const s of clean.match(/[^.;!?]+[.;!?]*\s*/g) ?? [clean]) {
     if (frame.length + quote.length + s.length > 490) break;
@@ -111,7 +112,14 @@ async function ask(slug, question, minScore = SCORE_THRESHOLD) {
   const results = await client.points.search(`book_${slug}`, vector, { limit: 5, withPayload: true });
   const passages = results
     .filter((r) => r.score >= minScore)
-    .map((r) => ({ ...r.payload, score: r.score }));
+    .map((r) => {
+      const p = { ...r.payload, score: r.score };
+      if (p.source_type === 'book' && slug !== 'bible-kjv') {
+        const part = String(p.ref ?? '').match(/§\d+$/)?.[0] ?? '';
+        p.ref = `${book.title.toUpperCase()}${part ? ' ' + part : ''}`;
+      }
+      return p;
+    });
   if (passages.length === 0) {
     return {
       covered: false,
@@ -408,10 +416,23 @@ const server = createServer(async (req, res) => {
     const url = req.url.split('?')[0];
 
     if (req.method === 'GET' && url === '/api/books') {
-      const list = Object.values(books).map(({ slug, title, author, units, authorAvatarId, avatarImage, ownerSub }) => ({
-        slug, title, author, units, authorAvatarId, avatarImage, ownerSub,
-      }));
+      const user = await maskyUser(token);
+      const list = Object.values(books)
+        .filter((b) => b.visibility !== 'private' || (user && b.ownerSub === user.sub))
+        .map(({ slug, title, author, units, authorAvatarId, avatarImage, ownerSub, visibility }) => ({
+          slug, title, author, units, authorAvatarId, avatarImage, ownerSub, visibility,
+        }));
       return res.writeHead(200, headers).end(JSON.stringify({ books: list }));
+    }
+    const visMatch = url.match(/^\/api\/books\/([a-z0-9-]+)\/visibility$/);
+    if (req.method === 'POST' && visMatch) {
+      const book = books[visMatch[1]];
+      if (!book) return res.writeHead(404, headers).end('{"error":"unknown book"}');
+      const user = await maskyUser(token);
+      if (!user || (book.ownerSub && user.sub !== book.ownerSub)) return res.writeHead(403, headers).end('{"error":"not your book"}');
+      book.visibility = data.visibility === 'private' ? 'private' : 'public';
+      saveBooks();
+      return res.writeHead(200, headers).end(JSON.stringify({ ok: true, visibility: book.visibility }));
     }
     const avatarMatch = url.match(/^\/api\/books\/([a-z0-9-]+)\/avatar$/);
     if (req.method === 'POST' && avatarMatch) {
@@ -485,6 +506,7 @@ const server = createServer(async (req, res) => {
         }
         voicecert = { sessionId: voicecertSessionId, method: vc.method, attestedAt: vc.issuedAt };
       }
+      if (sourceType === 'book') title = book.title;
       const chunks = chunkText(text, title);
       const points = [];
       for (const c of chunks) {
@@ -548,6 +570,9 @@ const server = createServer(async (req, res) => {
       if (!user) return res.writeHead(401, headers).end('{"error":"Login with Masky to talk — your avatar is your identity"}');
       const { slug, question } = data;
       if (!books[slug] || !question) return res.writeHead(400, headers).end('{"error":"slug and question required"}');
+      if (books[slug].visibility === 'private' && books[slug].ownerSub !== user.sub) {
+        return res.writeHead(403, headers).end('{"error":"this book is private"}');
+      }
       const answer = await ask(slug, question);
       const convoId = `${user.sub}~${slug}`;
       const convo = (convos[convoId] ??= {
@@ -567,6 +592,51 @@ const server = createServer(async (req, res) => {
       convo.updatedAt = Date.now();
       saveConvos();
       return res.writeHead(200, headers).end(JSON.stringify({ ...answer, conversationId: convoId }));
+    }
+
+    if (req.method === 'GET' && url.startsWith('/api/talk/history')) {
+      const user = await maskyUser(token);
+      if (!user) return res.writeHead(401, headers).end('{"error":"Login with Masky required"}');
+      const slug = new URL(req.url, 'http://x').searchParams.get('slug');
+      const convo = convos[`${user.sub}~${slug}`];
+      return res.writeHead(200, headers).end(JSON.stringify({ turns: convo?.turns ?? [], renderUrl: convo?.visitorRenderUrl ?? null }));
+    }
+    if (req.method === 'POST' && url === '/api/talk/render') {
+      const user = await maskyUser(token);
+      if (!user) return res.writeHead(401, headers).end('{"error":"Login with Masky required"}');
+      const convo = convos[`${user.sub}~${data.slug}`];
+      if (!convo || convo.turns.length === 0) return res.writeHead(404, headers).end('{"error":"no conversation yet"}');
+      const book = books[convo.slug];
+      // Rendered on the VISITOR's own token — their credits, their share link.
+      const conv = await fetch(`${MASKY}/conversations`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          avatarId: book.authorAvatarId ?? NARRATOR_AVATAR_ID,
+          avatarOwnerUserId: book.avatarOwner ?? NARRATOR_OWNER,
+        }),
+      }).then((r) => r.json());
+      if (!conv.conversationId) throw new Error(`conversation failed: ${JSON.stringify(conv).slice(0, 200)}`);
+      const recent = convo.turns.slice(-6);
+      for (let i = 0; i < recent.length; i += 2) {
+        const q = recent[i];
+        const a = recent[i + 1];
+        if (!q || !a) break;
+        await fetch(`${MASKY}/conversations/${conv.conversationId}/turn`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userText: q.text.slice(0, 499),
+            avatarText: a.text.slice(0, 499),
+            ...(convo.fromAvatarId ? { speakerAvatarId: convo.fromAvatarId, userOutput: 'video' } : {}),
+            output: 'video',
+            mode: 'chat',
+          }),
+        });
+      }
+      convo.visitorRenderUrl = conv.liveUrl;
+      saveConvos();
+      return res.writeHead(200, headers).end(JSON.stringify({ liveUrl: conv.liveUrl, shareSlug: conv.shareSlug }));
     }
 
     // Owner inbox: incoming conversations with their books (text-only until rendered).

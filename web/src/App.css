@@ -786,3 +786,82 @@ button:disabled {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.ghost.small {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.55rem;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: #000a;
+  display: grid;
+  place-items: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.modal {
+  background: var(--panel-bg, #fff);
+  color: inherit;
+  border-radius: 16px;
+  padding: 1.2rem 1.4rem;
+  max-width: 560px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 60px #0005;
+}
+
+@media (prefers-color-scheme: dark) {
+  .modal {
+    background: #1c1a22;
+  }
+}
+
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.modal-head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.modal-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0.8rem 0;
+}
+
+.imgpick {
+  border: 3px solid transparent;
+  border-radius: 12px;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.imgpick img {
+  width: 108px;
+  height: 108px;
+  border-radius: 9px;
+  object-fit: cover;
+  display: block;
+}
+
+.imgpick.selected {
+  border-color: #7c3aed;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
