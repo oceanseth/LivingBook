@@ -67,22 +67,16 @@ export default function News() {
           </p>
           <div className="takebtns">
             {books.map((b) => (
-              <span key={b.slug} className="takepair">
-                <button
-                  className="ghost"
-                  disabled={busy === s.title + b.slug}
-                  onClick={() => getTake(s, b.slug)}
-                >
-                  {busy === s.title + b.slug ? 'Asking…' : `Ask ${b.title.split('(')[0].trim()}`}
-                </button>
-                <button
-                  className="ghost deep"
-                  disabled={busy === s.title + b.slug + 'deep'}
-                  onClick={() => getTake(s, b.slug, true)}
-                >
-                  {busy === s.title + b.slug + 'deep' ? 'Reasoning…' : '💭 Reason'}
-                </button>
-              </span>
+              <button
+                key={b.slug}
+                className="ghost deep"
+                disabled={busy === s.title + b.slug + 'deep'}
+                onClick={() => getTake(s, b.slug, true)}
+              >
+                {busy === s.title + b.slug + 'deep'
+                  ? 'Reasoning…'
+                  : `💭 ${b.title.split('(')[0].trim()}`}
+              </button>
             ))}
           </div>
           {Object.entries(takes[s.title] ?? {}).map(([slug, take]) => (
