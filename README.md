@@ -49,6 +49,20 @@ video of a narrator — or the characters — reading that exact section. **This
 today**: our KJV Narrator answers that question with Psalms 82 / Romans 2, verbatim,
 on video.
 
+### The scout: your books watch the world for you
+
+Say you've published a paper on vector embeddings and uploaded a book about an esoteric
+manifold-optimization technique. Tomorrow, Karpathy posts that a frontier lab is using
+exactly that technique in their agents. **Your phone buzzes.** The LivingBook scout — a
+Guild-governed agent running hourly over every book you've uploaded — found the post,
+matched it against your exact writing in the knowledge base, and drafted a suggested
+reply grounded in what you already wrote. In the app you see the post, the draft, and a
+link to **the exact rendered turn where your living book speaks on this** — edit,
+approve, submit. The reply carries a link to your avatar so the poster (and everyone
+reading) can ask your book follow-up questions drawn from everything you've published
+since. Signals today: arXiv + news search; X/social channels as authors connect them.
+Nothing goes out without your approval — autonomy with a leash.
+
 ### Human verification — powered by [VoiceCert](https://www.voicecert.com)
 
 Rendered text is only trustworthy if readers know a **real human actually said it**.

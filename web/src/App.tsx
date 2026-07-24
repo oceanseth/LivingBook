@@ -125,7 +125,7 @@ export default function App() {
             <iframe className="clip" src="https://masky.ai/live/t-26-07-angu?autoplay=0" title="Marketing agent: Red Sea chokepoint" allowFullScreen />
             <iframe
               className="clip"
-              src="https://masky.ai/live/c-26-07-icn4?token=2f6ea719864ecdab7cae0af20dc0dc99353aebb900b1194c&autoplay=0"
+              src="https://masky.ai/live/c-26-07-3b36?token=4c16e00ee98cb2cdb0e9a5374bd8d7947e04d8e3ba9b6abf&autoplay=0"
               title="Generated podcast episode"
               allowFullScreen
             />

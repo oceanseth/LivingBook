@@ -13,7 +13,9 @@
 // the only generated text is the connective frame, template-composed here.
 import { createServer } from 'node:http';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { VectorAIClient } from '@actian/vectorai-client';
+const pdfParse = createRequire(import.meta.url)('pdf-parse');
 import { pipeline } from '@xenova/transformers';
 
 const PORT = process.env.PORT ?? 8787;
@@ -34,6 +36,10 @@ const saveConvos = () => writeFileSync(CONVOS_FILE, JSON.stringify(convos, null,
 // VoiceCert demo gate: production liveness attestation isn't live yet, so this
 // mints demo sessions the recording flow requires before any spoken ingestion.
 const voicecertSessions = new Map();
+// Mobile pairing: web session mints a short code; the app claims it once for
+// the same Masky SSO token (device-code pattern; Expo Go can't take an https
+// OAuth redirect).
+const pairCodes = new Map();
 
 const books = existsSync(BOOKS_FILE)
   ? JSON.parse(readFileSync(BOOKS_FILE, 'utf8'))
@@ -260,6 +266,132 @@ async function render(question, token, { avatarId, avatarOwnerUserId, output = '
   };
 }
 
+// ── Scout: every book watches the world for its author ──────────────────────
+const ALERTS_FILE = new URL('./local_data/alerts.json', import.meta.url).pathname;
+const alerts = existsSync(ALERTS_FILE) ? JSON.parse(readFileSync(ALERTS_FILE, 'utf8')) : {};
+const saveAlerts = () => writeFileSync(ALERTS_FILE, JSON.stringify(alerts, null, 1));
+
+async function pioneerChat(messages, max_tokens = 300) {
+  const r = await fetch('https://api.pioneer.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${process.env.PIONEER_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'pioneer/auto', max_tokens, messages }),
+  }).then((x) => x.json());
+  return r.choices?.[0]?.message?.content?.trim();
+}
+
+async function guildSuggestReply(book, signal, passages) {
+  try {
+    const basic = Buffer.from(`${process.env.GUILD_TRIGGER_KEY_ID}:${process.env.GUILD_TRIGGER_KEY_SECRET}`).toString('base64');
+    const input = {
+      book: { id: book.slug, title: book.title },
+      trends: [{ topic: signal.title, summary: signal.summary ?? signal.title, source: signal.url }],
+      passages: passages.map((p) => ({ ref: p.ref, text: p.text })),
+      budget: { dailyOutboundRemaining: 3, creditBudgetRemaining: 5 },
+      engagementNotes: 'Scout mode: draft a REPLY to this specific post/paper, addressed to its author, grounded in the passages.',
+    };
+    const created = await fetch('https://app.guild.ai/api/workspaces/seth/livingbook/sessions', {
+      method: 'POST',
+      headers: { Authorization: `Basic ${basic}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_type: 'api_trigger', agent_input: { text: JSON.stringify(input) } }),
+    }).then((r) => r.json());
+    const sessionId = created.id ?? created.session_id;
+    for (let i = 0; i < 10; i++) {
+      await new Promise((r) => setTimeout(r, 5000));
+      const ev = await fetch(`https://app.guild.ai/api/sessions/${sessionId}/events`, {
+        headers: { Authorization: `Basic ${basic}` },
+      }).then((r) => r.json()).catch(() => null);
+      const items = ev?.items ?? [];
+      for (const e of items) {
+        const d = e?.content?.data;
+        if (typeof d === 'string' && d.includes('"decision"')) {
+          const parsed = JSON.parse(d.replace(/^```(json)?|```$/g, '').trim());
+          if (parsed.postText) return { reply: parsed.postText, via: 'guild', sessionId };
+        }
+      }
+    }
+  } catch { /* fall through to Pioneer */ }
+  const reply = await pioneerChat([
+    {
+      role: 'system',
+      content: `Draft a <=240-char reply to a post/paper on behalf of the author of "${book.title}". Ground it ONLY in the provided passages (refer to them, do not fabricate). Warm, specific, no hashtags.`,
+    },
+    { role: 'user', content: JSON.stringify({ signal, passages: passages.slice(0, 2) }) },
+  ]);
+  return { reply, via: 'pioneer' };
+}
+
+async function scoutBook(slug) {
+  const book = books[slug];
+  if (!book) throw new Error(`unknown book: ${slug}`);
+  const seed = `${book.title}. ${book.sampleText ?? ''}`.slice(0, 500);
+  const STOP = new Set('the a an and or of to in on for with that this is are be as it its not we you i they when than then their our your from should would could'.split(' '));
+  const keywordTerms = () => {
+    const freq = new Map();
+    for (const w of seed.toLowerCase().match(/[a-z]{4,}/g) ?? []) {
+      if (!STOP.has(w)) freq.set(w, (freq.get(w) ?? 0) + 1);
+    }
+    return [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([w]) => w).join(' ');
+  };
+  let terms = await pioneerChat([
+    {
+      role: 'user',
+      content: `Reply with ONLY a search query, nothing else — 3 to 6 words, no quotes, no explanation — for finding literature related to:\n${seed}`,
+    },
+  ], 40).catch(() => null);
+  terms = terms?.split('\n').filter((l) => l.trim()).pop()?.replace(/[*_#"'`]/g, '').trim();
+  if (!terms || terms.split(/\s+/).length > 8) terms = keywordTerms();
+  const candidates = [];
+  // arXiv
+  try {
+    const xml = await fetch(
+      `http://export.arxiv.org/api/query?search_query=all:${encodeURIComponent(terms)}&max_results=6&sortBy=submittedDate&sortOrder=descending`,
+    ).then((r) => r.text());
+    for (const m of xml.matchAll(/<entry>[\s\S]*?<id>([\s\S]*?)<\/id>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<summary>([\s\S]*?)<\/summary>/g)) {
+      candidates.push({ url: m[1].trim(), title: m[2].replace(/\s+/g, ' ').trim(), summary: m[3].replace(/\s+/g, ' ').slice(0, 400), source: 'arxiv' });
+    }
+  } catch { /* arxiv down — news still runs */ }
+  // News
+  try {
+    const rss = await fetch(`https://news.google.com/rss/search?q=${encodeURIComponent(terms)}&hl=en-US&gl=US&ceid=US:en`).then((r) => r.text());
+    for (const m of [...rss.matchAll(/<item>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<link>([\s\S]*?)<\/link>/g)].slice(0, 5)) {
+      candidates.push({ url: m[2].trim(), title: m[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim(), summary: '', source: 'news' });
+    }
+  } catch { /* ignore */ }
+  const created = [];
+  for (const c of candidates) {
+    const key = `${slug}~${c.url}`;
+    if (Object.values(alerts).some((a) => a.key === key)) continue;
+    const { passages } = await ask(slug, `${c.title}. ${c.summary}`.slice(0, 400), 0.3);
+    if (!passages.length) continue;
+    const suggestion = await guildSuggestReply(book, c, passages.slice(0, 3));
+    if (!suggestion.reply) continue;
+    const id = 'al_' + Math.random().toString(36).slice(2, 10);
+    alerts[id] = {
+      id,
+      key,
+      slug,
+      bookTitle: book.title,
+      signal: c,
+      passage: { ref: passages[0].ref, text: passages[0].text.replace(/\s*\{[^}]*\}/g, '') },
+      score: passages[0].score,
+      suggestedReply: suggestion.reply,
+      suggestedVia: suggestion.via,
+      status: 'pending',
+      createdAt: Date.now(),
+    };
+    created.push(alerts[id]);
+    if (created.length >= 2) break; // cap per run — quality over volume
+  }
+  saveAlerts();
+  return { terms, candidates: candidates.length, created };
+}
+
+// Hourly scout over every book (deduped by signal URL, so quiet when nothing new)
+setInterval(() => {
+  for (const slug of Object.keys(books)) scoutBook(slug).catch(() => {});
+}, 3600 * 1000);
+
 const server = createServer(async (req, res) => {
   const headers = {
     'Content-Type': 'application/json',
@@ -300,9 +432,10 @@ const server = createServer(async (req, res) => {
       books[slug] = {
         slug,
         title,
-        author: user.name,
+        author: data.authorName?.trim() || user.name,
         ownerSub: user.sub,
-        authorAvatarId: user.avatar_id ?? null,
+        authorAvatarId: data.avatarId ?? user.avatar_id ?? null,
+        avatarOwner: data.avatarOwnerUserId ?? null,
         units: 0,
         nextId: 1,
         createdAt: Date.now(),
@@ -319,8 +452,12 @@ const server = createServer(async (req, res) => {
       if (!user || (book.ownerSub && user.sub !== book.ownerSub)) {
         return res.writeHead(403, headers).end('{"error":"not your book"}');
       }
-      const { title = 'untitled', sourceType = 'book', text, voicecertSessionId } = data;
-      if (!text || text.length < 40) return res.writeHead(400, headers).end('{"error":"text too short"}');
+      let { title = 'untitled', sourceType = 'book', text, voicecertSessionId } = data;
+      if (!text && data.pdfBase64) {
+        const parsed = await pdfParse(Buffer.from(data.pdfBase64, 'base64'));
+        text = parsed.text.replace(/\u0000/g, ' ');
+      }
+      if (!text || text.length < 40) return res.writeHead(400, headers).end('{"error":"text too short (or PDF had no extractable text)"}');
       let voicecert = null;
       if (sourceType === 'spoken') {
         const vc = voicecertSessions.get(voicecertSessionId);
@@ -340,8 +477,24 @@ const server = createServer(async (req, res) => {
       }
       await client.points.upsert(`book_${book.slug}`, points);
       book.units += points.length;
+      if (!book.sampleText) book.sampleText = text.slice(0, 400);
       saveBooks();
       return res.writeHead(200, headers).end(JSON.stringify({ ok: true, unitsAdded: points.length, totalUnits: book.units }));
+    }
+
+    if (req.method === 'POST' && url === '/api/pair/start') {
+      const user = await maskyUser(token);
+      if (!user) return res.writeHead(401, headers).end('{"error":"Login with Masky required"}');
+      const code = Math.random().toString(36).slice(2, 8).toUpperCase();
+      pairCodes.set(code, { token, exp: Date.now() + 10 * 60 * 1000 });
+      return res.writeHead(200, headers).end(JSON.stringify({ code, expiresInSec: 600 }));
+    }
+    if (req.method === 'POST' && url === '/api/pair/claim') {
+      const entry = pairCodes.get(String(data.code ?? '').toUpperCase());
+      if (!entry || entry.exp < Date.now()) return res.writeHead(404, headers).end('{"error":"invalid or expired code"}');
+      pairCodes.delete(String(data.code).toUpperCase());
+      const user = await maskyUser(entry.token);
+      return res.writeHead(200, headers).end(JSON.stringify({ accessToken: entry.token, user }));
     }
 
     // VoiceCert attestation — gates spoken-word recording. The widget on the
@@ -442,6 +595,49 @@ const server = createServer(async (req, res) => {
       return res.writeHead(200, headers).end(JSON.stringify({ liveUrl: conv.liveUrl, shareSlug: conv.shareSlug }));
     }
 
+    if (req.method === 'POST' && url === '/api/scout/run') {
+      const result = await scoutBook(data.slug);
+      return res.writeHead(200, headers).end(JSON.stringify(result));
+    }
+    if (req.method === 'GET' && url.startsWith('/api/alerts')) {
+      const all = url.includes('all=1');
+      let mine = Object.values(alerts);
+      if (!all) {
+        const user = await maskyUser(token);
+        if (!user) return res.writeHead(401, headers).end('{"error":"auth required (or ?all=1 demo mode)"}');
+        mine = mine.filter((a) => books[a.slug]?.ownerSub === user.sub);
+      }
+      mine.sort((a, b) => b.createdAt - a.createdAt);
+      return res.writeHead(200, headers).end(JSON.stringify({ alerts: mine.slice(0, 20) }));
+    }
+    const approveMatch = url.match(/^\/api\/alerts\/([a-z0-9_]+)\/approve$/);
+    if (req.method === 'POST' && approveMatch) {
+      const alert = alerts[approveMatch[1]];
+      if (!alert) return res.writeHead(404, headers).end('{"error":"unknown alert"}');
+      const book = books[alert.slug];
+      const t = token || SERVICE_TOKEN;
+      // Render the exact turn: the book speaks its matched passage, on-platform.
+      const conv = await fetch(`${MASKY}/conversations`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${t}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          avatarId: book.authorAvatarId ?? NARRATOR_AVATAR_ID,
+          avatarOwnerUserId: book.avatarOwner ?? NARRATOR_OWNER,
+        }),
+      }).then((r) => r.json());
+      const spoken = frameFor(book, { ...alert.passage, source_type: 'book' });
+      await fetch(`${MASKY}/conversations/${conv.conversationId}/turn`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${t}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userText: spoken.slice(0, 499), mode: 'speak', output: 'video' }),
+      });
+      alert.status = 'approved';
+      alert.finalReply = `${(data.reply ?? alert.suggestedReply).trim()} — hear my book answer: ${conv.liveUrl} · ask it anything: https://livingbook.masky.ai`;
+      alert.turnLiveUrl = conv.liveUrl;
+      saveAlerts();
+      return res.writeHead(200, headers).end(JSON.stringify({ finalReply: alert.finalReply, turnLiveUrl: conv.liveUrl }));
+    }
+
     const askMatch = url.match(/^\/api\/books\/([a-z0-9-]+)\/ask$/);
     if (req.method === 'POST' && (askMatch || url === '/api/ask')) {
       const slug = askMatch ? askMatch[1] : 'bible-kjv';
@@ -451,9 +647,10 @@ const server = createServer(async (req, res) => {
     if (req.method === 'POST' && url === '/api/render') {
       const t = token || SERVICE_TOKEN;
       if (!t) return res.writeHead(401, headers).end('{"error":"Masky bearer token required"}');
+      const bookForRender = data.slug ? books[data.slug] : null;
       const result = await render(data.question, t, {
-        avatarId: data.avatarId ?? NARRATOR_AVATAR_ID,
-        avatarOwnerUserId: data.avatarOwnerUserId ?? NARRATOR_OWNER,
+        avatarId: data.avatarId ?? bookForRender?.authorAvatarId ?? NARRATOR_AVATAR_ID,
+        avatarOwnerUserId: data.avatarOwnerUserId ?? bookForRender?.avatarOwner ?? NARRATOR_OWNER,
         output: data.output,
         slug: data.slug,
       });

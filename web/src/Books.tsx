@@ -135,6 +135,18 @@ export default function Books({ session }: { session: MaskySession | null }) {
         </>
       )}
       {msg && <p className="notice">{msg}</p>}
+      {session && (
+        <button
+          className="ghost"
+          onClick={() =>
+            post('/api/pair/start', {})
+              .then((d) => setMsg(`📱 Mobile pairing code: ${d.code} (valid 10 min)`))
+              .catch((err) => setMsg(err.message))
+          }
+        >
+          📱 Connect mobile app
+        </button>
+      )}
       {session && <RecordSpoken session={session} books={books} />}
       {session && <Inbox session={session} />}
     </section>

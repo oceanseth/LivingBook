@@ -11,6 +11,8 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import Alerts, { useAlerts } from './src/Alerts';
+import Author from './src/Author';
 import {
   askBook,
   getNews,
@@ -22,15 +24,18 @@ import {
   type Story,
 } from './src/api';
 
-type Tab = 'ask' | 'news' | 'books';
+type Tab = 'ask' | 'news' | 'books' | 'author' | 'alerts';
 const PURPLE = '#7c3aed';
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('ask');
   const [books, setBooks] = useState<Book[]>([]);
 
+  const { alerts, reload: reloadAlerts } = useAlerts();
+  const pending = alerts.filter((a) => a.status === 'pending').length;
+  const reloadBooks = () => listBooks().then(setBooks).catch(() => {});
   useEffect(() => {
-    listBooks().then(setBooks).catch(() => {});
+    reloadBooks();
   }, []);
 
   return (
@@ -44,12 +49,24 @@ export default function App() {
         {tab === 'ask' && <Ask books={books} />}
         {tab === 'news' && <News books={books} />}
         {tab === 'books' && <Books books={books} />}
+        {tab === 'author' && <Author onBookCreated={reloadBooks} />}
+        {tab === 'alerts' && <Alerts alerts={alerts} reload={reloadAlerts} />}
       </View>
       <View style={s.tabbar}>
-        {(['ask', 'news', 'books'] as Tab[]).map((t) => (
+        {(['ask', 'news', 'books', 'author', 'alerts'] as Tab[]).map((t) => (
           <Pressable key={t} style={[s.tab, tab === t && s.tabActive]} onPress={() => setTab(t)}>
             <Text style={[s.tabText, tab === t && s.tabTextActive]}>
-              {t === 'ask' ? '💬 Ask' : t === 'news' ? '📰 News' : '📚 Books'}
+              {t === 'ask'
+                ? '💬 Ask'
+                : t === 'news'
+                  ? '📰 News'
+                  : t === 'books'
+                    ? '📚 Books'
+                    : t === 'author'
+                      ? '✍️ Author'
+                      : pending > 0
+                        ? `🔔 (${pending})`
+                        : '🔔 Alerts'}
             </Text>
           </Pressable>
         ))}
