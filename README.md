@@ -20,6 +20,10 @@ A submission to the **Self-Evolving Agent Hackathon**.
   books generate, and every short clip is one tap away from being reshared to socials.
 - A **self-evolving marketing agent** watches real-world signals trending on social media
   and proactively produces answer-videos that connect the book to the moment.
+- A **News tab** shows trending stories with text-only reasoning from each book you
+  follow: the Bible's take on today's headline, or Michael Crichton's — drawn from the
+  novels where he predicted it — each grounded in verbatim passages plus real web
+  references.
 
 ### Example
 

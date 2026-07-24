@@ -58,7 +58,24 @@ HNSW, filters applied during ANN search, native RRF fusion. Docs index for agent
   `reciprocal_rank_fusion`, `score_threshold` to honestly say "the book doesn't cover
   this", grouped search to dedup same-paragraph chunks.
 
-### The no-invention contract
+### News tab — grounded reasoning mode (text-only)
+A feed of live news stories; under each story, every book the user follows contributes
+its agent's take. Unlike spoken/video answers (verbatim-only, below), News reasoning is
+**text-only and generative — but strictly grounded**:
+
+- The agent reasons from its corpus and says so: *"My novel Next (2006) anticipated
+  exactly this — lab-grown tissue patents…"* with the supporting passages quoted
+  verbatim inline.
+- It does **real web searches** on the story and cites **real references** (links) next
+  to the book citations — reasoning connects the corpus to the world, it never invents
+  facts about either.
+- Examples: "What does the Bible say about the bombing in Iran?" → passages + reasoned
+  application. "What does Michael Crichton say about growing teeth?" → his novels'
+  predictions + current science links.
+- One shared story feed (X trends + news API) powers both the News tab and the
+  marketing agent — same signal, two consumers.
+
+### The no-invention contract (spoken/video answers)
 1. Retrieve top-k units from Actian (book-scoped, filtered).
 2. The LLM only **selects** units and emits a connective frame — *"I've answered this
    before, on {podcast}, and I said: '{exactText}'"*. Post-check enforces the quote is a
@@ -125,7 +142,7 @@ identity = a **service avatar** + `client_credentials` token in Secrets Manager.
 | # | Milestone | Contents |
 | --- | --- | --- |
 | M0 | Repo setup ✅ | Vite web + Masky SSO, docs, license plumbing |
-| M1 | **Today AM** — Bible slice | KJV → Actian (local Docker); narrator avatar; verse-verbatim answers on web; share links |
+| M1 | **Today AM** — Bible slice ✅ | KJV subset (2,769 units) → Actian local Docker (`server/ingest-bible.mjs`); verse-verbatim answers via `server/server.mjs` + Ask-the-Bible panel; Masky render path ready (`/api/render`, speak mode, SSO user token) — narrator avatar pending |
 | M2 | **Today midday** — marketing agent | Guild-hosted: trend signal → passage → Masky video → draft post; coach-agent versioning loop |
 | M3 | **Today PM** — self-repair + submission | Replay QA pass + MCP fix loop; 3-min demo video; submit by ~4:30 PM PT |
 | M4 | Author flow | Author login → create book → upload podcast/transcript → agent answers from it; earnings ledger |

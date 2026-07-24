@@ -7,6 +7,7 @@ import {
   logout,
   type MaskySession,
 } from './lib/masky';
+import AskBible from './AskBible';
 import './App.css';
 
 export default function App() {
@@ -81,6 +82,7 @@ export default function App() {
           </p>
         )}
         {error && <p className="error">{error}</p>}
+        <AskBible session={session} />
       </main>
 
       <footer className="foot">

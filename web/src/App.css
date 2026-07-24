@@ -95,6 +95,53 @@
   color: #dc2626;
 }
 
+.askbible {
+  text-align: left;
+  max-width: 640px;
+  margin: 2rem auto 0;
+  width: 100%;
+}
+
+.askrow {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.askrow input {
+  flex: 1;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #9993;
+  font-size: 1rem;
+  background: transparent;
+  color: inherit;
+}
+
+.answer {
+  margin-top: 1rem;
+}
+
+.spoken {
+  font-style: italic;
+}
+
+.player {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+  border-radius: 12px;
+}
+
+.passages {
+  padding-left: 1.2rem;
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
+.passages li {
+  margin-bottom: 0.5rem;
+}
+
 .foot {
   text-align: center;
   font-size: 0.85rem;
