@@ -60,9 +60,15 @@ inventing, always quoting — rendered as shareable talking-head video by Masky.
 1. **Credit spend share** — readers spend Masky credits on voice/video answers; the
    author earns a portion; LivingBook takes a platform cut. (Exact splits TBD — open
    question to founder; depends on whether Masky provides a revenue-share ledger.)
-2. **Author subscriptions** (later) — pro tools: analytics, marketing-agent autopilot,
+2. **Creator economy (Podcast tab)** — *"some of the best ideas in the world come from
+   the most unexpected places"*: any user who co-hosts a viral episode becomes a
+   creator. Fans subscribe to their future podcasts, pay to feature the creator's
+   avatar on their own episodes (generated), or book **real recorded video-to-video
+   sessions** published on the platform. Credit-split between creator, featured
+   authors, and platform.
+3. **Author subscriptions** (later) — pro tools: analytics, marketing-agent autopilot,
    multiple avatars/characters per book, priority rendering.
-3. **Sponsored landmarks / events** (later, see REALWORLDPLAN.MD) — bookstores,
+4. **Sponsored landmarks / events** (later, see REALWORLDPLAN.MD) — bookstores,
    churches, publishers.
 
 ## Metrics that matter

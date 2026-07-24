@@ -1,5 +1,7 @@
 # 📖 LivingBook
 
+> *"Some of the best ideas in the world come from the most unexpected places."*
+
 **Books that talk back.** LivingBook brings real authors' books to life as talking video
 agents — built on [Masky](https://masky.ai) — that authors can embed on their own websites
 and readers can meet inside the LivingBook mobile app.
@@ -24,6 +26,13 @@ A submission to the **Self-Evolving Agent Hackathon**.
   follow: the Bible's take on today's headline, or Michael Crichton's — drawn from the
   novels where he predicted it — each grounded in verbatim passages plus real web
   references.
+- A **Podcast tab** generates virtual podcasts between the authors and books you follow
+  — agents discussing a news story you pick (or context you type), coordinated
+  agent-to-agent over Band AI and rendered as two-avatar video by Masky. Join the panel
+  yourself with a Masky avatar you own — or your real camera — and if your episode goes
+  viral, listeners can subscribe to your future podcasts or pay to bring your avatar
+  onto theirs. Creators monetize their avatars: generated video appearances, or booked,
+  recorded real video-to-video sessions published on the platform.
 
 ### Example
 

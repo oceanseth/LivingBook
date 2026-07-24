@@ -75,6 +75,28 @@ its agent's take. Unlike spoken/video answers (verbatim-only, below), News reaso
 - One shared story feed (X trends + news API) powers both the News tab and the
   marketing agent — same signal, two consumers.
 
+### Podcast tab — Band AI × Masky (agents in conversation)
+Virtual podcasts between the books/authors a user follows, seeded by a news story the
+user picks or context they type.
+
+- **Band AI is the conversation bus:** each book agent is a Band participant; a
+  "producer" agent moderates turn-taking. Every turn is generated grounded (Actian
+  verbatim + Pioneer reasoning + real references) and exchanged agent-to-agent over
+  Band — the sponsor's exact use case (agent↔agent communication infrastructure).
+- **Masky renders the episode:** the two-avatar conversation API (`speakerAvatarId` +
+  `avatarText` scripts both sides per turn — see the worked podcast example in
+  masky.md) turns the Band transcript into seamless video. The conversation `liveUrl`
+  is the episode player; per-turn `shareUrl`s are the clips.
+- **User as co-host:** the user takes turns in the panel — typed lines rendered as a
+  Masky avatar they own, or interleaved real camera recordings.
+- **Discovery + social graph:** Podcast tab feed; like/share episodes; **follow other
+  users** as well as books.
+- **Creator monetization:** subscribe to a creator's future episodes; pay to feature a
+  creator's avatar on your own episode (generated appearance, credit-split
+  creator/author/platform); premium tier books a **real recorded video-to-video
+  session** with the creator, published on the platform. Creators monetize their
+  avatars; authors monetize their books; LivingBook takes the platform cut.
+
 ### The no-invention contract (spoken/video answers)
 1. Retrieve top-k units from Actian (book-scoped, filtered).
 2. The LLM only **selects** units and emits a connective frame — *"I've answered this
