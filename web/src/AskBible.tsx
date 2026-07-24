@@ -30,9 +30,12 @@ export default function AskBible({ session }: { session: MaskySession | null }) 
   const canRender = Boolean(session && session.scope.includes('generate') && session.avatarId);
 
   async function run(mode: 'ask' | 'render') {
+    // Clear before the empty-question guard, not after: an empty submit is
+    // still the user retrying, and leaving the previous attempt's error on
+    // screen makes it look like the new submit failed too.
+    setError(null);
     if (!question.trim()) return;
     setBusy(mode);
-    setError(null);
     try {
       const res = await fetch(`${API}/api/${mode}`, {
         method: 'POST',
@@ -46,9 +49,27 @@ export default function AskBible({ session }: { session: MaskySession | null }) 
             : { question },
         ),
       });
-      if (!res.ok) throw new Error((await res.json()).error ?? `HTTP ${res.status}`);
+      // Error bodies are not always JSON. Our own server writes {"error":…},
+      // but a proxy/gateway failure (502 from vite's /api proxy when the ask
+      // server is down, a CDN error page in prod) sends text or nothing at
+      // all. Parsing first would throw a SyntaxError and bury the status the
+      // user actually needs to see, so read as text and upgrade to JSON only
+      // if it parses.
+      if (!res.ok) {
+        const body = await res.text();
+        let message = `HTTP ${res.status}`;
+        try {
+          message = (JSON.parse(body) as { error?: string }).error ?? message;
+        } catch {
+          if (body.trim()) message += `: ${body.trim().slice(0, 200)}`;
+        }
+        throw new Error(message);
+      }
       setResult(await res.json());
     } catch (e) {
+      // Drop the previous answer too. Rendering a stale passage list under a
+      // fresh error reads as though the error applied to that answer.
+      setResult(null);
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(null);

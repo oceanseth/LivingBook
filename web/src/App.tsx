@@ -15,11 +15,19 @@ import './App.css';
 
 type Tab = 'ask' | 'news' | 'talk' | 'books';
 
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'ask', label: 'Ask the Bible' },
+  { id: 'news', label: 'News' },
+  { id: 'talk', label: 'Talk' },
+  { id: 'books', label: 'Books' },
+];
+
 export default function App() {
   const [session, setSession] = useState<MaskySession | null>(() => currentSession());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<Tab>('ask');
+  const [stuck, setStuck] = useState(false);
 
   useEffect(() => {
     handleCallback()
@@ -27,56 +35,78 @@ export default function App() {
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }, []);
 
+  // The header is transparent over the hero glow and only grows its blurred
+  // backdrop once content scrolls under it.
+  useEffect(() => {
+    const onScroll = () => setStuck(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
     <div className="page">
-      <header className="nav">
-        <span className="logo">📖 LivingBook</span>
-        {session ? (
-          <div className="account">
-            {session.picture && <img className="avatar" src={session.picture} alt={session.name} />}
-            <span>{session.name}</span>
+      <header className={stuck ? 'nav stuck' : 'nav'}>
+        <div className="wrap nav-inner">
+          <span className="logo">📖 LivingBook</span>
+          {session ? (
+            <div className="account">
+              {session.picture && (
+                <img className="avatar" src={session.picture} alt={session.name} />
+              )}
+              <span>{session.name}</span>
+              <button
+                className="ghost"
+                onClick={() => {
+                  logout();
+                  setSession(null);
+                }}
+              >
+                Sign out
+              </button>
+            </div>
+          ) : (
             <button
-              className="ghost"
+              className="cta"
+              disabled={busy || !isConfigured()}
               onClick={() => {
-                logout();
-                setSession(null);
+                setBusy(true);
+                login().catch((e) => {
+                  setBusy(false);
+                  setError(e instanceof Error ? e.message : String(e));
+                });
               }}
             >
-              Sign out
+              Login with Masky
             </button>
-          </div>
-        ) : (
-          <button
-            className="cta"
-            disabled={busy || !isConfigured()}
-            onClick={() => {
-              setBusy(true);
-              login().catch((e) => {
-                setBusy(false);
-                setError(e instanceof Error ? e.message : String(e));
-              });
-            }}
-          >
-            Login with Masky
-          </button>
-        )}
+          )}
+        </div>
       </header>
 
-      <main className="hero">
-        <h1>Books that talk back.</h1>
-        <p className="tagline">
-          Real authors&rsquo; books, alive as talking video agents. Ask a book a question and it
-          answers with the author&rsquo;s exact words — on video, ready to share.
-        </p>
-        {error && <p className="error">{error}</p>}
+      <main className="wrap">
+        <section className="hero">
+          <h1>Books that talk back.</h1>
+          <p className="tagline">
+            Real authors&rsquo; books, alive as talking video agents. Ask a book a question and it
+            answers with the author&rsquo;s exact words — on video, ready to share.
+          </p>
+          {error && <p className="error">{error}</p>}
+        </section>
 
-        <nav className="tabs">
-          {(['ask', 'news', 'talk', 'books'] as Tab[]).map((t) => (
-            <button key={t} className={tab === t ? 'tab active' : 'tab'} onClick={() => setTab(t)}>
-              {t === 'ask' ? 'Ask the Bible' : t === 'news' ? 'News' : t === 'talk' ? 'Talk' : 'Books'}
-            </button>
-          ))}
-        </nav>
+        <div className="tabsrow">
+          <nav className="tabs" aria-label="Sections">
+            {TABS.map((t) => (
+              <button
+                key={t.id}
+                className={tab === t.id ? 'tab active' : 'tab'}
+                aria-current={tab === t.id ? 'page' : undefined}
+                onClick={() => setTab(t.id)}
+              >
+                {t.label}
+              </button>
+            ))}
+          </nav>
+        </div>
 
         {tab === 'ask' && <AskBible session={session} />}
         {tab === 'news' && <News />}
@@ -103,7 +133,7 @@ export default function App() {
         </section>
       </main>
 
-      <footer className="foot">
+      <footer className="foot wrap">
         <span>
           Built on Masky · Actian VectorAI · Senso · Guild.ai · Band · AWS — a Self-Evolving
           Agents Hackathon project
