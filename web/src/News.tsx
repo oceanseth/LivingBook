@@ -11,7 +11,10 @@ interface Story {
 interface Take {
   covered: boolean;
   spoken: string;
-  passages: { ref: string; text: string; score: number }[];
+  passages: { ref: string; text: string; score?: number }[];
+  reasoning?: string;
+  references?: { title: string; link: string }[];
+  model?: string;
 }
 
 export default function News() {
@@ -27,16 +30,22 @@ export default function News() {
       .catch(() => {});
   }, []);
 
-  async function getTake(story: Story, slug: string) {
-    setBusy(story.title + slug);
+  async function getTake(story: Story, slug: string, deep = false) {
+    setBusy(story.title + slug + (deep ? 'deep' : ''));
     try {
-      const r = await fetch(`${API}/api/books/${slug}/ask`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: `What does this book say about: ${story.title}` }),
-      });
+      const r = deep
+        ? await fetch(`${API}/api/news/reason`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ slug, story: story.title }),
+          })
+        : await fetch(`${API}/api/books/${slug}/ask`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question: `What does this book say about: ${story.title}` }),
+          });
       const take = await r.json();
-      setTakes((t) => ({ ...t, [story.title]: { ...(t[story.title] ?? {}), [slug]: take } }));
+      setTakes((t) => ({ ...t, [story.title]: { ...(t[story.title] ?? {}), [slug + (deep ? '~deep' : '')]: take } }));
     } finally {
       setBusy(null);
     }
@@ -58,20 +67,49 @@ export default function News() {
           </p>
           <div className="takebtns">
             {books.map((b) => (
-              <button
-                key={b.slug}
-                className="ghost"
-                disabled={busy === s.title + b.slug}
-                onClick={() => getTake(s, b.slug)}
-              >
-                {busy === s.title + b.slug ? 'Asking…' : `Ask ${b.title.split('(')[0].trim()}`}
-              </button>
+              <span key={b.slug} className="takepair">
+                <button
+                  className="ghost"
+                  disabled={busy === s.title + b.slug}
+                  onClick={() => getTake(s, b.slug)}
+                >
+                  {busy === s.title + b.slug ? 'Asking…' : `Ask ${b.title.split('(')[0].trim()}`}
+                </button>
+                <button
+                  className="ghost deep"
+                  disabled={busy === s.title + b.slug + 'deep'}
+                  onClick={() => getTake(s, b.slug, true)}
+                >
+                  {busy === s.title + b.slug + 'deep' ? 'Reasoning…' : '💭 Reason'}
+                </button>
+              </span>
             ))}
           </div>
           {Object.entries(takes[s.title] ?? {}).map(([slug, take]) => (
             <blockquote className="take" key={slug}>
-              <p>{take.spoken}</p>
-              {take.passages?.[0] && <cite>— {take.passages[0].ref}</cite>}
+              {take.reasoning ? (
+                <>
+                  <p>{take.reasoning}</p>
+                  {take.passages?.map((p) => (
+                    <p className="verbatim" key={p.ref}>
+                      <strong>{p.ref}:</strong> &ldquo;{p.text}&rdquo;
+                    </p>
+                  ))}
+                  {take.references?.map((r) => (
+                    <cite key={r.link}>
+                      <a href={r.link} target="_blank" rel="noreferrer">
+                        {r.title}
+                      </a>
+                    </cite>
+                  ))}
+                  {take.model && <cite>reasoned by Pioneer ({take.model})</cite>}
+                </>
+              ) : (
+                <>
+                  <p>{take.spoken}</p>
+                  {take.passages?.[0] && <cite>— {take.passages[0].ref}</cite>}
+                </>
+              )}
             </blockquote>
           ))}
         </div>

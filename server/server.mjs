@@ -98,13 +98,13 @@ function frameFor(book, p) {
   return frame + (quote.trim() || clean.slice(0, 490 - frame.length));
 }
 
-async function ask(slug, question) {
+async function ask(slug, question, minScore = SCORE_THRESHOLD) {
   const book = books[slug];
   if (!book) throw new Error(`unknown book: ${slug}`);
   const vector = await embedText(question);
   const results = await client.points.search(`book_${slug}`, vector, { limit: 5, withPayload: true });
   const passages = results
-    .filter((r) => r.score >= SCORE_THRESHOLD)
+    .filter((r) => r.score >= minScore)
     .map((r) => ({ ...r.payload, score: r.score }));
   if (passages.length === 0) {
     return {
@@ -128,6 +128,114 @@ async function news() {
     .slice(0, 8);
   newsCache = { at: Date.now(), items };
   return items;
+}
+
+// News-tab grounded reasoning via Pioneer (pioneer/auto): the model may reason
+// freely about RELEVANCE, but every quote must be one of the retrieved verbatim
+// units — enforced by substring post-check. Real related links come from a live
+// news search, so references are real, never invented.
+const reasonCache = new Map();
+async function newsReason(slug, story) {
+  const key = `${slug}~${story}`;
+  if (reasonCache.has(key)) return reasonCache.get(key);
+  const book = books[slug];
+  if (!book) throw new Error(`unknown book: ${slug}`);
+  // Hybrid retrieval per Actian's hybrid-RAG pattern: embed the raw story AND a
+  // Pioneer-reformulated thematic query (headlines full of proper nouns embed
+  // poorly against a timeless corpus), then merge by best score.
+  const reformRes = await fetch('https://api.pioneer.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${process.env.PIONEER_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'pioneer/auto',
+      max_tokens: 60,
+      messages: [
+        {
+          role: 'user',
+          content: `Rewrite this news story as a short search query of timeless universal themes (no proper nouns, no dates), the way a concordance would index it. Reply with the query only.\nStory: ${story}`,
+        },
+      ],
+    }),
+  }).then((r) => r.json()).catch(() => null);
+  const essence = reformRes?.choices?.[0]?.message?.content?.trim().replace(/^"|"$/g, '') || story;
+  const a = await ask(slug, story, 0.22);
+  const b = await ask(slug, essence, 0.22);
+  const bestByRef = new Map();
+  for (const p of [...a.passages, ...b.passages]) {
+    if (!bestByRef.has(p.ref) || bestByRef.get(p.ref).score < p.score) bestByRef.set(p.ref, p);
+  }
+  const passages = [...bestByRef.values()].sort((x, y) => y.score - x.score).slice(0, 3);
+  const q = encodeURIComponent(story.split(' - ')[0].slice(0, 80));
+  const relatedRss = await fetch(`https://news.google.com/rss/search?q=${q}&hl=en-US&gl=US&ceid=US:en`)
+    .then((r) => r.text())
+    .catch(() => '');
+  const related = [...relatedRss.matchAll(/<item>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<link>([\s\S]*?)<\/link>/g)]
+    .slice(0, 3)
+    .map((m) => ({ title: m[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim(), link: m[2].trim() }));
+  const norm = (s) => s.replace(/[“”"']/g, '').replace(/\s+/g, ' ').toLowerCase().trim();
+  // Strip source-edition {margin notes} BEFORE the model sees the text, so the
+  // verbatim it quotes is the verbatim we check against.
+  for (const p of passages) p.text = p.text.replace(/\s*\{[^}]*\}/g, '');
+  const cleanTexts = passages.map((p) => norm(p.text));
+  const messages = [
+    {
+      role: 'system',
+      content:
+        `You are the reasoning voice of "${book.title}" on LivingBook's News tab. ` +
+        `You receive a news story, verbatim passages from this book's knowledge base, and real related articles. ` +
+        `Write 2-4 sentences of first-person reasoning connecting the book to the story. ` +
+        `HARD RULES: do NOT use quotation marks and do NOT reproduce passage text — refer to passages ` +
+        `by their ref only (e.g.: as Revelation 18:11-15 foresaw). The exact text is shown to the reader ` +
+        `separately, verbatim. Never invent facts or sources; if the passages don't relate, say so honestly. ` +
+        `You may mention one related article by its exact title. Plain text only, no markdown.`,
+    },
+    {
+      role: 'user',
+      content: JSON.stringify({ story, passages: passages.slice(0, 3), relatedArticles: related }),
+    },
+  ];
+  let reasoning = null;
+  let model = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const pioneerRes = await fetch('https://api.pioneer.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${process.env.PIONEER_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'pioneer/auto', max_tokens: 600, messages }),
+    }).then((r) => r.json());
+    const candidate = pioneerRes.choices?.[0]?.message?.content?.trim();
+    if (!candidate) throw new Error(`pioneer failed: ${JSON.stringify(pioneerRes).slice(0, 200)}`);
+    // No-invention post-check: the reasoner must not quote at all. Reject any
+    // quotation-mark usage or any reproduced 40+char passage span.
+    const quoted = [...candidate.matchAll(/[“"]([^”"]{12,})[”"]/g)].map((m) => m[1].trim());
+    const violation =
+      quoted.find((span) => !related.some((r) => norm(r.title).includes(norm(span)))) ??
+      (cleanTexts.some((t) => {
+        const c = norm(candidate);
+        for (let i = 0; i + 40 <= t.length; i += 20) if (c.includes(t.slice(i, i + 40))) return true;
+        return false;
+      })
+        ? 'reproduced passage text'
+        : undefined);
+    if (!violation) {
+      reasoning = candidate;
+      model = pioneerRes.model;
+      break;
+    }
+    messages.push({ role: 'assistant', content: candidate });
+    messages.push({
+      role: 'user',
+      content: `REJECTED (${String(violation).slice(0, 80)}): do not quote or reproduce any passage text — refer to passages by ref only. Rewrite.`,
+    });
+  }
+  if (!reasoning) throw new Error('reasoning rejected twice: quotes not grounded in retrieved passages');
+  const result = {
+    reasoning,
+    model,
+    passages: passages.slice(0, 3).map(({ ref, text }) => ({ ref, text })),
+    references: related,
+  };
+  reasonCache.set(key, result);
+  return result;
 }
 
 async function render(question, token, { avatarId, avatarOwnerUserId, output = 'video', slug = 'bible-kjv' }) {
@@ -173,6 +281,11 @@ const server = createServer(async (req, res) => {
     }
     if (req.method === 'GET' && url === '/api/news') {
       return res.writeHead(200, headers).end(JSON.stringify({ stories: await news() }));
+    }
+    if (req.method === 'POST' && url === '/api/news/reason') {
+      if (!data.slug || !data.story) return res.writeHead(400, headers).end('{"error":"slug and story required"}');
+      const reasoned = await newsReason(data.slug, data.story);
+      return res.writeHead(200, headers).end(JSON.stringify(reasoned));
     }
     if (req.method === 'POST' && url === '/api/books') {
       const user = await maskyUser(token);
@@ -332,7 +445,8 @@ const server = createServer(async (req, res) => {
     const askMatch = url.match(/^\/api\/books\/([a-z0-9-]+)\/ask$/);
     if (req.method === 'POST' && (askMatch || url === '/api/ask')) {
       const slug = askMatch ? askMatch[1] : 'bible-kjv';
-      return res.writeHead(200, headers).end(JSON.stringify(await ask(slug, data.question)));
+      const answer = await ask(slug, data.question);
+      return res.writeHead(200, headers).end(JSON.stringify(answer));
     }
     if (req.method === 'POST' && url === '/api/render') {
       const t = token || SERVICE_TOKEN;

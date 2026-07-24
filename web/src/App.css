@@ -321,3 +321,19 @@
   align-items: center;
   gap: 0.5rem;
 }
+
+.takepair {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.ghost.deep {
+  border-color: #7c3aed88;
+}
+
+.verbatim {
+  font-style: normal;
+  font-size: 0.9rem;
+  opacity: 0.85;
+  margin: 0.4rem 0 0;
+}
