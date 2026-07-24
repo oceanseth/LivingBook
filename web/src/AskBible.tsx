@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import type { MaskySession } from './lib/masky';
 
-const API = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8787';
+// Default to the app's own origin: the ask server is proxied under /api (see
+// vite.config.ts). An absolute http:// default would be blocked as mixed
+// content the moment the app is served over HTTPS. Override only when the API
+// genuinely lives on another host.
+const API = (import.meta.env.VITE_API_URL as string | undefined) ?? '';
 
 interface Passage {
   ref: string;
