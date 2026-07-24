@@ -91,13 +91,13 @@ export default function App() {
             podcast — the LivingBook Host interviewing the Bible itself.
           </p>
           <div className="clips">
-            <iframe className="clip" src="https://masky.ai/live/t-26-07-wdej" title="Bible on today's lawsuit" allow="autoplay" />
-            <iframe className="clip" src="https://masky.ai/live/t-26-07-angu" title="Marketing agent: Red Sea chokepoint" allow="autoplay" />
+            <iframe className="clip" src="https://masky.ai/live/t-26-07-wdej" title="Bible on today's lawsuit" allowFullScreen />
+            <iframe className="clip" src="https://masky.ai/live/t-26-07-angu" title="Marketing agent: Red Sea chokepoint" allowFullScreen />
             <iframe
               className="clip"
               src="https://masky.ai/live/c-26-07-icn4?token=2f6ea719864ecdab7cae0af20dc0dc99353aebb900b1194c"
               title="Generated podcast episode"
-              allow="autoplay"
+              allowFullScreen
             />
           </div>
         </section>

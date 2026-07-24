@@ -64,7 +64,7 @@ export default function Inbox({ session }: { session: MaskySession }) {
             <p>{c.turns[c.turns.length - 1]?.text.slice(0, 160)}…</p>
           </blockquote>
           {c.renderedUrl ? (
-            <iframe className="clip" src={c.renderedUrl} title={c.id} allow="autoplay" />
+            <iframe className="clip" src={c.renderedUrl} title={c.id} allow="autoplay" allowFullScreen />
           ) : (
             <button className="ghost" disabled={busy === c.id} onClick={() => renderConvo(c.id)}>
               {busy === c.id ? 'Rendering…' : '🎬 Render as video (your credits)'}

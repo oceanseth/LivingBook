@@ -91,7 +91,7 @@ export default function AskBible({ session }: { session: MaskySession | null }) 
               className="player"
               src={result.conversation.liveUrl}
               title="Narrator"
-              allow="autoplay"
+              allow="autoplay" allowFullScreen
             />
           )}
           {result.passages.length > 0 && (
