@@ -457,6 +457,10 @@ button:disabled {
   aspect-ratio: 16 / 10;
 }
 
+/* The iframe sits ON TOP of the skeleton and is never hidden: the embed paints
+   its first frame long before its load event fires, and the moment it paints it
+   covers the skeleton on its own. Fading the iframe in on load instead meant
+   staring at the shimmer while a ready video sat underneath it. */
 .frame {
   position: absolute;
   inset: 0;
@@ -464,17 +468,13 @@ button:disabled {
   height: 100%;
   border: 0;
   display: block;
-  opacity: 0;
-  transition: opacity 0.35s ease;
-}
-
-.frame.ready {
-  opacity: 1;
+  z-index: 1;
 }
 
 .frameload {
   position: absolute;
   inset: 0;
+  z-index: 0;
   display: grid;
   place-content: center;
   justify-items: center;
@@ -486,12 +486,13 @@ button:disabled {
     var(--surface-2);
   background-size: 250% 100%;
   animation: shimmer 1.8s linear infinite;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.2s ease;
 }
 
+/* Load done — stop animating. Visually this is usually already covered. */
 .frameload.gone {
   opacity: 0;
-  pointer-events: none;
+  animation-name: none;
 }
 
 .frameload small {
@@ -499,10 +500,6 @@ button:disabled {
   line-height: 1.4;
   color: var(--muted);
   max-width: 24ch;
-}
-
-.frameload a {
-  color: var(--accent);
 }
 
 .spinner {

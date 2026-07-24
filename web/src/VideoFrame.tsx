@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 
 // Masky embeds can take several seconds to hand back a first frame — and a
 // render that is still generating stays blank for longer than that. A bare
-// iframe is an empty box for the whole wait, which reads as broken. This keeps
-// a skeleton + spinner in place until the frame actually loads, and offers an
-// escape hatch once the wait stops looking normal.
-const SLOW_AFTER_MS = 15000;
+// iframe is an empty box for the whole wait, which reads as broken, so a
+// skeleton sits BEHIND the iframe and the embed covers it as soon as it paints.
+// The iframe's own load event fires much later (after its player JS and video),
+// so it is only used to stop the animation, never to reveal the video.
+const SLOW_AFTER_MS = 10000;
 
 export default function VideoFrame({
   src,
@@ -34,25 +35,11 @@ export default function VideoFrame({
 
   return (
     <div className={className}>
-      <iframe
-        className={loaded ? 'frame ready' : 'frame'}
-        src={src}
-        title={title}
-        allow="autoplay"
-        onLoad={() => setLoaded(true)}
-      />
+      <iframe className="frame" src={src} title={title} allow="autoplay" onLoad={() => setLoaded(true)} />
+      {/* Behind the iframe, so no link here — it would not be clickable. */}
       <div className={loaded ? 'frameload gone' : 'frameload'} aria-hidden={loaded}>
         <span className="spinner" />
-        {slow ? (
-          <small>
-            Still loading —{' '}
-            <a href={src} target="_blank" rel="noreferrer">
-              open directly
-            </a>
-          </small>
-        ) : (
-          <small>Loading video…</small>
-        )}
+        <small>{slow ? 'Still loading — the render may still be generating.' : 'Loading video…'}</small>
       </div>
     </div>
   );
