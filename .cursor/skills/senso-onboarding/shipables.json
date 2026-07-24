@@ -1,0 +1,23 @@
+{
+  "version": "1.7.1",
+  "keywords": [
+    "senso",
+    "onboarding",
+    "knowledge-base",
+    "geo",
+    "ai-visibility",
+    "content-generation",
+    "brand-kit",
+    "first-run"
+  ],
+  "categories": [
+    "ai-ml",
+    "documentation"
+  ],
+  "author": {
+    "name": "Senso AI",
+    "github": "senso-ai"
+  },
+  "homepage": "https://docs.senso.ai/docs/agent-skills",
+  "repository": "https://github.com/senso-ai/agent-skills"
+}

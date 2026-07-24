@@ -3,83 +3,114 @@
 > *"Some of the best ideas in the world come from the most unexpected places."*
 
 **Books that talk back.** LivingBook brings real authors' books to life as talking video
-agents — built on [Masky](https://masky.ai) — that authors can embed on their own websites
-and readers can meet inside the LivingBook mobile app.
+agents — built on [Masky](https://masky.ai) — that authors embed on their own websites
+and readers meet inside the LivingBook app. A submission to the **Self-Evolving Agents
+Hackathon** (SF, Jul 24 2026).
 
-A submission to the **Self-Evolving Agent Hackathon**.
+## The concept
 
-## What it does
+A book shouldn't be a static file. On LivingBook, every book is a **living agent** with
+a face, a voice, and a knowledge base built from everything its author ever said about
+it. Readers ask; the book answers **in the author's own words** — on video.
 
-- **Authors** sign in with **Login with Masky** (their Masky avatar *is* their identity),
-  claim their books, and upload the book plus related material: podcast episodes where they
-  discussed it, transcripts of fan Q&As, essays, errata — anything.
-- **Readers** favorite books in the app and talk to the agent that represents each book.
-  The agent answers **in the author's own words**: it retrieves exact, word-for-word
-  passages and transcripts from the knowledge base and never invents new content beyond
-  short connective phrases like *"I've answered this before, on this podcast, and I said…"*
-- **Masky renders the answer** as a voice or talking-head video experience, depending on
-  the user's available Masky credits. **Authors earn a share of the credit spend** their
-  books generate, and every short clip is one tap away from being reshared to socials.
-- A **self-evolving marketing agent** watches real-world signals trending on social media
-  and proactively produces answer-videos that connect the book to the moment.
-- A **News tab** shows trending stories with text-only reasoning from each book you
-  follow: the Bible's take on today's headline, or Michael Crichton's — drawn from the
-  novels where he predicted it — each grounded in verbatim passages plus real web
-  references.
-- A **Podcast tab** generates virtual podcasts between the authors and books you follow
-  — agents discussing a news story you pick (or context you type), coordinated
-  agent-to-agent over Band AI and rendered as two-avatar video by Masky. Join the panel
-  yourself with a Masky avatar you own — or your real camera — and if your episode goes
-  viral, listeners can subscribe to your future podcasts or pay to bring your avatar
-  onto theirs. Creators monetize their avatars: generated video appearances, or booked,
-  recorded real video-to-video sessions published on the platform.
+### For authors
+- Sign in with **Login with Masky** — your Masky avatar *is* your identity (no separate
+  accounts, ever).
+- Claim your books; upload the text plus everything around it: podcast episodes where
+  you discussed it, fan Q&A transcripts, essays, errata.
+- Embed your book's talking agent on your own site with one snippet.
+- Configure your **marketing agent**: spend budget, outbound messages/day, and connected
+  channels (X, Instagram, TikTok). It watches what's trending and posts grounded
+  answer-videos on your behalf.
+- **Earn**: a share of every Masky credit readers spend talking to your books, plus the
+  creator economy below.
 
-### Example
+### For readers
+- Favorite books, follow authors — and **follow other users**.
+- **Ask anything.** The agent retrieves the exact passage or transcript — never invents
+  beyond connective phrases like *"I've answered this before, on this podcast, and I
+  said: '…'"* — and Masky renders it as voice or talking-head video, depending on your
+  credits. Every clip reshares to socials in one tap.
+- **News tab** — trending stories, each with text-only *grounded reasoning* from every
+  book you follow: the Bible's take on today's headline, or Michael Crichton's — drawn
+  from the novels where he predicted it — with verbatim passages and real web references.
+- **Podcast tab** — generated virtual podcasts between the authors/books you follow,
+  discussing a news story you pick or context you type. Agent-to-agent conversation
+  runs over Band AI rooms; Masky renders it as two-avatar video. **Join the panel
+  yourself** with an avatar you own or your real camera.
+- **Public Domain shelf** — classics live free, starting with the Bible.
+
+### The example that started it
 
 > *"What does the Bible say about this lawsuit in the court today?"*
 
-LivingBook's marketing agent sees the trial trending, retrieves the most relevant passage
-from the Bible's knowledge base, and renders a video of a narrator — or the characters
-themselves — reading that exact section, ready to embed or share.
+LivingBook sees the trial trending, retrieves the most relevant passage, and renders a
+video of a narrator — or the characters — reading that exact section. **This works
+today**: our KJV Narrator answers that question with Psalms 82 / Romans 2, verbatim,
+on video.
 
-Classic public-domain works (starting with the Bible) live in a **Public Domain** section
-of the app, so the experience works from day one — no author signup required.
+### Creator economy
 
-## Architecture (hackathon build)
+If your podcast episode goes viral, you're a creator: fans **subscribe to your future
+episodes**, **pay to feature your avatar** on their own episodes (generated, credit-split
+between creator, featured authors, and platform), or **book a real recorded
+video-to-video session** with you, published on the platform. Longer-term, community
+goes physical — Reading Rooms → local Circles → geofenced **Story Landmark** challenges
+(Pokémon-gym style) → author tours ([REALWORLDPLAN.MD](REALWORLDPLAN.MD)).
 
-| Piece | Tech |
-| --- | --- |
-| Landing page + author dashboard | Vite + React (`web/`) |
-| Mobile app | React Native (`mobile/`, App Store submission planned) |
-| Identity | Login with Masky (OAuth 2.0 + PKCE) — see [masky.md](masky.md) |
-| Avatar voice/video rendering | Masky conversations API |
-| Knowledge base (verbatim retrieval) | Actian VectorAI DB |
-| Content ingestion / verified ground truth | Senso |
-| Agent runtime, triggers, versioned self-evolution | Guild.ai |
-| Simulated usage + autonomous QA / self-repair | Replay QA |
-| Cloud | AWS |
+## Self-evolving, three ways
+
+1. **The knowledge grows from use** — every reader Q&A, author AMA, and podcast episode
+   is ingested back as new verbatim units.
+2. **The marketing agent evolves governed** — a coach agent reviews engagement, rewrites
+   its strategy, and ships it as a new version on Guild.ai, with rollback and audit trail.
+3. **The product repairs itself** — Replay QA simulates readers using the app, finds
+   what broke, and the coding agent consumes the root cause and fixes it.
+
+## Architecture
+
+| Piece | Tech | Status |
+| --- | --- | --- |
+| Landing page + author dashboard | Vite + React (`web/`) | **Live: https://livingbook.masky.ai** |
+| Identity | Login with Masky (OAuth 2.0 + PKCE) — [masky.md](masky.md) | **Live** |
+| Avatar voice/video rendering | Masky conversations, `speak` mode (verbatim) | **Live** (KJV Narrator) |
+| Knowledge base (verbatim retrieval) | Actian VectorAI DB, Docker-local, offline | **Live** (2,769 Bible units) |
+| Reasoning (News tab, marketing agent) | Pioneer inference (`pioneer/auto`) | Key verified |
+| Ingestion / verified ground truth / GEO | Senso | Org onboarded |
+| Agent runtime + versioned self-evolution | Guild.ai | Planned today |
+| Agent↔agent podcast rooms | Band AI (`band-sdk`) | Planned today |
+| Simulated usage + autonomous QA | Replay QA | Planned today |
+| Cloud | AWS (S3/CloudFront/Route53/SSM; Lambda next) | Live |
+| Mobile app | React Native (Expo), App Store submission planned | Post-hackathon |
+
+The answer pipeline enforces a **no-invention contract**: the LLM only *selects*
+retrieved units and emits a short connective frame; a post-check rejects any quote that
+isn't a byte-identical substring of a stored unit.
 
 ## Repo docs
 
-- [DEVELOPMENT-PLAN.MD](DEVELOPMENT-PLAN.MD) — build plan
-- [GTM-PLAN.MD](GTM-PLAN.MD) — go-to-market plan
-- [REALWORLDPLAN.MD](REALWORLDPLAN.MD) — virtual-to-physical community features
-- [AGENTS.MD](AGENTS.MD) — instructions for AI agents working in this repo
-- [masky.md](masky.md) — the Masky API skill this project builds on
-- [OPEN-SESSION-LICENSE.md](OPEN-SESSION-LICENSE.md) — session-transparency license
-  (code is MIT, see [LICENSE](LICENSE))
+- [DEVELOPMENT-PLAN.MD](DEVELOPMENT-PLAN.MD) — build plan + sponsor integration detail
+- [GTM-PLAN.MD](GTM-PLAN.MD) — go-to-market
+- [REALWORLDPLAN.MD](REALWORLDPLAN.MD) — virtual → physical community
+- [AGENTS.MD](AGENTS.MD) — AI-agent instructions (session logging is mandatory)
+- [OPEN-SESSION-LICENSE.md](OPEN-SESSION-LICENSE.md) — this repo ships its full
+  human/AI session history in `llm-turn-history.jsonl` (code is MIT, see
+  [LICENSE](LICENSE))
 
 ## Getting started (web)
 
 ```bash
 cd web
-cp .env.example .env.local        # set VITE_MASKY_CLIENT_ID (see below)
-npm install
-npm run dev
+cp .env.example .env.local        # set VITE_MASKY_CLIENT_ID
+npm install && npm run dev
 ```
 
-One-time OAuth client registration (needs a `mky_` key from https://masky.ai/developer):
+Bible demo (needs Docker):
 
 ```bash
-MASKY_API_KEY=mky_... ./scripts/register-oauth-client.sh
+docker run -d --name vectorai -p 6573-6575:6573-6575 \
+  -e ACTIAN_VECTORAI_ACCEPT_EULA=YES actian/vectorai:latest
+cd server && npm install
+node ingest-bible.mjs local_data/en_kjv.json
+node --env-file=../.env server.mjs   # POST /api/ask, /api/render
 ```
