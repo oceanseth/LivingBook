@@ -1,75 +1,146 @@
 #!/usr/bin/env node
-// LivingBook ask server — the no-invention answer pipeline.
+// LivingBook API server — multi-book verbatim answering + author uploads.
 //
-// POST /api/ask { question }
-//   → embeds the question, retrieves verbatim units from Actian VectorAI,
-//     and returns exact passages with provenance. The connective frame is
-//     assembled from templates; the quoted text is byte-identical payload text.
+//   GET  /api/books                       list books
+//   POST /api/books {title}               create a book (Masky SSO bearer = author)
+//   POST /api/books/:slug/content         upload content {title, sourceType, text}
+//   POST /api/books/:slug/ask {question}  verbatim passages + spoken frame
+//   POST /api/ask {question}              legacy: bible-kjv ask
+//   POST /api/render                      render answer via narrator (speak mode)
+//   GET  /api/news                        cached top headlines
 //
-// POST /api/render { question, avatarId, output }  (Authorization: Bearer <user's Masky SSO token, generate scope>)
-//   → runs /api/ask, then renders the answer through Masky in `speak` mode
-//     (verbatim, no LLM rewrite) on the caller's credits. Returns the turn's
-//     live/share URLs for embed + one-tap reshare.
+// The no-invention contract: answers quote stored units byte-identically;
+// the only generated text is the connective frame, template-composed here.
 import { createServer } from 'node:http';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { VectorAIClient } from '@actian/vectorai-client';
 import { pipeline } from '@xenova/transformers';
 
 const PORT = process.env.PORT ?? 8787;
-// Service identity (run with: node --env-file=../.env server.mjs). When set,
-// /api/render works without a caller token, billing the client owner.
 const SERVICE_TOKEN = process.env.MASKY_SERVICE_TOKEN;
 const NARRATOR_AVATAR_ID = process.env.MASKY_NARRATOR_AVATAR_ID;
 const NARRATOR_OWNER = process.env.MASKY_NARRATOR_OWNER;
-const COLLECTION = 'book_bible-kjv';
-const SCORE_THRESHOLD = 0.35; // below this we honestly say the book doesn't cover it
 const MASKY = 'https://masky.ai/api';
+const SCORE_THRESHOLD = 0.35;
+const BOOKS_FILE = new URL('./local_data/books.json', import.meta.url).pathname;
 
 const embed = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
 const client = new VectorAIClient('localhost:6574', { restUrl: 'http://localhost:6573' });
 
-async function ask(question) {
-  const out = await embed(question, { pooling: 'mean', normalize: true });
-  const results = await client.points.search(COLLECTION, Array.from(out.data), {
-    limit: 5,
-    withPayload: true,
-  });
-  const passages = results
-    .filter((r) => r.score >= SCORE_THRESHOLD)
-    .map((r) => ({ ref: r.payload.ref, text: r.payload.text, score: r.score }));
-  if (passages.length === 0) {
-    return { covered: false, spoken: 'The scriptures I hold do not speak directly to that question.', passages: [] };
-  }
-  const top = passages[0];
-  // Connective frame only — the quote itself is the stored verbatim text.
-  // Strip the source edition's {translator margin notes}, and trim to Masky's
-  // 500-char userText cap at sentence boundaries (never mid-verse).
-  const frame = `Hear the word, from ${top.ref}: `;
-  const clean = top.text.replace(/\s*\{[^}]*\}/g, '');
-  let quote = '';
-  for (const sentence of clean.match(/[^.;!?]+[.;!?]*\s*/g) ?? [clean]) {
-    if (frame.length + quote.length + sentence.length > 495) break;
-    quote += sentence;
-  }
-  const spoken = frame + (quote.trim() || clean.slice(0, 495 - frame.length));
-  return { covered: true, spoken, passages };
+const books = existsSync(BOOKS_FILE)
+  ? JSON.parse(readFileSync(BOOKS_FILE, 'utf8'))
+  : {
+      'bible-kjv': {
+        slug: 'bible-kjv',
+        title: 'The Holy Bible (KJV)',
+        author: 'Public Domain',
+        ownerSub: null,
+        units: 2769,
+        nextId: 100000,
+        createdAt: 0,
+      },
+    };
+const saveBooks = () => writeFileSync(BOOKS_FILE, JSON.stringify(books, null, 1));
+saveBooks();
+
+async function embedText(text) {
+  const out = await embed(text, { pooling: 'mean', normalize: true });
+  return Array.from(out.data);
 }
 
-async function render(question, token, { avatarId, avatarOwnerUserId, output = 'video' }) {
-  const answer = await ask(question);
+const userCache = new Map();
+async function maskyUser(token) {
+  if (!token) return null;
+  if (userCache.has(token)) return userCache.get(token);
+  const res = await fetch(`${MASKY}/oauth/userinfo`, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) return null;
+  const info = await res.json();
+  userCache.set(token, info);
+  return info;
+}
+
+function chunkText(text, sourceRef) {
+  const sentences = text.replace(/\s+/g, ' ').match(/[^.;!?]+[.;!?]+["']?\s*/g) ?? [text];
+  const chunks = [];
+  let buf = '';
+  for (const s of sentences) {
+    buf += s;
+    if (buf.length > 700) {
+      chunks.push(buf.trim());
+      buf = '';
+    }
+  }
+  if (buf.trim()) chunks.push(buf.trim());
+  return chunks.map((t, i) => ({ text: t, ref: `${sourceRef} §${i + 1}` }));
+}
+
+function frameFor(book, p) {
+  const clean = p.text.replace(/\s*\{[^}]*\}/g, '');
+  let frame;
+  if (p.source_type === 'podcast') frame = `I've answered this before, on ${p.source_title ?? p.ref}, and I said: `;
+  else if (p.source_type === 'qa') frame = `A reader once asked me this. From ${p.source_title ?? p.ref}, I said: `;
+  else if (book.slug === 'bible-kjv') frame = `Hear the word, from ${p.ref}: `;
+  else frame = `From ${p.ref}: `;
+  let quote = '';
+  for (const s of clean.match(/[^.;!?]+[.;!?]*\s*/g) ?? [clean]) {
+    if (frame.length + quote.length + s.length > 490) break;
+    quote += s;
+  }
+  return frame + (quote.trim() || clean.slice(0, 490 - frame.length));
+}
+
+async function ask(slug, question) {
+  const book = books[slug];
+  if (!book) throw new Error(`unknown book: ${slug}`);
+  const vector = await embedText(question);
+  const results = await client.points.search(`book_${slug}`, vector, { limit: 5, withPayload: true });
+  const passages = results
+    .filter((r) => r.score >= SCORE_THRESHOLD)
+    .map((r) => ({ ...r.payload, score: r.score }));
+  if (passages.length === 0) {
+    return {
+      covered: false,
+      spoken: `${book.title} does not speak directly to that question.`,
+      passages: [],
+    };
+  }
+  return { covered: true, spoken: frameFor(book, passages[0]), passages };
+}
+
+let newsCache = { at: 0, items: [] };
+async function news() {
+  if (Date.now() - newsCache.at < 10 * 60 * 1000) return newsCache.items;
+  const rss = await fetch('https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en').then((r) => r.text());
+  const items = [...rss.matchAll(/<item>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<link>([\s\S]*?)<\/link>/g)]
+    .map((m) => ({
+      title: m[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim(),
+      link: m[2].trim(),
+    }))
+    .slice(0, 8);
+  newsCache = { at: Date.now(), items };
+  return items;
+}
+
+async function render(question, token, { avatarId, avatarOwnerUserId, output = 'video', slug = 'bible-kjv' }) {
+  const answer = await ask(slug, question);
   const conv = await fetch(`${MASKY}/conversations`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ avatarId, avatarOwnerUserId }),
   }).then((r) => r.json());
-  if (!conv.conversationId) throw new Error(`conversation failed: ${JSON.stringify(conv)}`);
+  if (!conv.conversationId) throw new Error(`conversation failed: ${JSON.stringify(conv).slice(0, 200)}`);
   const turnRes = await fetch(`${MASKY}/conversations/${conv.conversationId}/turn`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userText: answer.spoken, mode: 'speak', output }),
+    body: JSON.stringify({ userText: answer.spoken.slice(0, 499), mode: 'speak', output }),
   });
   const turn = await turnRes.json();
   if (!turnRes.ok || !turn.turn) throw new Error(`turn failed (${turnRes.status}): ${JSON.stringify(turn).slice(0, 300)}`);
-  return { ...answer, conversation: { id: conv.conversationId, liveUrl: conv.liveUrl, shareSlug: conv.shareSlug }, turn: turn.turn };
+  return {
+    ...answer,
+    conversation: { id: conv.conversationId, liveUrl: conv.liveUrl, shareSlug: conv.shareSlug },
+    turn: turn.turn,
+  };
 }
 
 const server = createServer(async (req, res) => {
@@ -77,26 +148,85 @@ const server = createServer(async (req, res) => {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   };
   if (req.method === 'OPTIONS') return res.writeHead(204, headers).end();
-  if (req.method !== 'POST') return res.writeHead(405, headers).end('{"error":"POST only"}');
   let body = '';
   for await (const c of req) body += c;
+  const token = (req.headers.authorization ?? '').replace(/^Bearer /, '');
   try {
-    const data = JSON.parse(body || '{}');
-    if (req.url === '/api/ask') {
-      const result = await ask(data.question);
-      return res.writeHead(200, headers).end(JSON.stringify(result));
+    const data = body ? JSON.parse(body) : {};
+    const url = req.url.split('?')[0];
+
+    if (req.method === 'GET' && url === '/api/books') {
+      const list = Object.values(books).map(({ slug, title, author, units }) => ({ slug, title, author, units }));
+      return res.writeHead(200, headers).end(JSON.stringify({ books: list }));
     }
-    if (req.url === '/api/render') {
-      const callerToken = (req.headers.authorization ?? '').replace(/^Bearer /, '');
-      const token = callerToken || SERVICE_TOKEN;
-      if (!token) return res.writeHead(401, headers).end('{"error":"Masky bearer token required"}');
-      const result = await render(data.question, token, {
+    if (req.method === 'GET' && url === '/api/news') {
+      return res.writeHead(200, headers).end(JSON.stringify({ stories: await news() }));
+    }
+    if (req.method === 'POST' && url === '/api/books') {
+      const user = await maskyUser(token);
+      if (!user) return res.writeHead(401, headers).end('{"error":"Login with Masky required"}');
+      const title = String(data.title ?? '').trim();
+      if (!title) return res.writeHead(400, headers).end('{"error":"title required"}');
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
+      if (books[slug]) return res.writeHead(409, headers).end('{"error":"book exists"}');
+      try {
+        await client.collections.create(`book_${slug}`, { dimension: 384, distanceMetric: 'COSINE' });
+      } catch { /* may exist from a prior run */ }
+      books[slug] = {
+        slug,
+        title,
+        author: user.name,
+        ownerSub: user.sub,
+        authorAvatarId: user.avatar_id ?? null,
+        units: 0,
+        nextId: 1,
+        createdAt: Date.now(),
+      };
+      saveBooks();
+      return res.writeHead(200, headers).end(JSON.stringify({ book: books[slug] }));
+    }
+
+    const contentMatch = url.match(/^\/api\/books\/([a-z0-9-]+)\/content$/);
+    if (req.method === 'POST' && contentMatch) {
+      const book = books[contentMatch[1]];
+      if (!book) return res.writeHead(404, headers).end('{"error":"unknown book"}');
+      const user = await maskyUser(token);
+      if (!user || (book.ownerSub && user.sub !== book.ownerSub)) {
+        return res.writeHead(403, headers).end('{"error":"not your book"}');
+      }
+      const { title = 'untitled', sourceType = 'book', text } = data;
+      if (!text || text.length < 40) return res.writeHead(400, headers).end('{"error":"text too short"}');
+      const chunks = chunkText(text, title);
+      const points = [];
+      for (const c of chunks) {
+        points.push({
+          id: book.nextId++,
+          vector: await embedText(c.text),
+          payload: { source_type: sourceType, source_title: title, ref: c.ref, text: c.text },
+        });
+      }
+      await client.points.upsert(`book_${book.slug}`, points);
+      book.units += points.length;
+      saveBooks();
+      return res.writeHead(200, headers).end(JSON.stringify({ ok: true, unitsAdded: points.length, totalUnits: book.units }));
+    }
+
+    const askMatch = url.match(/^\/api\/books\/([a-z0-9-]+)\/ask$/);
+    if (req.method === 'POST' && (askMatch || url === '/api/ask')) {
+      const slug = askMatch ? askMatch[1] : 'bible-kjv';
+      return res.writeHead(200, headers).end(JSON.stringify(await ask(slug, data.question)));
+    }
+    if (req.method === 'POST' && url === '/api/render') {
+      const t = token || SERVICE_TOKEN;
+      if (!t) return res.writeHead(401, headers).end('{"error":"Masky bearer token required"}');
+      const result = await render(data.question, t, {
         avatarId: data.avatarId ?? NARRATOR_AVATAR_ID,
         avatarOwnerUserId: data.avatarOwnerUserId ?? NARRATOR_OWNER,
         output: data.output,
+        slug: data.slug,
       });
       return res.writeHead(200, headers).end(JSON.stringify(result));
     }
@@ -105,4 +235,4 @@ const server = createServer(async (req, res) => {
     res.writeHead(500, headers).end(JSON.stringify({ error: e.message }));
   }
 });
-server.listen(PORT, () => console.log(`LivingBook ask server on :${PORT}`));
+server.listen(PORT, () => console.log(`LivingBook API on :${PORT} — ${Object.keys(books).length} book(s)`));
