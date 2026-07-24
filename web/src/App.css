@@ -148,3 +148,176 @@
   opacity: 0.6;
   padding-top: 2rem;
 }
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.tab {
+  background: transparent;
+  border: 1px solid #9994;
+  border-radius: 999px;
+  padding: 0.45rem 1.1rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  color: inherit;
+}
+
+.tab.active {
+  background: #7c3aed;
+  border-color: #7c3aed;
+  color: white;
+}
+
+.panel {
+  text-align: left;
+  max-width: 680px;
+  margin: 1.5rem auto 0;
+  width: 100%;
+}
+
+.booklist {
+  padding-left: 1.2rem;
+}
+
+.booklist li {
+  margin-bottom: 0.35rem;
+}
+
+.uploadform {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.uploadform input,
+.uploadform textarea,
+.uploadform select,
+.askrow select {
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid #9993;
+  font-size: 0.95rem;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+}
+
+.story {
+  border-top: 1px solid #9993;
+  padding: 0.8rem 0;
+}
+
+.storytitle a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.takebtns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.4rem 0;
+}
+
+.take {
+  margin: 0.6rem 0 0;
+  padding: 0.6rem 0.9rem;
+  border-left: 3px solid #7c3aed;
+  background: #7c3aed11;
+  font-style: italic;
+}
+
+.take cite {
+  display: block;
+  font-style: normal;
+  opacity: 0.7;
+  font-size: 0.85rem;
+  margin-top: 0.3rem;
+}
+
+.showcase {
+  max-width: 960px;
+}
+
+.clips {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.8rem;
+}
+
+.clip {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border: none;
+  border-radius: 12px;
+  background: #0002;
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.8rem 0;
+}
+
+.msg {
+  max-width: 85%;
+  padding: 0.55rem 0.8rem;
+  border-radius: 12px;
+}
+
+.msg.mine {
+  align-self: flex-end;
+  background: #7c3aed22;
+}
+
+.msg.theirs {
+  align-self: flex-start;
+  background: #9992;
+  font-style: italic;
+}
+
+.msg cite {
+  display: block;
+  font-style: normal;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.recordbox,
+.inbox {
+  border-top: 1px solid #9993;
+  margin-top: 1.4rem;
+  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.vcwidget {
+  min-height: 70px;
+  border: 1px dashed #9995;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+}
+
+.cta.rec {
+  background: #dc2626;
+}
+
+.convo {
+  border-top: 1px dashed #9993;
+  padding: 0.6rem 0;
+}
+
+.convohead {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

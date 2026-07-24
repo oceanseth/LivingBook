@@ -8,12 +8,18 @@ import {
   type MaskySession,
 } from './lib/masky';
 import AskBible from './AskBible';
+import Books from './Books';
+import News from './News';
+import Talk from './Talk';
 import './App.css';
+
+type Tab = 'ask' | 'news' | 'talk' | 'books';
 
 export default function App() {
   const [session, setSession] = useState<MaskySession | null>(() => currentSession());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [tab, setTab] = useState<Tab>('ask');
 
   useEffect(() => {
     handleCallback()
@@ -59,34 +65,49 @@ export default function App() {
       <main className="hero">
         <h1>Books that talk back.</h1>
         <p className="tagline">
-          LivingBook turns real authors&rsquo; books into living video agents. Ask a book a
-          question and watch its narrator — or its characters — answer with the author&rsquo;s
-          exact words, on video, ready to embed anywhere.
+          Real authors&rsquo; books, alive as talking video agents. Ask a book a question and it
+          answers with the author&rsquo;s exact words — on video, ready to share.
         </p>
-        {!session && (
-          <p className="sub">
-            Authors: sign in with your Masky avatar to claim your books, upload podcasts and
-            Q&amp;A transcripts, and let your readers meet your book face to face.
-          </p>
-        )}
-        {session && (
-          <p className="sub">
-            Welcome, {session.name}. Your author dashboard is coming online — book uploads,
-            knowledge base, and your marketing agent land here next.
-          </p>
-        )}
-        {!isConfigured() && (
-          <p className="notice">
-            SSO not configured yet: set <code>VITE_MASKY_CLIENT_ID</code> in <code>web/.env.local</code>{' '}
-            (run <code>scripts/register-oauth-client.sh</code>).
-          </p>
-        )}
         {error && <p className="error">{error}</p>}
-        <AskBible session={session} />
+
+        <nav className="tabs">
+          {(['ask', 'news', 'talk', 'books'] as Tab[]).map((t) => (
+            <button key={t} className={tab === t ? 'tab active' : 'tab'} onClick={() => setTab(t)}>
+              {t === 'ask' ? 'Ask the Bible' : t === 'news' ? 'News' : t === 'talk' ? 'Talk' : 'Books'}
+            </button>
+          ))}
+        </nav>
+
+        {tab === 'ask' && <AskBible session={session} />}
+        {tab === 'news' && <News />}
+        {tab === 'talk' && <Talk session={session} />}
+        {tab === 'books' && <Books session={session} />}
+
+        <section className="panel showcase">
+          <h2>Fresh from the living books</h2>
+          <p className="sub">
+            Real renders from today: the Bible answering a trending courtroom question, the
+            self-evolving marketing agent&rsquo;s take on the Red Sea chokepoint, and a generated
+            podcast — the LivingBook Host interviewing the Bible itself.
+          </p>
+          <div className="clips">
+            <iframe className="clip" src="https://masky.ai/live/t-26-07-wdej" title="Bible on today's lawsuit" allow="autoplay" />
+            <iframe className="clip" src="https://masky.ai/live/t-26-07-angu" title="Marketing agent: Red Sea chokepoint" allow="autoplay" />
+            <iframe
+              className="clip"
+              src="https://masky.ai/live/c-26-07-icn4?token=2f6ea719864ecdab7cae0af20dc0dc99353aebb900b1194c"
+              title="Generated podcast episode"
+              allow="autoplay"
+            />
+          </div>
+        </section>
       </main>
 
       <footer className="foot">
-        <span>Built on Masky · AWS · Actian — a Self-Evolving Agent Hackathon project</span>
+        <span>
+          Built on Masky · Actian VectorAI · Senso · Guild.ai · Band · AWS — a Self-Evolving
+          Agents Hackathon project
+        </span>
       </footer>
     </div>
   );
