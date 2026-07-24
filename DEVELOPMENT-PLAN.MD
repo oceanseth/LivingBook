@@ -131,12 +131,26 @@ identity = a **service avatar** + `client_credentials` token in Secrets Manager.
 | M4 | Author flow | Author login → create book → upload podcast/transcript → agent answers from it; earnings ledger |
 | M5 | Mobile app | RN reader app (favorites, agent chat, Public Domain shelf); App Store submission |
 
+## Decisions (Jul 24)
+
+- **Scope today:** hackathon demo loop AND the author flow.
+- **Mobile:** Expo (EAS builds, AuthSession for the Masky PKCE flow). Replay "mobile"
+  simulation = mobile-web emulation.
+- **Marketing agent:** start with **X trends**. Authors configure their own agent: spend
+  budget, outbound messages/day, and connected channels (x.com, Instagram, TikTok) so
+  posts go out on their behalf reacting to top trending posts/reels.
+- **Domain:** web app deployed at **https://livingbook.masky.ai** (S3 + CloudFront
+  `E2DGNXZJVOM8A` + Route53 in the masky.ai zone; ACM cert issued).
+- **OAuth client:** `mkc_c6ea337a1294f9ba32e96255`, redirect
+  `https://livingbook.masky.ai/callback`. Client id in `web/.env.local`; the client
+  SECRET lives only in the untracked root `.env` → move to AWS Secrets Manager for the
+  backend. It was shared in-session, so rotate it after the hackathon.
+
 ## Open questions (tracked)
 
-- Expo vs bare React Native; is mobile in scope today at all (Replay can only do mobile-web)?
-- Masky keys: `MASKY_API_KEY` for OAuth client registration; who creates the Bible
-  narrator avatar + service avatar; credit budget for video turns today.
 - Credit-share economics: what % of user credit spend accrues to the author; does Masky
   provide the ledger or do we track app-side?
-- Trending-signal source today (X API? news RSS? manual seed list for the demo?).
-- AWS account/region; role of the existing Akash deployment, if any.
+- X API access tier for trend reads + posting on authors' behalf (OAuth per author).
+- Sponsor-service credentials needed: Actian VectorAI trial signup, Guild.ai account,
+  Senso API key, Replay.io account/GitHub app install.
+- Role of the existing Akash deployment, if any.
