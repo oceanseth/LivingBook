@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { MaskySession } from './lib/masky';
+import RecordSpoken from './RecordSpoken';
+import Inbox from './Inbox';
 
 const API = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8787';
 
@@ -133,6 +135,8 @@ export default function Books({ session }: { session: MaskySession | null }) {
         </>
       )}
       {msg && <p className="notice">{msg}</p>}
+      {session && <RecordSpoken session={session} books={books} />}
+      {session && <Inbox session={session} />}
     </section>
   );
 }

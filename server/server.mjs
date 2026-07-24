@@ -27,6 +27,14 @@ const BOOKS_FILE = new URL('./local_data/books.json', import.meta.url).pathname;
 const embed = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
 const client = new VectorAIClient('localhost:6574', { restUrl: 'http://localhost:6573' });
 
+const CONVOS_FILE = new URL('./local_data/convos.json', import.meta.url).pathname;
+const convos = existsSync(CONVOS_FILE) ? JSON.parse(readFileSync(CONVOS_FILE, 'utf8')) : {};
+const saveConvos = () => writeFileSync(CONVOS_FILE, JSON.stringify(convos, null, 1));
+
+// VoiceCert demo gate: production liveness attestation isn't live yet, so this
+// mints demo sessions the recording flow requires before any spoken ingestion.
+const voicecertSessions = new Map();
+
 const books = existsSync(BOOKS_FILE)
   ? JSON.parse(readFileSync(BOOKS_FILE, 'utf8'))
   : {
@@ -79,6 +87,7 @@ function frameFor(book, p) {
   let frame;
   if (p.source_type === 'podcast') frame = `I've answered this before, on ${p.source_title ?? p.ref}, and I said: `;
   else if (p.source_type === 'qa') frame = `A reader once asked me this. From ${p.source_title ?? p.ref}, I said: `;
+  else if (p.source_type === 'spoken') frame = `I spoke these words myself, on the record${p.voicecert ? ' — VoiceCert-attested' : ''} (${p.source_title ?? p.ref}): `;
   else if (book.slug === 'bible-kjv') frame = `Hear the word, from ${p.ref}: `;
   else frame = `From ${p.ref}: `;
   let quote = '';
@@ -197,21 +206,127 @@ const server = createServer(async (req, res) => {
       if (!user || (book.ownerSub && user.sub !== book.ownerSub)) {
         return res.writeHead(403, headers).end('{"error":"not your book"}');
       }
-      const { title = 'untitled', sourceType = 'book', text } = data;
+      const { title = 'untitled', sourceType = 'book', text, voicecertSessionId } = data;
       if (!text || text.length < 40) return res.writeHead(400, headers).end('{"error":"text too short"}');
+      let voicecert = null;
+      if (sourceType === 'spoken') {
+        const vc = voicecertSessions.get(voicecertSessionId);
+        if (!vc || vc.sub !== user.sub) {
+          return res.writeHead(403, headers).end('{"error":"spoken content requires a VoiceCert-attested session — authenticate first"}');
+        }
+        voicecert = { sessionId: voicecertSessionId, method: vc.method, attestedAt: vc.issuedAt };
+      }
       const chunks = chunkText(text, title);
       const points = [];
       for (const c of chunks) {
         points.push({
           id: book.nextId++,
           vector: await embedText(c.text),
-          payload: { source_type: sourceType, source_title: title, ref: c.ref, text: c.text },
+          payload: { source_type: sourceType, source_title: title, ref: c.ref, text: c.text, ...(voicecert ? { voicecert } : {}) },
         });
       }
       await client.points.upsert(`book_${book.slug}`, points);
       book.units += points.length;
       saveBooks();
       return res.writeHead(200, headers).end(JSON.stringify({ ok: true, unitsAdded: points.length, totalUnits: book.units }));
+    }
+
+    // VoiceCert attestation — gates spoken-word recording. The widget on the
+    // client yields a token; we verify it server-side with the site secret.
+    if (req.method === 'POST' && url === '/api/voicecert/session') {
+      const user = await maskyUser(token);
+      if (!user) return res.writeHead(401, headers).end('{"error":"Login with Masky required"}');
+      if (!data.token) return res.writeHead(400, headers).end('{"error":"VoiceCert widget token required"}');
+      const verify = await fetch('https://vjo75sxcjitvjyzwbkiadmg2u40nojps.lambda-url.us-east-1.on.aws/v1/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secret: process.env.VOICECERT_SECRET, token: data.token }),
+      }).then((r) => r.json()).catch((e) => ({ success: false, error: e.message }));
+      if (!verify.success) {
+        return res.writeHead(403, headers).end(JSON.stringify({ error: 'VoiceCert verification failed', detail: verify }));
+      }
+      const sessionId = 'vc_' + Math.random().toString(36).slice(2, 12);
+      const session = {
+        sessionId,
+        sub: user.sub,
+        name: user.name,
+        method: 'voicecert',
+        issuedAt: Date.now(),
+      };
+      voicecertSessions.set(sessionId, session);
+      return res.writeHead(200, headers).end(JSON.stringify({ session }));
+    }
+
+    // Visitor talks to someone's book agent; the exchange lands in the owner's inbox.
+    if (req.method === 'POST' && url === '/api/talk') {
+      const user = await maskyUser(token);
+      if (!user) return res.writeHead(401, headers).end('{"error":"Login with Masky to talk — your avatar is your identity"}');
+      const { slug, question } = data;
+      if (!books[slug] || !question) return res.writeHead(400, headers).end('{"error":"slug and question required"}');
+      const answer = await ask(slug, question);
+      const convoId = `${user.sub}~${slug}`;
+      const convo = (convos[convoId] ??= {
+        id: convoId,
+        fromSub: user.sub,
+        fromName: user.name,
+        fromAvatarId: user.avatar_id ?? null,
+        fromPicture: user.picture ?? null,
+        slug,
+        bookTitle: books[slug].title,
+        turns: [],
+        renderedUrl: null,
+        createdAt: Date.now(),
+      });
+      convo.turns.push({ who: 'visitor', text: question, at: Date.now() });
+      convo.turns.push({ who: 'agent', text: answer.spoken, ref: answer.passages[0]?.ref ?? null, at: Date.now() });
+      convo.updatedAt = Date.now();
+      saveConvos();
+      return res.writeHead(200, headers).end(JSON.stringify({ ...answer, conversationId: convoId }));
+    }
+
+    // Owner inbox: incoming conversations with their books (text-only until rendered).
+    if (req.method === 'GET' && url === '/api/inbox') {
+      const user = await maskyUser(token);
+      if (!user) return res.writeHead(401, headers).end('{"error":"Login with Masky required"}');
+      const mine = Object.values(convos).filter((c) => books[c.slug]?.ownerSub === user.sub);
+      return res.writeHead(200, headers).end(JSON.stringify({ conversations: mine }));
+    }
+
+    // Owner renders an inbox conversation as two-avatar video on THEIR credits.
+    const renderMatch = url.match(/^\/api\/inbox\/([^/]+)\/render$/);
+    if (req.method === 'POST' && renderMatch) {
+      const convo = convos[decodeURIComponent(renderMatch[1])];
+      if (!convo) return res.writeHead(404, headers).end('{"error":"unknown conversation"}');
+      const user = await maskyUser(token);
+      if (!user || books[convo.slug]?.ownerSub !== user.sub) {
+        return res.writeHead(403, headers).end('{"error":"only the book owner can render"}');
+      }
+      const bookAvatar = books[convo.slug].authorAvatarId ?? NARRATOR_AVATAR_ID;
+      const conv = await fetch(`${MASKY}/conversations`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatarId: bookAvatar, avatarOwnerUserId: NARRATOR_OWNER }),
+      }).then((r) => r.json());
+      if (!conv.conversationId) throw new Error(`conversation failed: ${JSON.stringify(conv).slice(0, 200)}`);
+      for (let i = 0; i < convo.turns.length; i += 2) {
+        const q = convo.turns[i];
+        const a = convo.turns[i + 1];
+        if (!q || !a) break;
+        await fetch(`${MASKY}/conversations/${conv.conversationId}/turn`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userText: q.text.slice(0, 499),
+            avatarText: a.text.slice(0, 499),
+            ...(convo.fromAvatarId ? { speakerAvatarId: convo.fromAvatarId, userOutput: 'video' } : {}),
+            output: 'video',
+            mode: 'chat',
+          }),
+        });
+      }
+      convo.renderedUrl = conv.liveUrl;
+      saveConvos();
+      return res.writeHead(200, headers).end(JSON.stringify({ liveUrl: conv.liveUrl, shareSlug: conv.shareSlug }));
     }
 
     const askMatch = url.match(/^\/api\/books\/([a-z0-9-]+)\/ask$/);

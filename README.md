@@ -49,6 +49,26 @@ video of a narrator — or the characters — reading that exact section. **This
 today**: our KJV Narrator answers that question with Psalms 82 / Romans 2, verbatim,
 on video.
 
+### Human verification — powered by [VoiceCert](https://www.voicecert.com)
+
+Rendered text is only trustworthy if readers know a **real human actually said it**.
+LivingBook gates every spoken-word recording session behind **VoiceCert human
+verification**: before an author records, the VoiceCert widget proves a live human is
+present and speaking; our backend verifies the attestation server-side with the site
+secret. The transcribed words are then ingested as `spoken` ground truth — tagged with
+their VoiceCert attestation — so when an agent later says *"I spoke these words myself,
+on the record — VoiceCert-attested"*, that claim is backed by proof, not vibes. As the
+VoiceCert stack matures (per-session and per-turn liveness attestation), the same gate
+extends to user-to-user calls and author AMAs, giving readers cryptographic-grade trust
+that rendered avatars speak **the authors' actual spoken words**.
+
+### Talk to books, author inbox
+
+Sign in with Masky and talk to any book **as your avatar**. The conversation lands in
+the author's **inbox** (text-only). The author can render any conversation as a
+two-avatar video — your avatar asking, the book answering — on their credits, and share
+it to socials.
+
 ### Creator economy
 
 If your podcast episode goes viral, you're a creator: fans **subscribe to your future

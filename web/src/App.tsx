@@ -10,9 +10,10 @@ import {
 import AskBible from './AskBible';
 import Books from './Books';
 import News from './News';
+import Talk from './Talk';
 import './App.css';
 
-type Tab = 'ask' | 'news' | 'books';
+type Tab = 'ask' | 'news' | 'talk' | 'books';
 
 export default function App() {
   const [session, setSession] = useState<MaskySession | null>(() => currentSession());
@@ -70,15 +71,16 @@ export default function App() {
         {error && <p className="error">{error}</p>}
 
         <nav className="tabs">
-          {(['ask', 'news', 'books'] as Tab[]).map((t) => (
+          {(['ask', 'news', 'talk', 'books'] as Tab[]).map((t) => (
             <button key={t} className={tab === t ? 'tab active' : 'tab'} onClick={() => setTab(t)}>
-              {t === 'ask' ? 'Ask the Bible' : t === 'news' ? 'News' : 'Books'}
+              {t === 'ask' ? 'Ask the Bible' : t === 'news' ? 'News' : t === 'talk' ? 'Talk' : 'Books'}
             </button>
           ))}
         </nav>
 
         {tab === 'ask' && <AskBible session={session} />}
         {tab === 'news' && <News />}
+        {tab === 'talk' && <Talk session={session} />}
         {tab === 'books' && <Books session={session} />}
 
         <section className="panel showcase">
