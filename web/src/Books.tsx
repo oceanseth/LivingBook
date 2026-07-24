@@ -12,6 +12,7 @@ export interface Book {
   author: string;
   units: number;
   visibility?: string;
+  followed?: boolean;
   authorAvatarId?: string | null;
   avatarImage?: string | null;
   ownerSub?: string | null;
@@ -47,6 +48,7 @@ export default function Books({ session }: { session: MaskySession | null }) {
   const [avatars, setAvatars] = useState<MaskyAvatar[]>([]);
   const [avatarSlug, setAvatarSlug] = useState('');
   const [picked, setPicked] = useState<PickedAvatar | null>(null);
+  const [shelf, setShelf] = useState<'mine' | 'public'>(session ? 'mine' : 'public');
 
   useEffect(() => {
     if (!session) return;
@@ -83,32 +85,78 @@ export default function Books({ session }: { session: MaskySession | null }) {
   return (
     <section className="panel">
       <h2>Books</h2>
-      <ul className="booklist">
-        {books.map((b) => (
-          <li key={b.slug} className="bookrow">
-            {b.avatarImage && <img className="avatar" src={b.avatarImage} alt="" />}
-            <span>
-              <strong>{b.title}</strong> — {b.author} · {b.units} verbatim units
-            </span>
-            {session && b.ownerSub === session.sub && (
-              <button
-                className="ghost small"
-                onClick={() =>
-                  post(`/api/books/${b.slug}/visibility`, {
-                    visibility: b.visibility === 'private' ? 'public' : 'private',
-                  })
-                    .then(() => reload())
-                    .catch((err) => setMsg(err.message))
-                }
-              >
-                {b.visibility === 'private' ? '🔒 private' : '🌐 public'}
-              </button>
-            )}
-          </li>
-        ))}
-      </ul>
-      {!session && <p className="sub">Sign in with Masky to claim your books and upload content.</p>}
-      {session && (
+      <nav className="tabs subtabs">
+        <button className={shelf === 'mine' ? 'tab active' : 'tab'} onClick={() => setShelf('mine')}>
+          Your books
+        </button>
+        <button className={shelf === 'public' ? 'tab active' : 'tab'} onClick={() => setShelf('public')}>
+          Public books
+        </button>
+      </nav>
+      {shelf === 'mine' && (
+        <ul className="booklist">
+          {books.filter((b) => session && b.ownerSub === session.sub).length === 0 && (
+            <p className="sub">
+              {session ? 'No books yet — add one below.' : 'Sign in with Masky to claim your books.'}
+            </p>
+          )}
+          {books
+            .filter((b) => session && b.ownerSub === session.sub)
+            .map((b) => (
+              <li key={b.slug} className="bookrow">
+                {b.avatarImage && <img className="avatar" src={b.avatarImage} alt="" />}
+                <span>
+                  <strong>{b.title}</strong> — {b.author} · {b.units} verbatim units
+                </span>
+                <button
+                  className="ghost small"
+                  onClick={() =>
+                    post(`/api/books/${b.slug}/visibility`, {
+                      visibility: b.visibility === 'private' ? 'public' : 'private',
+                    })
+                      .then(() => reload())
+                      .catch((err) => setMsg(err.message))
+                  }
+                >
+                  {b.visibility === 'private' ? '🔒 private' : '🌐 public'}
+                </button>
+              </li>
+            ))}
+        </ul>
+      )}
+      {shelf === 'public' && (
+        <ul className="booklist">
+          {books
+            .filter((b) => b.visibility !== 'private' && (!session || b.ownerSub !== session.sub))
+            .map((b) => (
+              <li key={b.slug} className="bookrow">
+                <button
+                  className="starbtn"
+                  title={
+                    session
+                      ? b.followed
+                        ? 'Unfollow'
+                        : 'Follow this book'
+                      : 'Sign in to follow books'
+                  }
+                  disabled={!session}
+                  onClick={() =>
+                    post(`/api/books/${b.slug}/follow`, {})
+                      .then(() => reload())
+                      .catch((err) => setMsg(err.message))
+                  }
+                >
+                  {b.followed ? '★' : '☆'}
+                </button>
+                {b.avatarImage && <img className="avatar" src={b.avatarImage} alt="" />}
+                <span>
+                  <strong>{b.title}</strong> — {b.author} · {b.units} verbatim units
+                </span>
+              </li>
+            ))}
+        </ul>
+      )}
+      {session && shelf === 'mine' && (
         <>
           <h3>Add a book</h3>
           <form
@@ -200,7 +248,7 @@ export default function Books({ session }: { session: MaskySession | null }) {
           </div>
         </>
       )}
-      {session && avatars.length > 0 && (
+      {session && shelf === 'mine' && avatars.length > 0 && (
         <>
           <h3>Book avatar</h3>
           <p className="sub">Pick which of your Masky avatars represents a book — it becomes the face and voice readers see.</p>
@@ -276,8 +324,8 @@ export default function Books({ session }: { session: MaskySession | null }) {
           📱 Connect mobile app
         </button>
       )}
-      {session && <RecordSpoken session={session} books={books} />}
-      {session && <Inbox session={session} />}
+      {session && shelf === 'mine' && <RecordSpoken session={session} books={books} />}
+      {session && shelf === 'mine' && <Inbox session={session} />}
     </section>
   );
 }

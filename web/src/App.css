@@ -891,3 +891,22 @@ button:disabled {
   color: #7c3aed;
   font-style: normal;
 }
+
+.subtabs {
+  margin: 0.4rem 0 0.8rem;
+  justify-content: flex-start;
+}
+
+.starbtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.15rem;
+  color: #f59e0b;
+  padding: 0 0.2rem;
+}
+
+.starbtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

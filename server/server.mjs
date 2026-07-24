@@ -40,6 +40,9 @@ const voicecertSessions = new Map();
 // the same Masky SSO token (device-code pattern; Expo Go can't take an https
 // OAuth redirect).
 const pairCodes = new Map();
+const FOLLOWS_FILE = new URL('./local_data/follows.json', import.meta.url).pathname;
+const follows = existsSync(FOLLOWS_FILE) ? JSON.parse(readFileSync(FOLLOWS_FILE, 'utf8')) : {};
+const saveFollows = () => writeFileSync(FOLLOWS_FILE, JSON.stringify(follows, null, 1));
 
 const books = existsSync(BOOKS_FILE)
   ? JSON.parse(readFileSync(BOOKS_FILE, 'utf8'))
@@ -427,12 +430,26 @@ const server = createServer(async (req, res) => {
 
     if (req.method === 'GET' && url === '/api/books') {
       const user = await maskyUser(token);
+      const mine = user ? (follows[user.sub] ?? []) : [];
       const list = Object.values(books)
         .filter((b) => b.visibility !== 'private' || (user && b.ownerSub === user.sub))
         .map(({ slug, title, author, units, authorAvatarId, avatarImage, ownerSub, visibility }) => ({
           slug, title, author, units, authorAvatarId, avatarImage, ownerSub, visibility,
+          followed: mine.includes(slug),
         }));
       return res.writeHead(200, headers).end(JSON.stringify({ books: list }));
+    }
+    const followMatch = url.match(/^\/api\/books\/([a-z0-9-]+)\/follow$/);
+    if (req.method === 'POST' && followMatch) {
+      const user = await maskyUser(token);
+      if (!user) return res.writeHead(401, headers).end('{"error":"Login with Masky required"}');
+      if (!books[followMatch[1]]) return res.writeHead(404, headers).end('{"error":"unknown book"}');
+      const mine = (follows[user.sub] ??= []);
+      const idx = mine.indexOf(followMatch[1]);
+      if (idx === -1) mine.push(followMatch[1]);
+      else mine.splice(idx, 1);
+      saveFollows();
+      return res.writeHead(200, headers).end(JSON.stringify({ followed: idx === -1 }));
     }
     const visMatch = url.match(/^\/api\/books\/([a-z0-9-]+)\/visibility$/);
     if (req.method === 'POST' && visMatch) {
