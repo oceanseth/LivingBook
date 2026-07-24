@@ -734,3 +734,55 @@ button:disabled {
   gap: 0.5rem;
   flex-wrap: wrap;
 }
+
+.bookrow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.avatargrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+}
+
+.avatarcard {
+  width: 92px;
+  border: 2px solid #9993;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.avatarcard:hover:not(:disabled) {
+  border-color: #7c3aed;
+}
+
+.avatarcard:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.avatarcard img {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.avatarcard span {
+  font-size: 0.7rem;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

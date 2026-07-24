@@ -408,8 +408,25 @@ const server = createServer(async (req, res) => {
     const url = req.url.split('?')[0];
 
     if (req.method === 'GET' && url === '/api/books') {
-      const list = Object.values(books).map(({ slug, title, author, units }) => ({ slug, title, author, units }));
+      const list = Object.values(books).map(({ slug, title, author, units, authorAvatarId, avatarImage, ownerSub }) => ({
+        slug, title, author, units, authorAvatarId, avatarImage, ownerSub,
+      }));
       return res.writeHead(200, headers).end(JSON.stringify({ books: list }));
+    }
+    const avatarMatch = url.match(/^\/api\/books\/([a-z0-9-]+)\/avatar$/);
+    if (req.method === 'POST' && avatarMatch) {
+      const book = books[avatarMatch[1]];
+      if (!book) return res.writeHead(404, headers).end('{"error":"unknown book"}');
+      const user = await maskyUser(token);
+      if (!user || (book.ownerSub && user.sub !== book.ownerSub)) {
+        return res.writeHead(403, headers).end('{"error":"not your book"}');
+      }
+      book.authorAvatarId = data.avatarId ?? null;
+      book.avatarOwner = data.avatarOwnerUserId ?? null;
+      book.avatarImage = data.avatarImage ?? null;
+      if (data.avatarName) book.author = data.avatarName;
+      saveBooks();
+      return res.writeHead(200, headers).end(JSON.stringify({ ok: true, book: { slug: book.slug, authorAvatarId: book.authorAvatarId } }));
     }
     if (req.method === 'GET' && url === '/api/news') {
       return res.writeHead(200, headers).end(JSON.stringify({ stories: await news() }));

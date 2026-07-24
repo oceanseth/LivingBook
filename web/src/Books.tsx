@@ -10,6 +10,17 @@ export interface Book {
   title: string;
   author: string;
   units: number;
+  authorAvatarId?: string | null;
+  avatarImage?: string | null;
+  ownerSub?: string | null;
+}
+
+interface MaskyAvatar {
+  avatarId: string;
+  avatarOwnerUserId: string;
+  displayName: string;
+  avatarImageUrl?: string;
+  imageUrl?: string;
 }
 
 export function useBooks() {
@@ -30,6 +41,18 @@ export default function Books({ session }: { session: MaskySession | null }) {
   const [title, setTitle] = useState('');
   const [upload, setUpload] = useState({ slug: '', title: '', sourceType: 'podcast', text: '' });
   const [pdf, setPdf] = useState<{ name: string; base64: string } | null>(null);
+  const [avatars, setAvatars] = useState<MaskyAvatar[]>([]);
+  const [avatarSlug, setAvatarSlug] = useState('');
+
+  useEffect(() => {
+    if (!session) return;
+    fetch('https://masky.ai/api/avatars', {
+      headers: { Authorization: `Bearer ${session.accessToken}` },
+    })
+      .then((r) => r.json())
+      .then((d) => setAvatars(d.avatars ?? []))
+      .catch(() => {});
+  }, [session]);
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -58,8 +81,11 @@ export default function Books({ session }: { session: MaskySession | null }) {
       <h2>Books</h2>
       <ul className="booklist">
         {books.map((b) => (
-          <li key={b.slug}>
-            <strong>{b.title}</strong> — {b.author} · {b.units} verbatim units
+          <li key={b.slug} className="bookrow">
+            {b.avatarImage && <img className="avatar" src={b.avatarImage} alt="" />}
+            <span>
+              <strong>{b.title}</strong> — {b.author} · {b.units} verbatim units
+            </span>
           </li>
         ))}
       </ul>
@@ -153,6 +179,51 @@ export default function Books({ session }: { session: MaskySession | null }) {
             >
               Ingest
             </button>
+          </div>
+        </>
+      )}
+      {session && avatars.length > 0 && (
+        <>
+          <h3>Book avatar</h3>
+          <p className="sub">Pick which of your Masky avatars represents a book — it becomes the face and voice readers see.</p>
+          <div className="askrow">
+            <select value={avatarSlug} onChange={(e) => setAvatarSlug(e.target.value)}>
+              <option value="">— pick your book —</option>
+              {books
+                .filter((b) => !b.ownerSub || b.ownerSub === session.sub)
+                .map((b) => (
+                  <option key={b.slug} value={b.slug}>
+                    {b.title}
+                  </option>
+                ))}
+            </select>
+          </div>
+          <div className="avatargrid">
+            {avatars.map((av) => (
+              <button
+                key={av.avatarId}
+                className="avatarcard"
+                disabled={busy || !avatarSlug}
+                onClick={() =>
+                  post(`/api/books/${avatarSlug}/avatar`, {
+                    avatarId: av.avatarId,
+                    avatarOwnerUserId: av.avatarOwnerUserId,
+                    avatarImage: av.avatarImageUrl ?? av.imageUrl ?? null,
+                    avatarName: av.displayName,
+                  })
+                    .then(() => {
+                      setMsg(`"${av.displayName}" now represents that book`);
+                      reload();
+                    })
+                    .catch((err) => setMsg(err.message))
+                }
+              >
+                {(av.avatarImageUrl ?? av.imageUrl) && (
+                  <img src={av.avatarImageUrl ?? av.imageUrl} alt={av.displayName} />
+                )}
+                <span>{av.displayName}</span>
+              </button>
+            ))}
           </div>
         </>
       )}
