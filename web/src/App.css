@@ -865,3 +865,29 @@ button:disabled {
   gap: 0.6rem;
   margin-top: 1rem;
 }
+
+.turnactions {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  margin-top: 0.35rem;
+}
+
+.iconbtn {
+  background: transparent;
+  border: 1px solid #9994;
+  border-radius: 6px;
+  padding: 0.15rem 0.4rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.iconbtn:hover:not(:disabled) {
+  border-color: #7c3aed;
+}
+
+.sharelink {
+  font-size: 0.8rem;
+  color: #7c3aed;
+  font-style: normal;
+}

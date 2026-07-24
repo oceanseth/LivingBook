@@ -116,6 +116,11 @@ async function ask(slug, question, minScore = SCORE_THRESHOLD) {
       const p = { ...r.payload, score: r.score };
       // Filenames must never surface: any unit whose stored title looks like a
       // file (legacy uploads) is treated as book text titled by the BOOK TITLE.
+      if (slug !== 'bible-kjv' && typeof p.text === 'string') {
+        // PDF footnote markers glued to punctuation ("psychiatrist.18 None") —
+        // extraction artifacts, not the author's words. Strip on the way out.
+        p.text = p.text.replace(/(?<=[a-zA-Z][.!?;:,\u201d")\u2019])\d{1,3}(?=\s|$)/g, '');
+      }
       const fileLike = /\.(pdf|docx?|txt|md|epub)\s*$/i.test(p.source_title ?? '');
       if ((p.source_type === 'book' || fileLike) && slug !== 'bible-kjv') {
         if (fileLike) p.source_type = 'book';
@@ -605,6 +610,31 @@ const server = createServer(async (req, res) => {
       const slug = new URL(req.url, 'http://x').searchParams.get('slug');
       const convo = convos[`${user.sub}~${slug}`];
       return res.writeHead(200, headers).end(JSON.stringify({ turns: convo?.turns ?? [], renderUrl: convo?.visitorRenderUrl ?? null }));
+    }
+    if (req.method === 'POST' && url === '/api/talk/render-turn') {
+      const user = await maskyUser(token);
+      if (!user) return res.writeHead(401, headers).end('{"error":"Login with Masky required"}');
+      const convo = convos[`${user.sub}~${data.slug}`];
+      const turn = convo?.turns?.[data.index];
+      if (!turn || turn.who !== 'agent') return res.writeHead(404, headers).end('{"error":"no such agent turn"}');
+      const book = books[convo.slug];
+      const conv = await fetch(`${MASKY}/conversations`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          avatarId: book.authorAvatarId ?? NARRATOR_AVATAR_ID,
+          avatarOwnerUserId: book.avatarOwner ?? NARRATOR_OWNER,
+        }),
+      }).then((r) => r.json());
+      if (!conv.conversationId) throw new Error(`conversation failed: ${JSON.stringify(conv).slice(0, 200)}`);
+      await fetch(`${MASKY}/conversations/${conv.conversationId}/turn`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userText: turn.text.slice(0, 499), mode: 'speak', output: 'video' }),
+      });
+      turn.renderUrl = conv.liveUrl;
+      saveConvos();
+      return res.writeHead(200, headers).end(JSON.stringify({ liveUrl: conv.liveUrl }));
     }
     if (req.method === 'POST' && url === '/api/talk/render') {
       const user = await maskyUser(token);

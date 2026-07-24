@@ -8,6 +8,7 @@ interface Msg {
   who: 'visitor' | 'agent';
   text: string;
   ref?: string | null;
+  renderUrl?: string | null;
 }
 
 // One place to talk to any public book or author. Signed-in users keep their
@@ -19,8 +20,8 @@ export default function TalkToBook({ session }: { session: MaskySession | null }
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
-  const [rendering, setRendering] = useState(false);
-  const [renderUrl, setRenderUrl] = useState<string | null>(null);
+  const [renderingIdx, setRenderingIdx] = useState<number | null>(null);
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const options = useMemo(
@@ -39,7 +40,6 @@ export default function TalkToBook({ session }: { session: MaskySession | null }
   // Load saved history when a book is picked (signed-in users only).
   useEffect(() => {
     setMsgs([]);
-    setRenderUrl(null);
     if (!slug || !session) return;
     fetch(`${API}/api/talk/history?slug=${slug}`, {
       headers: { Authorization: `Bearer ${session.accessToken}` },
@@ -47,13 +47,13 @@ export default function TalkToBook({ session }: { session: MaskySession | null }
       .then((r) => r.json())
       .then((d) => {
         setMsgs(
-          (d.turns ?? []).map((t: { who: string; text: string; ref?: string }) => ({
+          (d.turns ?? []).map((t: { who: string; text: string; ref?: string; renderUrl?: string }) => ({
             who: t.who === 'visitor' ? 'visitor' : 'agent',
             text: t.text,
             ref: t.ref,
+            renderUrl: t.renderUrl ?? null,
           })),
         );
-        setRenderUrl(d.renderUrl ?? null);
       })
       .catch(() => {});
   }, [slug, session]);
@@ -90,27 +90,34 @@ export default function TalkToBook({ session }: { session: MaskySession | null }
     }
   }
 
-  async function renderVideo() {
+  async function renderTurn(index: number) {
     if (!session || !slug) return;
-    setRendering(true);
+    setRenderingIdx(index);
     setError(null);
     try {
-      const res = await fetch(`${API}/api/talk/render`, {
+      const res = await fetch(`${API}/api/talk/render-turn`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session.accessToken}`,
         },
-        body: JSON.stringify({ slug }),
+        body: JSON.stringify({ slug, index }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
-      setRenderUrl(data.liveUrl);
+      setMsgs((m) => m.map((msg, i) => (i === index ? { ...msg, renderUrl: data.liveUrl } : msg)));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
-      setRendering(false);
+      setRenderingIdx(null);
     }
+  }
+
+  function copyTurn(index: number, text: string) {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedIdx(index);
+      setTimeout(() => setCopiedIdx(null), 1500);
+    });
   }
 
   const book = books.find((b) => b.slug === slug);
@@ -145,6 +152,34 @@ export default function TalkToBook({ session }: { session: MaskySession | null }
           <div key={i} className={m.who === 'visitor' ? 'msg mine' : 'msg theirs'}>
             <p>{m.text}</p>
             {m.ref && <cite>— {m.ref}</cite>}
+            {m.who === 'agent' && (
+              <span className="turnactions">
+                <button
+                  type="button"
+                  className="iconbtn"
+                  title="Copy to clipboard"
+                  onClick={() => copyTurn(i, m.text)}
+                >
+                  {copiedIdx === i ? '✓' : '📋'}
+                </button>
+                {session && !m.renderUrl && (
+                  <button
+                    type="button"
+                    className="iconbtn"
+                    title="Render this turn as video (your credits)"
+                    disabled={renderingIdx === i}
+                    onClick={() => renderTurn(i)}
+                  >
+                    {renderingIdx === i ? '⏳' : '🎬'}
+                  </button>
+                )}
+                {m.renderUrl && (
+                  <a className="sharelink" href={m.renderUrl} target="_blank" rel="noreferrer">
+                    ▶ share link
+                  </a>
+                )}
+              </span>
+            )}
           </div>
         ))}
       </div>
@@ -164,23 +199,7 @@ export default function TalkToBook({ session }: { session: MaskySession | null }
         <button className="cta" disabled={busy || !slug || !input.trim()}>
           {busy ? '…' : 'Send'}
         </button>
-        {session && msgs.length > 0 && (
-          <button type="button" className="ghost" disabled={rendering} onClick={renderVideo}>
-            {rendering ? 'Rendering…' : '🎬 Render video (your credits)'}
-          </button>
-        )}
       </form>
-      {renderUrl && (
-        <div className="answer">
-          <iframe className="player" src={`${renderUrl}&autoplay=0`} title="Your conversation" allowFullScreen />
-          <p className="sub">
-            Shareable link (plays anywhere):{' '}
-            <a href={renderUrl} target="_blank" rel="noreferrer">
-              {renderUrl.split('?')[0]}
-            </a>
-          </p>
-        </div>
-      )}
       {error && <p className="error">{error}</p>}
     </section>
   );
