@@ -142,7 +142,7 @@ identity = a **service avatar** + `client_credentials` token in Secrets Manager.
 | # | Milestone | Contents |
 | --- | --- | --- |
 | M0 | Repo setup ✅ | Vite web + Masky SSO, docs, license plumbing |
-| M1 | **Today AM** — Bible slice ✅ | KJV subset (2,769 units) → Actian local Docker (`server/ingest-bible.mjs`); verse-verbatim answers via `server/server.mjs` + Ask-the-Bible panel; Masky render path ready (`/api/render`, speak mode, SSO user token) — narrator avatar pending |
+| M1 | **Today AM** — Bible slice ✅ | KJV subset (2,769 units) → Actian local Docker (`server/ingest-bible.mjs`); verse-verbatim answers via `server/server.mjs` + Ask-the-Bible panel; **KJV Narrator avatar `H7NjYDjQYYZh5FuuqBB6`** renders speak-mode video end-to-end (demo turn: masky.ai/t-26-07-wdej). Service identity live (`client_credentials`); secrets in SSM under `/livingbook/*` (incl. Pioneer inference key — 4th sponsor tool) |
 | M2 | **Today midday** — marketing agent | Guild-hosted: trend signal → passage → Masky video → draft post; coach-agent versioning loop |
 | M3 | **Today PM** — self-repair + submission | Replay QA pass + MCP fix loop; 3-min demo video; submit by ~4:30 PM PT |
 | M4 | Author flow | Author login → create book → upload podcast/transcript → agent answers from it; earnings ledger |

@@ -15,6 +15,11 @@ import { VectorAIClient } from '@actian/vectorai-client';
 import { pipeline } from '@xenova/transformers';
 
 const PORT = process.env.PORT ?? 8787;
+// Service identity (run with: node --env-file=../.env server.mjs). When set,
+// /api/render works without a caller token, billing the client owner.
+const SERVICE_TOKEN = process.env.MASKY_SERVICE_TOKEN;
+const NARRATOR_AVATAR_ID = process.env.MASKY_NARRATOR_AVATAR_ID;
+const NARRATOR_OWNER = process.env.MASKY_NARRATOR_OWNER;
 const COLLECTION = 'book_bible-kjv';
 const SCORE_THRESHOLD = 0.35; // below this we honestly say the book doesn't cover it
 const MASKY = 'https://masky.ai/api';
@@ -36,7 +41,16 @@ async function ask(question) {
   }
   const top = passages[0];
   // Connective frame only — the quote itself is the stored verbatim text.
-  const spoken = `Hear the word, from ${top.ref}: ${top.text}`;
+  // Strip the source edition's {translator margin notes}, and trim to Masky's
+  // 500-char userText cap at sentence boundaries (never mid-verse).
+  const frame = `Hear the word, from ${top.ref}: `;
+  const clean = top.text.replace(/\s*\{[^}]*\}/g, '');
+  let quote = '';
+  for (const sentence of clean.match(/[^.;!?]+[.;!?]*\s*/g) ?? [clean]) {
+    if (frame.length + quote.length + sentence.length > 495) break;
+    quote += sentence;
+  }
+  const spoken = frame + (quote.trim() || clean.slice(0, 495 - frame.length));
   return { covered: true, spoken, passages };
 }
 
@@ -48,11 +62,13 @@ async function render(question, token, { avatarId, avatarOwnerUserId, output = '
     body: JSON.stringify({ avatarId, avatarOwnerUserId }),
   }).then((r) => r.json());
   if (!conv.conversationId) throw new Error(`conversation failed: ${JSON.stringify(conv)}`);
-  const turn = await fetch(`${MASKY}/conversations/${conv.conversationId}/turn`, {
+  const turnRes = await fetch(`${MASKY}/conversations/${conv.conversationId}/turn`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ userText: answer.spoken, mode: 'speak', output }),
-  }).then((r) => r.json());
+  });
+  const turn = await turnRes.json();
+  if (!turnRes.ok || !turn.turn) throw new Error(`turn failed (${turnRes.status}): ${JSON.stringify(turn).slice(0, 300)}`);
   return { ...answer, conversation: { id: conv.conversationId, liveUrl: conv.liveUrl, shareSlug: conv.shareSlug }, turn: turn.turn };
 }
 
@@ -70,12 +86,19 @@ const server = createServer(async (req, res) => {
   try {
     const data = JSON.parse(body || '{}');
     if (req.url === '/api/ask') {
-      return res.writeHead(200, headers).end(JSON.stringify(await ask(data.question)));
+      const result = await ask(data.question);
+      return res.writeHead(200, headers).end(JSON.stringify(result));
     }
     if (req.url === '/api/render') {
-      const token = (req.headers.authorization ?? '').replace(/^Bearer /, '');
+      const callerToken = (req.headers.authorization ?? '').replace(/^Bearer /, '');
+      const token = callerToken || SERVICE_TOKEN;
       if (!token) return res.writeHead(401, headers).end('{"error":"Masky bearer token required"}');
-      return res.writeHead(200, headers).end(JSON.stringify(await render(data.question, token, data)));
+      const result = await render(data.question, token, {
+        avatarId: data.avatarId ?? NARRATOR_AVATAR_ID,
+        avatarOwnerUserId: data.avatarOwnerUserId ?? NARRATOR_OWNER,
+        output: data.output,
+      });
+      return res.writeHead(200, headers).end(JSON.stringify(result));
     }
     res.writeHead(404, headers).end('{"error":"not found"}');
   } catch (e) {
