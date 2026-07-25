@@ -11,9 +11,11 @@ Hackathon** (SF, Jul 24 2026).
 
 ## 🎬 The 90-second demo
 
-https://github.com/oceanseth/LivingBook/raw/main/media/livingbook-showcase.mp4
-
 [![LivingBook — 90-second showcase](media/showcase-poster.jpg)](https://livingbook.masky.ai/media/livingbook-showcase.mp4)
+
+**[▶ Watch the demo](https://livingbook.masky.ai/media/livingbook-showcase.mp4)** — or the
+[About page](https://livingbook.masky.ai) with both featured videos
+([mp4 in this repo](media/livingbook-showcase.mp4)).
 
 **The real thing, unfaked:** a reader asked *Out of Focus* about America's psychiatrist
 shortage, and [Aly Vredenburgh's book answered on video](https://livingbook.masky.ai/media/author-answer-demo.mp4)
