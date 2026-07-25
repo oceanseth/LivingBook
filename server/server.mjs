@@ -424,10 +424,47 @@ async function scoutBook(slug) {
   return { terms, candidates: candidates.length, created };
 }
 
-// Hourly scout over every book (deduped by signal URL, so quiet when nothing new)
-setInterval(() => {
-  for (const slug of Object.keys(books)) scoutBook(slug).catch(() => {});
-}, 3600 * 1000);
+// Hourly scout over every book (deduped by signal URL, so quiet when nothing
+// new). Runs shortly after startup too — dev restarts kept resetting the old
+// 1h timer so it never fired. Each sweep also logs a digest session to Guild,
+// so the workspace shows an auditable hourly trail even on quiet hours.
+async function scoutSweep(reason) {
+  const summary = { reason, books: 0, candidates: 0, alertsCreated: 0 };
+  for (const slug of Object.keys(books)) {
+    try {
+      const r = await scoutBook(slug);
+      summary.books += 1;
+      summary.candidates += r.candidates;
+      summary.alertsCreated += r.created.length;
+    } catch (e) {
+      console.error('scout error', slug, e.message);
+    }
+  }
+  console.log('scout sweep done:', JSON.stringify(summary));
+  try {
+    const basic = Buffer.from(`${process.env.GUILD_TRIGGER_KEY_ID}:${process.env.GUILD_TRIGGER_KEY_SECRET}`).toString('base64');
+    await fetch('https://app.guild.ai/api/workspaces/seth/livingbook/sessions', {
+      method: 'POST',
+      headers: { Authorization: `Basic ${basic}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        session_type: 'api_trigger',
+        agent_input: {
+          text: JSON.stringify({
+            book: { id: 'scout-digest', title: 'LivingBook Scout Digest' },
+            trends: [{ topic: `Scout sweep (${reason}): ${summary.books} books, ${summary.candidates} candidates, ${summary.alertsCreated} new alerts`, summary: 'Review the sweep; output decision hold unless a strategy change is warranted.' }],
+            passages: [],
+            budget: { dailyOutboundRemaining: 0, creditBudgetRemaining: 0 },
+            engagementNotes: 'Hourly digest — governance trail. dailyOutboundRemaining is 0: always hold.',
+          }),
+        },
+      }),
+    });
+  } catch (e) {
+    console.error('digest session failed:', e.message);
+  }
+}
+setTimeout(() => scoutSweep('startup'), 3 * 60 * 1000);
+setInterval(() => scoutSweep('hourly'), 3600 * 1000);
 
 const server = createServer(async (req, res) => {
   const headers = {
