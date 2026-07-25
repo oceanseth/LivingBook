@@ -50,6 +50,7 @@ export async function login(): Promise<void> {
   const state = randomToken(16);
   sessionStorage.setItem(VERIFIER_KEY, verifier);
   sessionStorage.setItem(STATE_KEY, state);
+  sessionStorage.setItem('masky_return_to', window.location.pathname);
 
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
@@ -104,7 +105,9 @@ export async function handleCallback(): Promise<MaskySession | null> {
     avatarId: info.avatar_id ?? token.avatar?.id ?? null,
   };
   localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-  window.history.replaceState(null, '', '/');
+  const returnTo = sessionStorage.getItem('masky_return_to') ?? '/';
+  sessionStorage.removeItem('masky_return_to');
+  window.history.replaceState(null, '', returnTo);
   return session;
 }
 

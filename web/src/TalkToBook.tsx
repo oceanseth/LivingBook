@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { MaskySession } from './lib/masky';
+import { login, type MaskySession } from './lib/masky';
 import { useBooks } from './Books';
 
 const API =
@@ -174,13 +174,17 @@ export default function TalkToBook({
                 >
                   {copiedIdx === i ? '✓' : '📋'}
                 </button>
-                {session && !m.renderUrl && (
+                {!m.renderUrl && (
                   <button
                     type="button"
                     className="iconbtn"
-                    title="Render this turn as video (your credits)"
+                    title={
+                      session
+                        ? 'Render this turn as video (your credits)'
+                        : 'Sign in with Masky to render this as video'
+                    }
                     disabled={renderingIdx === i}
-                    onClick={() => renderTurn(i)}
+                    onClick={() => (session ? renderTurn(i) : login())}
                   >
                     {renderingIdx === i ? '⏳' : '🎬'}
                   </button>

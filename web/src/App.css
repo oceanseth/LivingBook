@@ -1104,3 +1104,17 @@ button:disabled {
      width gates on narrow/mobile screens; navy letterboxing fills the rest. */
   object-fit: contain;
 }
+
+.bookpage-top {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.bookpage-top .account {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

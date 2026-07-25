@@ -1,4 +1,4 @@
-import type { MaskySession } from './lib/masky';
+import { login, type MaskySession } from './lib/masky';
 import { useBooks } from './Books';
 import TalkToBook from './TalkToBook';
 
@@ -12,9 +12,21 @@ export default function BookPage({ slug, session }: { slug: string; session: Mas
 
   return (
     <div className="bookpage">
-      <a className="bookpage-home" href="/">
-        📖 LivingBook
-      </a>
+      <div className="bookpage-top">
+        <a className="bookpage-home" href="/">
+          📖 LivingBook
+        </a>
+        {session ? (
+          <span className="account">
+            {session.picture && <img className="avatar" src={session.picture} alt="" />}
+            {session.name}
+          </span>
+        ) : (
+          <button className="cta" onClick={() => login()}>
+            Login with Masky
+          </button>
+        )}
+      </div>
       {!book ? (
         <div className="bookpage-center">
           <h1>…</h1>
