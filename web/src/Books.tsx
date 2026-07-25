@@ -4,7 +4,10 @@ import AvatarModal, { type PickedAvatar } from './AvatarModal';
 import RecordSpoken from './RecordSpoken';
 import Inbox from './Inbox';
 
-const API = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8787';
+const API =
+  ((window as unknown as { __API__?: string }).__API__ ??
+    (import.meta.env.VITE_API_URL as string | undefined)) ??
+  'http://localhost:8787';
 
 export interface Book {
   slug: string;

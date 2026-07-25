@@ -2,7 +2,10 @@ import { useState } from 'react';
 import type { MaskySession } from './lib/masky';
 import { useBooks } from './Books';
 
-const API = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8787';
+const API =
+  ((window as unknown as { __API__?: string }).__API__ ??
+    (import.meta.env.VITE_API_URL as string | undefined)) ??
+  'http://localhost:8787';
 
 interface Msg {
   who: 'visitor' | 'agent';

@@ -1,7 +1,7 @@
 // Shared API client — same endpoints the web app uses (server/server.mjs).
 // Point EXPO_PUBLIC_API_URL elsewhere to override (defaults to the live tunnel).
 const API =
-  process.env.EXPO_PUBLIC_API_URL ?? 'https://chance-wood-neighbor-writings.trycloudflare.com';
+  process.env.EXPO_PUBLIC_API_URL ?? 'https://tag-rca-moon-filled.trycloudflare.com';
 
 export interface Book {
   slug: string;

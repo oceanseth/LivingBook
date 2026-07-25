@@ -2,7 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import type { MaskySession } from './lib/masky';
 import type { Book } from './Books';
 
-const API = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8787';
+const API =
+  ((window as unknown as { __API__?: string }).__API__ ??
+    (import.meta.env.VITE_API_URL as string | undefined)) ??
+  'http://localhost:8787';
 const VOICECERT_SITE_KEY = 'vcs_7b153be16b2f05fdb9427281';
 
 interface SpeechRec {

@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 
 const API =
-  process.env.EXPO_PUBLIC_API_URL ?? 'https://chance-wood-neighbor-writings.trycloudflare.com';
+  process.env.EXPO_PUBLIC_API_URL ?? 'https://tag-rca-moon-filled.trycloudflare.com';
 
 
 export interface Alert {
