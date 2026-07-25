@@ -1,0 +1,427 @@
+<template>
+  <div id="root" data-composition-id="02-reader-asks">
+    <style>
+      /* Biennale Yellow (indigo remap) — fonts resolve from render-machine locals; no webfont files ship */
+      @font-face {
+        font-family: "Iowan Old Style";
+        src: local("Iowan Old Style"), local("IowanOldStyle-Roman");
+      }
+      @font-face {
+        font-family: "JetBrains Mono";
+        src: local("JetBrains Mono"), local("JetBrainsMono-Regular"), local("Menlo");
+      }
+
+      #root {
+        position: absolute;
+        inset: 0;
+        width: 1920px;
+        height: 1080px;
+        font-family: "Iowan Old Style", Georgia, "Times New Roman", serif;
+        color: #f2efpa;
+        color: #f2effa;
+      }
+
+      /* ---- scene (track 0) ---- */
+      .f02ra-scene {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        background: #14122d; /* paper ground painted by the clip, never by #root */
+      }
+      .f02ra-camera {
+        position: absolute;
+        inset: 0;
+        transform-origin: 50% 50%;
+        will-change: transform;
+      }
+      .f02ra-bg {
+        position: absolute;
+        inset: -8%;
+        background: #14122d;
+      }
+      .f02ra-sun-bloom {
+        position: absolute;
+        left: 980px;
+        top: 430px;
+        width: 1500px;
+        height: 1300px;
+        background: radial-gradient(
+          closest-side,
+          rgba(124, 58, 237, 0.88) 0%,
+          #2a0962 40%,
+          rgba(57, 12, 134, 0.55) 64%,
+          rgba(20, 18, 45, 0) 80%
+        );
+      }
+      .f02ra-ember-bloom {
+        position: absolute;
+        left: -260px;
+        top: -300px;
+        width: 900px;
+        height: 820px;
+        background: radial-gradient(closest-side, rgba(220, 38, 38, 0.18) 0%, rgba(220, 38, 38, 0) 72%);
+      }
+
+      /* ---- micro-label ---- */
+      .f02ra-microlabel {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 118px;
+        text-align: center;
+        font-size: 19px;
+        font-weight: 600;
+        letter-spacing: 0.22em;
+        opacity: 0;
+      }
+      .f02ra-microlabel .f02ra-path {
+        font-family: "JetBrains Mono", Menlo, monospace;
+        font-size: 17px;
+        letter-spacing: 0.08em;
+        opacity: 0.85;
+      }
+
+      /* ---- title block (upper third, left 60%) ---- */
+      .f02ra-titleblock {
+        position: absolute;
+        left: 288px;
+        top: 200px;
+        width: 852px;
+      }
+      .f02ra-avatar {
+        position: absolute;
+        left: 0;
+        top: 4px;
+        width: 148px;
+        height: 148px;
+        border: 1px solid rgba(242, 239, 250, 0.35);
+        opacity: 0;
+      }
+      .f02ra-avatar img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 50% 8%;
+      }
+      .f02ra-titletext {
+        position: absolute;
+        left: 196px;
+        top: 8px;
+      }
+      .f02ra-booktitle {
+        font-size: 62px;
+        font-weight: 600;
+        line-height: 1.1;
+        letter-spacing: 0.01em;
+        white-space: nowrap;
+      }
+      .f02ra-booktitle .f02ra-w {
+        display: inline-block;
+        opacity: 0;
+      }
+      .f02ra-author {
+        margin-top: 16px;
+        font-size: 23px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        opacity: 0;
+      }
+      .f02ra-titlerule {
+        position: absolute;
+        left: 0;
+        top: 176px;
+        width: 748px;
+        height: 1px;
+        background: rgba(242, 239, 250, 0.22);
+        transform-origin: left center;
+      }
+
+      /* ---- ask input (mid-frame) ---- */
+      .f02ra-ask {
+        position: absolute;
+        left: 390px;
+        top: 562px;
+        width: 1140px;
+        height: 96px;
+        border: 1px solid rgba(242, 239, 250, 0.3);
+        display: flex;
+        align-items: center;
+        opacity: 0;
+      }
+      .f02ra-ask-textwrap {
+        display: flex;
+        align-items: baseline;
+        white-space: pre;
+        margin-left: 32px;
+        font-family: "JetBrains Mono", Menlo, monospace;
+        font-size: 27px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+      }
+      .f02ra-typed {
+        white-space: pre;
+      }
+      .f02ra-cursor {
+        display: inline-block;
+        width: 15px;
+        height: 32px;
+        background: #f2effa;
+        vertical-align: -5px;
+        opacity: 0;
+      }
+      .f02ra-placeholder {
+        position: absolute;
+        left: 56px;
+        top: 33px;
+        font-family: "JetBrains Mono", Menlo, monospace;
+        font-size: 27px;
+        font-weight: 600;
+        opacity: 0.42;
+        white-space: pre;
+      }
+      .f02ra-submitwrap {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        width: 64px;
+        height: 64px;
+      }
+      .f02ra-burst {
+        position: absolute;
+        left: -8px;
+        top: -8px;
+        width: 80px;
+        height: 80px;
+        z-index: 1;
+        background: radial-gradient(closest-side, rgba(98, 38, 205, 0.95) 0%, rgba(124, 58, 237, 0) 70%);
+        filter: blur(22px);
+        opacity: 0;
+      }
+      .f02ra-submit {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        border: 1px solid rgba(242, 239, 250, 0.4);
+        background: rgba(124, 58, 237, 0);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "JetBrains Mono", Menlo, monospace;
+        font-size: 30px;
+        font-weight: 600;
+        color: #f2effa;
+      }
+
+      /* ---- chrome (track 1) ---- */
+      .f02ra-chrome {
+        position: absolute;
+        inset: 0;
+      }
+      .f02ra-pagenum {
+        position: absolute;
+        right: 64px;
+        top: 826px;
+        font-family: "JetBrains Mono", Menlo, monospace;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        opacity: 0.75;
+      }
+      .f02ra-dim {
+        position: absolute;
+        inset: 0;
+        background: #14122d;
+        opacity: 0;
+      }
+    </style>
+
+    <!-- full-bleed ground + whole shot, clip-owned (never painted on #root) -->
+    <div class="clip f02ra-scene" data-start="0" data-duration="6.101" data-track-index="0">
+      <div class="f02ra-camera" id="f02ra-camera">
+        <div class="f02ra-bg">
+          <div class="f02ra-sun-bloom" id="f02ra-sun-bloom"></div>
+          <div class="f02ra-ember-bloom"></div>
+        </div>
+
+        <div class="f02ra-microlabel" id="f02ra-microlabel">
+          LIVINGBOOK&#8202;&#183;&#8202;<span class="f02ra-path">/b/out-of-focus</span>
+        </div>
+
+        <div class="f02ra-titleblock">
+          <div class="f02ra-avatar" id="f02ra-avatar">
+            <img src="assets/media/aly-poster.png" alt="" />
+          </div>
+          <div class="f02ra-titletext">
+            <div class="f02ra-booktitle">
+              <span class="f02ra-w" id="f02ra-w1">OUT</span>
+              <span class="f02ra-w" id="f02ra-w2">OF</span>
+              <span class="f02ra-w" id="f02ra-w3">FOCUS</span>
+            </div>
+            <div class="f02ra-author" id="f02ra-author">Aly Vredenburgh</div>
+          </div>
+          <div class="f02ra-titlerule" id="f02ra-titlerule"></div>
+        </div>
+
+        <div class="f02ra-ask" id="f02ra-ask">
+          <div class="f02ra-placeholder" id="f02ra-placeholder">Ask this book anything</div>
+          <div class="f02ra-ask-textwrap">
+            <span class="f02ra-typed" id="f02ra-typed"></span><span class="f02ra-cursor" id="f02ra-cursor"></span>
+          </div>
+          <div class="f02ra-submitwrap">
+            <div class="f02ra-burst" id="f02ra-burst"></div>
+            <div class="f02ra-submit" id="f02ra-submit">&#8594;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- persistent chrome + cut dim (track 1) -->
+    <div class="clip f02ra-chrome" data-start="0" data-duration="6.101" data-track-index="1">
+      <div class="f02ra-pagenum">02</div>
+      <div class="f02ra-dim" id="f02ra-dim"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      (function () {
+        var DUR = 6.101;
+        window.__timelines = window.__timelines || {};
+        var tl = gsap.timeline({ paused: true });
+        window.__timelines["02-reader-asks"] = tl;
+
+        var INK = "#F2EFFA";
+        var SUN = "#7C3AED";
+
+        /* ---------- multi-phase camera: settle -> slow push toward the input ---------- */
+        var camera = document.getElementById("f02ra-camera");
+        var cam = { scale: 0.96, ty: 0 };
+        // Phase 1 (0-1.5s): gentle settle to neutral while the title block builds
+        tl.to(cam, { scale: 1.0, duration: 1.5, ease: "power2.out" }, 0);
+        // Phase 2 (1.7s->): one slow eased push-in toward the ask input, decelerating to near-hold
+        tl.to(cam, { scale: 1.075, ty: -52, duration: 3.4, ease: "power3.out" }, 1.7);
+        // Drift channel — the ONE writer of camera transform
+        var drift = { p: 0 };
+        tl.to(
+          drift,
+          {
+            p: Math.PI * 2 * 2,
+            duration: DUR,
+            ease: "none",
+            onUpdate: function () {
+              var dx = Math.sin(drift.p) * 5;
+              var dy = Math.sin(drift.p * 1.3) * 3;
+              camera.style.transform =
+                "scale(" + cam.scale + ") translate(" + dx + "px, " + (cam.ty + dy) + "px)";
+            },
+          },
+          0
+        );
+
+        // Bloom breathes once across the shot
+        tl.fromTo("#f02ra-sun-bloom", { scale: 1 }, { scale: 1.05, duration: DUR, ease: "sine.inOut" }, 0);
+
+        /* ---------- Scene 1 (0-1.6s): label, per-word title, author, avatar ---------- */
+        tl.fromTo("#f02ra-microlabel", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.12);
+        tl.fromTo("#f02ra-w1", { opacity: 0, y: 42 }, { opacity: 1, y: 0, duration: 0.65, ease: "power3.out" }, 0.5);
+        tl.fromTo("#f02ra-w2", { opacity: 0, y: 42 }, { opacity: 1, y: 0, duration: 0.65, ease: "power3.out" }, 0.68);
+        tl.fromTo("#f02ra-w3", { opacity: 0, y: 42 }, { opacity: 1, y: 0, duration: 0.65, ease: "power3.out" }, 0.86);
+        tl.fromTo("#f02ra-titlerule", { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "power2.inOut" }, 0.9);
+        tl.fromTo("#f02ra-author", { opacity: 0, x: -22 }, { opacity: 0.85, x: 0, duration: 0.55, ease: "power3.out" }, 1.15);
+        tl.fromTo("#f02ra-avatar", { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.6, ease: "power2.out" }, 1.22);
+
+        /* ---------- Scene 2 (1.6-5.2s): ask input + typed question ---------- */
+        tl.fromTo("#f02ra-ask", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 1.6);
+        tl.to("#f02ra-placeholder", { opacity: 0, duration: 0.18, ease: "power1.in" }, 2.0);
+
+        // discrete-text-sequence + context-sensitive-cursor:
+        // sparse text states in keystroke clusters; cursor block turns SUN while the title is typed.
+        var SEQ = [
+          { t: 0.0, text: "", color: INK },
+          { t: 2.12, text: "W", color: INK },
+          { t: 2.2, text: "Wha", color: INK },
+          { t: 2.3, text: "What", color: INK },
+          { t: 2.42, text: "What do", color: INK },
+          { t: 2.52, text: "What does", color: INK },
+          { t: 2.66, text: "What does ", color: INK },
+          { t: 2.84, text: "What does OU", color: SUN },
+          { t: 2.96, text: "What does OUT", color: SUN },
+          { t: 3.08, text: "What does OUT O", color: SUN },
+          { t: 3.18, text: "What does OUT OF", color: SUN },
+          { t: 3.3, text: "What does OUT OF FOC", color: SUN },
+          { t: 3.42, text: "What does OUT OF FOCUS", color: SUN },
+          { t: 3.74, text: "What does OUT OF FOCUS say", color: INK },
+          { t: 3.86, text: "What does OUT OF FOCUS say ab", color: INK },
+          { t: 3.96, text: "What does OUT OF FOCUS say about", color: INK },
+          { t: 4.08, text: "What does OUT OF FOCUS say about the", color: INK },
+          { t: 4.24, text: "What does OUT OF FOCUS say about the psychi", color: INK },
+          { t: 4.36, text: "What does OUT OF FOCUS say about the psychiatr", color: INK },
+          { t: 4.5, text: "What does OUT OF FOCUS say about the psychiatrist", color: INK },
+          { t: 4.64, text: "What does OUT OF FOCUS say about the psychiatrist shor", color: INK },
+          { t: 4.76, text: "What does OUT OF FOCUS say about the psychiatrist shortage", color: INK },
+          { t: 4.92, text: "What does OUT OF FOCUS say about the psychiatrist shortage?", color: INK },
+        ];
+        // Baked typing events — pure of runtime state, reverse-seek-safe
+        var CHANGE_TIMES = [];
+        for (var i = 1; i < SEQ.length; i++) {
+          if (SEQ[i].text !== SEQ[i - 1].text) CHANGE_TIMES.push(SEQ[i].t);
+        }
+        var TYPING_GRACE = 0.18;
+        var BLINK_CYCLES = 7; // whole number over DUR — no pop on the last frame
+        var CURSOR_ON_AT = 1.72; // cursor exists only once the input has landed
+
+        function entryAt(t) {
+          for (var i = SEQ.length - 1; i >= 0; i--) {
+            if (t >= SEQ[i].t) return SEQ[i];
+          }
+          return SEQ[0];
+        }
+
+        var typedEl = document.getElementById("f02ra-typed");
+        var cursorEl = document.getElementById("f02ra-cursor");
+        var driver = { t: 0 };
+        tl.to(
+          driver,
+          {
+            t: DUR,
+            duration: DUR,
+            ease: "none",
+            onUpdate: function () {
+              var t = driver.t;
+              var entry = entryAt(t);
+              typedEl.textContent = entry.text;
+              cursorEl.style.background = entry.color;
+              if (t < CURSOR_ON_AT) {
+                cursorEl.style.opacity = "0";
+                return;
+              }
+              var isTyping = false;
+              for (var i = 0; i < CHANGE_TIMES.length; i++) {
+                if (CHANGE_TIMES[i] <= t && t - CHANGE_TIMES[i] < TYPING_GRACE) {
+                  isTyping = true;
+                  break;
+                }
+              }
+              var blinkOn = Math.sin((t / DUR) * Math.PI * 2 * BLINK_CYCLES) > 0;
+              cursorEl.style.opacity = isTyping || blinkOn ? "1" : "0";
+            },
+          },
+          0
+        );
+
+        /* ---------- Scene 3 (5.2-6.0s): submit fills, press-release-spring, dim at the cut ---------- */
+        // Fill solid on the cue (ink arrow on sun — the signature, never inverted)
+        tl.to("#f02ra-submit", { backgroundColor: "rgba(124, 58, 237, 1)", borderColor: "rgba(124, 58, 237, 1)", duration: 0.16, ease: "power1.out" }, 5.2);
+        // Press: linear compression
+        tl.to("#f02ra-submit", { scale: 0.9, duration: 0.14, ease: "power1.in" }, 5.36);
+        // Release: spring recovery — starts exactly at press end (state continuity)
+        tl.to("#f02ra-submit", { scale: 1, duration: 0.5, ease: "back.out(2)" }, 5.5);
+        // Burst pops behind the button on release, then fades
+        tl.fromTo("#f02ra-burst", { scale: 0.6, opacity: 0 }, { scale: 3.2, opacity: 0.55, duration: 0.4, ease: "power2.out" }, 5.5);
+        tl.to("#f02ra-burst", { opacity: 0, duration: 0.18, ease: "power2.in" }, 5.92);
+        // Sub-shape A cliffhanger: the frame dims 20% into the cut
+        tl.to("#f02ra-dim", { opacity: 0.2, duration: 0.24, ease: "power1.inOut" }, 5.85);
+      })();
+    </script>
+  </div>
+</template>

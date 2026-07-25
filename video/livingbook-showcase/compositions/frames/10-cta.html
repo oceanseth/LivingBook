@@ -1,0 +1,269 @@
+<template>
+  <style>
+    /* 10-cta — CTA text-clear bloom · Biennale Yellow frame system */
+    #root {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      container-type: size;
+    }
+
+    /* ---- track 0 · paper ground + sun bloom + ember counter-bloom ---- */
+    .cta10-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(
+          circle at 50% 44%,
+          rgba(124, 58, 237, 0.85) 0%,
+          rgba(42, 9, 98, 0.75) 26%,
+          rgba(57, 12, 134, 0.28) 48%,
+          rgba(20, 18, 45, 0) 68%
+        ),
+        radial-gradient(
+          circle at 96% 96%,
+          rgba(220, 38, 38, 0.16) 0%,
+          rgba(220, 38, 38, 0) 34%
+        ),
+        #14122d;
+    }
+
+    /* ---- track 1 · faint site backdrop (final hold only) ---- */
+    #cta10-hero {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+    }
+
+    /* ---- track 2 · content stage ---- */
+    .cta10-stage {
+      position: absolute;
+      inset: 0;
+      color: #f2effa;
+    }
+
+    /* Scene 1 — serif tagline, centered on the bloom */
+    #cta10-tagline {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 88%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Iowan Old Style", Georgia, "Times New Roman", serif;
+      font-weight: 600;
+      font-size: 5.2cqw;
+      line-height: 1.06;
+      letter-spacing: -0.005em;
+      white-space: nowrap;
+      will-change: transform, opacity;
+    }
+    .cta10-word {
+      display: inline-block;
+      opacity: 0;
+      margin-right: 1.15cqw;
+    }
+    .cta10-word:last-child {
+      margin-right: 0;
+      font-style: italic;
+    }
+
+    /* Scenes 2–3 — mark bloom + lockup */
+    #cta10-lockuprow {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 88%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.8cqw;
+    }
+    #cta10-mark {
+      width: 6cqw;
+      height: 6cqw;
+      display: block;
+      opacity: 0;
+      transform-origin: 50% 50%;
+      will-change: transform, opacity;
+    }
+    #cta10-wordmark {
+      font-family: "Iowan Old Style", Georgia, "Times New Roman", serif;
+      font-weight: 600;
+      font-size: 6.2cqw;
+      line-height: 1;
+      letter-spacing: -0.005em;
+      clip-path: inset(0% 100% 0% 0%);
+      will-change: clip-path;
+    }
+
+    /* Scene 4 — hairline + mono data lines */
+    #cta10-panel {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 59.5%;
+      text-align: center;
+    }
+    #cta10-rule {
+      width: 18cqw;
+      height: 1px;
+      margin: 0 auto 1.6cqw;
+      background: rgba(242, 239, 250, 0.2);
+      opacity: 0;
+      transform-origin: 50% 50%;
+      will-change: transform, opacity;
+    }
+    .cta10-url {
+      font-family: "JetBrains Mono", "SF Mono", Menlo, monospace;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      opacity: 0;
+      will-change: transform, opacity;
+    }
+    #cta10-url1 {
+      font-size: 1.7cqw;
+      margin-bottom: 0.9cqw;
+    }
+    #cta10-url2 {
+      font-size: 1.35cqw;
+      color: rgba(242, 239, 250, 0.78);
+    }
+  </style>
+
+  <div id="root" data-composition-id="10-cta">
+    <div class="clip cta10-bg" data-start="0" data-duration="3.84" data-track-index="0"></div>
+
+    <img
+      class="clip"
+      id="cta10-hero"
+      src="assets/media/site-hero.png"
+      alt=""
+      data-start="0"
+      data-duration="3.84"
+      data-track-index="1"
+    />
+
+    <div class="clip cta10-stage" data-start="0" data-duration="3.84" data-track-index="2">
+      <div id="cta10-tagline" aria-label="Ask a book anything.">
+        <span class="cta10-word">Ask</span>
+        <span class="cta10-word">a</span>
+        <span class="cta10-word">book</span>
+        <span class="cta10-word">anything.</span>
+      </div>
+
+      <div id="cta10-lockuprow">
+        <img id="cta10-mark" src="assets/media/brand-favicon.svg" alt="" />
+        <div id="cta10-wordmark">LivingBook</div>
+      </div>
+
+      <div id="cta10-panel">
+        <div id="cta10-rule"></div>
+        <div class="cta10-url" id="cta10-url1">livingbook.masky.ai</div>
+        <div class="cta10-url" id="cta10-url2">github.com/oceanseth/LivingBook</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (() => {
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines = window.__timelines || {};
+      window.__timelines["10-cta"] = tl;
+
+      /* Packet scenes (authored at 8.0s) compressed to the locked 3.84s VO:
+         S1 0.00–1.05 tagline word-stagger fade-through-grey
+         S2 1.05–1.82 the clear: tagline shrinks to center + fades; mark spring-blooms
+         S3 1.82–2.64 mark slides left; "LivingBook" partial-state wipe; lockup centers
+         S4 2.64–3.84 mono URLs fade up; site backdrop very faint; dead-still hold */
+
+      /* S1 — left→right word-staggered fade-through-grey (color grey → ink) */
+      gsap.utils.toArray(".cta10-word").forEach((el, i) => {
+        tl.fromTo(
+          el,
+          { opacity: 0, color: "#766fa3" },
+          { opacity: 1, color: "#f2effa", duration: 0.55, ease: "power2.out" },
+          0.06 + i * 0.13
+        );
+      });
+
+      /* S2 — the clear (signature): shrink-toward-center + fade to blank */
+      tl.to(
+        "#cta10-tagline",
+        { scale: 0.7, opacity: 0, duration: 0.32, ease: "power2.in" },
+        1.05
+      );
+
+      /* S2 — spring-pop-entrance: mark blooms from zero at dead center,
+         slight rotation settling flat, power3.out (no overshoot).
+         xPercent 273 parks the mark over canvas center inside the lockup row. */
+      tl.fromTo(
+        "#cta10-mark",
+        { scale: 0, opacity: 0, rotation: -8, xPercent: 273 },
+        {
+          scale: 1,
+          opacity: 1,
+          rotation: 0,
+          xPercent: 273,
+          duration: 0.55,
+          ease: "power3.out",
+        },
+        1.32
+      );
+
+      /* S3 — mark slides a short distance left into its lockup slot */
+      tl.to(
+        "#cta10-mark",
+        { xPercent: 0, duration: 0.5, ease: "power3.inOut" },
+        1.95
+      );
+
+      /* S3 — wordmark reveals with a visible partial-state wipe */
+      tl.fromTo(
+        "#cta10-wordmark",
+        { clipPath: "inset(0% 100% 0% 0%)" },
+        { clipPath: "inset(0% 0% 0% 0%)", duration: 0.55, ease: "power3.inOut" },
+        2.0
+      );
+
+      /* S4 — hairline draws, then mono-data lines fade up on the URL cue */
+      tl.fromTo(
+        "#cta10-rule",
+        { scaleX: 0, opacity: 0 },
+        { scaleX: 1, opacity: 1, duration: 0.4, ease: "power2.out" },
+        2.5
+      );
+      tl.fromTo(
+        "#cta10-url1",
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" },
+        2.64
+      );
+      tl.fromTo(
+        "#cta10-url2",
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" },
+        2.88
+      );
+
+      /* S4 — site screenshot fades in very faint behind the lockup */
+      tl.fromTo(
+        "#cta10-hero",
+        { opacity: 0 },
+        { opacity: 0.12, duration: 0.7, ease: "power1.inOut" },
+        2.64
+      );
+
+      /* Final hold — dead still to the last frame; spacer pins full duration */
+      tl.to({ t: 0 }, { t: 1, duration: 0.001 }, 3.839);
+    })();
+  </script>
+</template>

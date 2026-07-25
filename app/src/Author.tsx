@@ -16,7 +16,7 @@ import {
 const API =
   process.env.EXPO_PUBLIC_API_URL ?? 'https://chance-wood-neighbor-writings.trycloudflare.com';
 const MASKY = 'https://masky.ai/api';
-const PURPLE = '#7c3aed';
+
 
 interface Session {
   accessToken: string;
@@ -223,38 +223,38 @@ export default function Author({ onBookCreated }: { onBookCreated: () => void })
 const a = StyleSheet.create({
   pad: { padding: 20, paddingBottom: 40 },
   h: { fontSize: 20, fontWeight: '700', marginBottom: 8 },
-  sub: { fontSize: 13, color: '#666', lineHeight: 19, marginBottom: 10 },
+  sub: { fontSize: 13, color: '#5d5a72', lineHeight: 19, marginBottom: 10 },
   step: { fontSize: 15, fontWeight: '600', marginTop: 16, marginBottom: 6 },
   row: { flexGrow: 0 },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: 'rgba(20, 18, 45, 0.11)',
     borderRadius: 10,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
     marginTop: 4,
   },
   cta: {
-    backgroundColor: PURPLE,
+    backgroundColor: '#7c3aed',
     borderRadius: 10,
     padding: 13,
     alignItems: 'center',
     marginTop: 10,
   },
-  ctaText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  ctaText: { color: '#ffffff', fontWeight: '700', fontSize: 15 },
   avatarCard: {
     width: 92,
     marginRight: 8,
     borderWidth: 2,
-    borderColor: '#eee',
-    borderRadius: 12,
+    borderColor: 'rgba(20, 18, 45, 0.11)',
+    borderRadius: 14,
     padding: 6,
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
   },
-  avatarSel: { borderColor: PURPLE },
+  avatarSel: { borderColor: '#7c3aed' },
   avatarImg: { width: 72, height: 72, borderRadius: 8 },
   avatarName: { fontSize: 11, marginTop: 4 },
-  status: { marginTop: 14, fontSize: 13, color: '#444', lineHeight: 19 },
+  status: { marginTop: 14, fontSize: 13, color: '#5d5a72', lineHeight: 19 },
 });

@@ -13,7 +13,7 @@ import {
 
 const API =
   process.env.EXPO_PUBLIC_API_URL ?? 'https://chance-wood-neighbor-writings.trycloudflare.com';
-const PURPLE = '#7c3aed';
+
 
 export interface Alert {
   id: string;
@@ -124,21 +124,21 @@ export default function Alerts({ alerts, reload }: { alerts: Alert[]; reload: ()
 const st = StyleSheet.create({
   pad: { padding: 20, paddingBottom: 40 },
   h: { fontSize: 20, fontWeight: '700' },
-  sub: { fontSize: 13, color: '#666', lineHeight: 19, marginTop: 6, marginBottom: 6 },
+  sub: { fontSize: 13, color: '#5d5a72', lineHeight: 19, marginTop: 6, marginBottom: 6 },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: '#ffffff',
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#eee',
+    borderColor: 'rgba(20, 18, 45, 0.11)',
     padding: 14,
     marginTop: 12,
   },
-  book: { fontSize: 12, color: '#888' },
-  signal: { fontSize: 15, fontWeight: '600', color: PURPLE, marginTop: 4, lineHeight: 21 },
-  passage: { fontSize: 13, color: '#555', marginTop: 8, fontStyle: 'italic', lineHeight: 19 },
+  book: { fontSize: 12, color: '#5d5a72' },
+  signal: { fontSize: 15, fontWeight: '600', color: '#7c3aed', marginTop: 4, lineHeight: 21 },
+  passage: { fontSize: 13, color: '#5d5a72', marginTop: 8, fontStyle: 'italic', lineHeight: 19 },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: 'rgba(20, 18, 45, 0.11)',
     borderRadius: 10,
     padding: 10,
     fontSize: 14,
@@ -146,9 +146,9 @@ const st = StyleSheet.create({
     minHeight: 80,
     textAlignVertical: 'top',
   },
-  cta: { backgroundColor: PURPLE, borderRadius: 10, padding: 12, alignItems: 'center', marginTop: 8 },
-  ctaText: { color: '#fff', fontWeight: '700', fontSize: 14 },
-  via: { fontSize: 11, color: '#aaa', marginTop: 6 },
+  cta: { backgroundColor: '#7c3aed', borderRadius: 10, padding: 12, alignItems: 'center', marginTop: 8 },
+  ctaText: { color: '#ffffff', fontWeight: '700', fontSize: 14 },
+  via: { fontSize: 11, color: '#5d5a72', marginTop: 6 },
   final: { fontSize: 13, color: '#333', marginTop: 8, lineHeight: 19 },
-  link: { color: PURPLE, fontSize: 14, marginTop: 8, fontWeight: '600' },
+  link: { color: '#7c3aed', fontSize: 14, marginTop: 8, fontWeight: '600' },
 });

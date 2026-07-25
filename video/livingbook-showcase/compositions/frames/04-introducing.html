@@ -1,0 +1,357 @@
+<template>
+  <div id="root" data-composition-id="04-introducing">
+    <style>
+      /* Biennale Yellow frame tokens — frame.md is the source of truth */
+      @font-face {
+        font-family: "Iowan Old Style";
+        src: local("Iowan Old Style"), local("IowanOldStyle-Roman"), local("Iowan Old Style Roman");
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "Iowan Old Style";
+        src: local("Iowan Old Style Italic"), local("IowanOldStyle-Italic");
+        font-style: italic;
+      }
+      @font-face {
+        font-family: "JetBrains Mono";
+        src: local("JetBrains Mono"), local("JetBrainsMono-Regular"), local("Menlo");
+      }
+
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ── Track 0 · full-bleed ground (paper + sun bloom + ember counter-bloom) ── */
+      .i04-bg {
+        position: absolute;
+        inset: 0;
+        background: #14122D;
+      }
+      .i04-sunbloom {
+        position: absolute;
+        left: 160px;
+        top: 140px;
+        width: 1600px;
+        height: 1200px;
+        background: radial-gradient(
+          closest-side,
+          rgba(124, 58, 237, 0.72) 0%,
+          rgba(42, 9, 98, 0.55) 38%,
+          rgba(57, 12, 134, 0.28) 62%,
+          rgba(20, 18, 45, 0) 78%
+        );
+      }
+      .i04-ember {
+        position: absolute;
+        left: -200px;
+        top: -180px;
+        width: 920px;
+        height: 720px;
+        background: radial-gradient(
+          closest-side,
+          rgba(220, 38, 38, 0.16) 0%,
+          rgba(220, 38, 38, 0.07) 45%,
+          rgba(20, 18, 45, 0) 72%
+        );
+      }
+
+      /* ── Track 1 · site hero cameo (background role, faint, lower-right, late) ── */
+      .i04-cameo-clip {
+        position: absolute;
+        inset: 0;
+      }
+      #i04-cameo {
+        position: absolute;
+        right: 70px;
+        top: 630px;
+        width: 450px;
+        height: 253px;
+        overflow: hidden;
+        border: 1px solid rgba(242, 239, 250, 0.18);
+      }
+      #i04-cameo img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .i04-cameo-dim {
+        position: absolute;
+        inset: 0;
+        background: rgba(20, 18, 45, 0.55);
+      }
+
+      /* ── Track 2 · content stage ── */
+      .i04-stage {
+        position: absolute;
+        inset: 0;
+      }
+      #i04-scale {
+        position: absolute;
+        inset: 0;
+        transform-origin: 50% 46%;
+      }
+
+      /* ambient-glow-bloom layer — behind the lockup (z1 under z2) */
+      #i04-glow {
+        position: absolute;
+        left: calc(50% - 700px);
+        top: 35px;
+        width: 1400px;
+        height: 800px;
+        z-index: 1;
+        background: radial-gradient(
+          closest-side,
+          rgba(124, 58, 237, 0.6) 0%,
+          rgba(57, 12, 134, 0.32) 50%,
+          rgba(20, 18, 45, 0) 75%
+        );
+      }
+
+      /* "THIS IS" micro-label — discrete-text-sequence target */
+      #i04-label {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 420px;
+        z-index: 2;
+        text-align: center;
+        font-family: "Iowan Old Style", serif;
+        font-weight: 600;
+        font-size: 30px;
+        line-height: 1.2;
+        letter-spacing: 0.3em;
+        padding-left: 0.3em; /* re-center against trailing tracking */
+        text-transform: uppercase;
+        color: rgba(242, 239, 250, 0.88);
+        min-height: 36px; /* reserved — discrete states must not reflow */
+        white-space: nowrap;
+      }
+
+      /* LivingBook lockup — mark + display serif wordmark, dead-center */
+      #i04-lockup {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 330px;
+        z-index: 2;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 38px;
+      }
+      #i04-mark {
+        width: 148px;
+        height: 148px;
+        transform-origin: 50% 50%;
+        will-change: transform;
+      }
+      #i04-mark img {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      #i04-wordmark {
+        font-family: "Iowan Old Style", serif;
+        font-weight: 600;
+        font-size: 240px;
+        line-height: 0.86;
+        letter-spacing: -0.018em;
+        color: #F2EFFA;
+        transform-origin: 50% 50%;
+        will-change: transform;
+        white-space: nowrap;
+      }
+
+      /* claim line — three phrase-groups, body-lede register, ~60% width */
+      #i04-claim {
+        position: absolute;
+        left: 20%;
+        width: 60%;
+        top: 628px;
+        height: 64px; /* reserved — phrase reveals must not reflow */
+        z-index: 2;
+        text-align: center;
+        font-family: "Iowan Old Style", serif;
+        font-weight: 600;
+        font-size: 29px;
+        line-height: 1.55;
+        color: rgba(242, 239, 250, 0.95);
+        white-space: nowrap;
+      }
+      #i04-claim .i04-phrase {
+        display: inline-block;
+        margin: 0 0.35em;
+        will-change: transform;
+      }
+      #i04-claim .i04-it {
+        font-style: italic;
+      }
+
+      /* pagenum chrome — kept above the caption keep-out band (y <= 896) */
+      #i04-pagenum {
+        position: absolute;
+        right: 77px;
+        top: 852px;
+        z-index: 3;
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 600;
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        color: rgba(242, 239, 250, 0.75);
+      }
+    </style>
+
+    <!-- Track 0 — ground -->
+    <div class="clip i04-bg" data-start="0" data-duration="7.509" data-track-index="0">
+      <div class="i04-sunbloom"></div>
+      <div class="i04-ember"></div>
+    </div>
+
+    <!-- Track 1 — site hero cameo, revealed on the final phrase cue -->
+    <div class="clip i04-cameo-clip" data-start="6.3" data-duration="1.209" data-track-index="1">
+      <div id="i04-cameo">
+        <img src="assets/media/site-hero.png" alt="" />
+        <div class="i04-cameo-dim"></div>
+      </div>
+    </div>
+
+    <!-- Track 2 — content stage -->
+    <div class="clip i04-stage" data-start="0" data-duration="7.509" data-track-index="2">
+      <div id="i04-scale">
+        <div id="i04-glow"></div>
+        <div id="i04-label"></div>
+        <div id="i04-lockup">
+          <div id="i04-mark"><img src="assets/media/brand-favicon.svg" alt="" /></div>
+          <div id="i04-wordmark">LivingBook</div>
+        </div>
+        <div id="i04-claim">
+          <span class="i04-phrase i04-it" id="i04-p0">living agents</span>
+          <span class="i04-phrase" id="i04-p1">only in the author&rsquo;s exact words</span>
+          <span class="i04-phrase" id="i04-p2">&mdash; on video.</span>
+        </div>
+      </div>
+      <div id="i04-pagenum">04</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      (function () {
+        window.__timelines = window.__timelines || {};
+        var tl = gsap.timeline({ paused: true });
+
+        /* ────────────────────────────────────────────────────────────
+         * Scene 1 (0.0–1.4s) — "THIS IS" flashes centered.
+         * discrete-text-sequence: sparse state array + reverse search,
+         * instant jumps, driven by one linear tween. VO: "This" 0.07,
+         * "is" 0.40.
+         * ──────────────────────────────────────────────────────────── */
+        var SEQ = [
+          { t: 0.0, text: "" },
+          { t: 0.1, text: "THIS" },
+          { t: 0.47, text: "THIS IS" }
+        ];
+        function textAt(time) {
+          for (var i = SEQ.length - 1; i >= 0; i--) {
+            if (time >= SEQ[i].t) return SEQ[i].text;
+          }
+          return "";
+        }
+        var labelEl = document.getElementById("i04-label");
+        var driver = { t: 0 };
+        tl.to(
+          driver,
+          {
+            t: 1.2,
+            duration: 1.2,
+            ease: "none",
+            onUpdate: function () {
+              labelEl.textContent = textAt(driver.t);
+            }
+          },
+          0
+        );
+
+        /* ────────────────────────────────────────────────────────────
+         * Scene 2 (1.4–3.2s) — the lockup lands dead-center.
+         * spring-pop-entrance (smooth long-tail, power3.out — no
+         * overshoot); glow blooms in landing ON the wordmark settle
+         * (ambient-glow-bloom, bloom-and-hold, single pass, peak 0.38).
+         * VO: "Book," lands at 1.58.
+         * ──────────────────────────────────────────────────────────── */
+        tl.to("#i04-label", { y: -155, opacity: 0.72, duration: 0.55, ease: "power3.inOut" }, 1.35);
+
+        tl.fromTo(
+          "#i04-wordmark",
+          { scale: 0, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.9, ease: "power3.out" },
+          1.35
+        );
+        tl.fromTo(
+          "#i04-mark",
+          { scale: 0, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.6, ease: "power3.out" },
+          1.72
+        );
+        /* glow and hero resolve as one beat: 1.35 + 0.9 = wordmark settle */
+        tl.fromTo(
+          "#i04-glow",
+          { opacity: 0, scale: 0.85 },
+          { opacity: 0.38, scale: 1, duration: 0.9, ease: "power2.out" },
+          1.35
+        );
+
+        /* ────────────────────────────────────────────────────────────
+         * Scene 3 (3.2–7.0s) — claim reveals in three phrase-groups.
+         * dynamic-content-sequencing: durations computed once from
+         * content length + per-entry hold; starts land on the spoken
+         * cues ("living agents" 2.7–3.52, "only" 4.24, "on" 6.5).
+         * ──────────────────────────────────────────────────────────── */
+        var BASE = 0.6;
+        var SEC_PER_CHAR = 0.03;
+        var SEQ_START = 3.05;
+        var CONTENT = [
+          { text: "living agents", hold: 0.21 },
+          { text: "only in the author's exact words", hold: 0.69 },
+          { text: "— on video.", hold: 0 }
+        ];
+        var cumulative = 0;
+        var TIMELINE = CONTENT.map(function (entry) {
+          var dur = BASE + entry.text.length * SEC_PER_CHAR + entry.hold;
+          var start = cumulative;
+          cumulative += dur;
+          return { text: entry.text, start: start, end: cumulative };
+        });
+        /* computed starts: 0 / 1.20 / 3.45 → absolute 3.05 / 4.25 / 6.50 */
+        TIMELINE.forEach(function (entry, i) {
+          tl.fromTo(
+            "#i04-p" + i,
+            { opacity: 0, y: 16 },
+            { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" },
+            SEQ_START + entry.start
+          );
+        });
+
+        /* final cue — the real product grounds the claim, faint lower-right */
+        tl.fromTo(
+          "#i04-cameo",
+          { opacity: 0, y: 18 },
+          { opacity: 0.55, y: 0, duration: 1.0, ease: "power2.out" },
+          6.42
+        );
+
+        /* chrome */
+        tl.fromTo("#i04-pagenum", { opacity: 0 }, { opacity: 0.75, duration: 0.6, ease: "power1.out" }, 0.3);
+
+        /* macro move — slow push-in under the whole shot, then hold */
+        tl.fromTo("#i04-scale", { scale: 1 }, { scale: 1.028, duration: 7.509, ease: "none" }, 0);
+
+        window.__timelines["04-introducing"] = tl;
+      })();
+    </script>
+  </div>
+</template>

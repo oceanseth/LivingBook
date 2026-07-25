@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -10,7 +10,9 @@ import {
   Text,
   TextInput,
   View,
+  useColorScheme,
 } from 'react-native';
+import { palette, type Theme } from './src/theme';
 import Alerts, { useAlerts } from './src/Alerts';
 import Author from './src/Author';
 import {
@@ -25,9 +27,11 @@ import {
 } from './src/api';
 
 type Tab = 'ask' | 'news' | 'books' | 'author' | 'alerts';
-const PURPLE = '#7c3aed';
 
 export default function App() {
+  const scheme = useColorScheme();
+  const t = palette(scheme);
+  s = useMemo(() => makeStyles(t), [scheme]); // eslint-disable-line react-hooks/exhaustive-deps
   const [tab, setTab] = useState<Tab>('ask');
   const [books, setBooks] = useState<Book[]>([]);
 
@@ -40,7 +44,7 @@ export default function App() {
 
   return (
     <View style={s.root}>
-      <StatusBar style="dark" />
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <View style={s.header}>
         <Text style={s.logo}>📖 LivingBook</Text>
         <Text style={s.tagline}>Books that talk back.</Text>
@@ -243,83 +247,87 @@ function Books({ books }: { books: Book[] }) {
   );
 }
 
-const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#faf9fc' },
-  header: { paddingTop: 64, paddingHorizontal: 20, paddingBottom: 8 },
-  logo: { fontSize: 26, fontWeight: '800' },
-  tagline: { fontSize: 14, color: '#666', marginTop: 2 },
-  body: { flex: 1 },
-  pad: { padding: 20, paddingBottom: 40 },
-  tabbar: { flexDirection: 'row', borderTopWidth: 1, borderColor: '#eee', backgroundColor: '#fff' },
-  tab: { flex: 1, alignItems: 'center', paddingVertical: 14 },
-  tabActive: { borderTopWidth: 2, borderColor: PURPLE },
-  tabText: { fontSize: 14, color: '#777' },
-  tabTextActive: { color: PURPLE, fontWeight: '700' },
-  picker: { flexGrow: 0, marginBottom: 12 },
-  chip: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    marginRight: 8,
-  },
-  chipActive: { backgroundColor: PURPLE, borderColor: PURPLE },
-  chipText: { color: '#444', fontSize: 13 },
-  chipTextActive: { color: '#fff', fontWeight: '600' },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  cta: {
-    backgroundColor: PURPLE,
-    borderRadius: 10,
-    padding: 13,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  ctaText: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  ghost: {
-    borderWidth: 1,
-    borderColor: PURPLE,
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    alignSelf: 'flex-start',
-    marginTop: 6,
-  },
-  ghostText: { color: PURPLE, fontSize: 13 },
-  answer: { marginTop: 16 },
-  spoken: { fontSize: 16, fontStyle: 'italic', lineHeight: 23 },
-  passage: { fontSize: 13, color: '#555', marginTop: 10, lineHeight: 19 },
-  ref: { fontWeight: '700', color: '#333' },
-  error: { color: '#dc2626', marginTop: 10 },
-  note: { fontSize: 12, color: '#999', marginTop: 24, lineHeight: 17 },
-  story: { borderTopWidth: 1, borderColor: '#eee', paddingVertical: 12 },
-  storyTitle: { fontSize: 15, fontWeight: '600', lineHeight: 21 },
-  take: {
-    borderLeftWidth: 3,
-    borderColor: PURPLE,
-    backgroundColor: '#7c3aed11',
-    padding: 10,
-    marginTop: 8,
-    borderRadius: 6,
-  },
-  takeText: { fontSize: 14, fontStyle: 'italic', lineHeight: 20 },
-  link: { color: PURPLE, fontSize: 13, marginTop: 8 },
-  section: { fontSize: 18, fontWeight: '700', marginTop: 12, marginBottom: 8 },
-  bookCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#eee',
-  },
-  bookTitle: { fontSize: 16, fontWeight: '600' },
-  bookMeta: { fontSize: 12, color: '#888', marginTop: 3 },
-});
+let s: ReturnType<typeof makeStyles>;
+function makeStyles(t: Theme) {
+  return StyleSheet.create({
+    root: { flex: 1, backgroundColor: t.bg },
+    header: { paddingTop: 64, paddingHorizontal: 20, paddingBottom: 8 },
+    logo: { fontSize: 27, fontWeight: '800', color: t.text, fontFamily: t.serif },
+    tagline: { fontSize: 14, color: t.muted, marginTop: 2, fontStyle: 'italic' },
+    body: { flex: 1 },
+    pad: { padding: 20, paddingBottom: 40 },
+    tabbar: { flexDirection: 'row', borderTopWidth: 1, borderColor: t.border, backgroundColor: t.surface },
+    tab: { flex: 1, alignItems: 'center', paddingVertical: 14 },
+    tabActive: { borderTopWidth: 2, borderColor: t.accent },
+    tabText: { fontSize: 13, color: t.muted },
+    tabTextActive: { color: t.accent, fontWeight: '700' },
+    picker: { flexGrow: 0, marginBottom: 12 },
+    chip: {
+      borderWidth: 1,
+      borderColor: t.borderStrong,
+      borderRadius: 999,
+      paddingHorizontal: 14,
+      paddingVertical: 7,
+      marginRight: 8,
+    },
+    chipActive: { backgroundColor: t.accent, borderColor: t.accent },
+    chipText: { color: t.muted, fontSize: 13 },
+    chipTextActive: { color: t.accentInk, fontWeight: '600' },
+    input: {
+      borderWidth: 1,
+      borderColor: t.border,
+      borderRadius: t.radiusSm,
+      padding: 12,
+      fontSize: 16,
+      backgroundColor: t.surface,
+      color: t.text,
+    },
+    cta: {
+      backgroundColor: t.accent,
+      borderRadius: t.radiusSm,
+      padding: 13,
+      alignItems: 'center',
+      marginTop: 10,
+    },
+    ctaText: { color: t.accentInk, fontWeight: '700', fontSize: 16 },
+    ghost: {
+      borderWidth: 1,
+      borderColor: t.accent,
+      borderRadius: 999,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      alignSelf: 'flex-start',
+      marginTop: 6,
+    },
+    ghostText: { color: t.accent, fontSize: 13 },
+    answer: { marginTop: 16 },
+    spoken: { fontSize: 16, fontStyle: 'italic', lineHeight: 23, color: t.text, fontFamily: t.serif },
+    passage: { fontSize: 13, color: t.muted, marginTop: 10, lineHeight: 19 },
+    ref: { fontWeight: '700', color: t.text },
+    error: { color: t.danger, marginTop: 10 },
+    note: { fontSize: 12, color: t.muted, marginTop: 24, lineHeight: 17 },
+    story: { borderTopWidth: 1, borderColor: t.border, paddingVertical: 12 },
+    storyTitle: { fontSize: 15, fontWeight: '600', lineHeight: 21, color: t.text },
+    take: {
+      borderLeftWidth: 3,
+      borderColor: t.accent,
+      backgroundColor: t.accentWeak,
+      padding: 10,
+      marginTop: 8,
+      borderRadius: 6,
+    },
+    takeText: { fontSize: 14, fontStyle: 'italic', lineHeight: 20, color: t.text, fontFamily: t.serif },
+    link: { color: t.accent, fontSize: 13, marginTop: 8 },
+    section: { fontSize: 18, fontWeight: '700', marginTop: 12, marginBottom: 8, color: t.text, fontFamily: t.serif },
+    bookCard: {
+      backgroundColor: t.surface,
+      borderRadius: t.radius,
+      padding: 14,
+      marginBottom: 8,
+      borderWidth: 1,
+      borderColor: t.border,
+    },
+    bookTitle: { fontSize: 16, fontWeight: '600', color: t.text, fontFamily: t.serif },
+    bookMeta: { fontSize: 12, color: t.muted, marginTop: 3 },
+  });
+}

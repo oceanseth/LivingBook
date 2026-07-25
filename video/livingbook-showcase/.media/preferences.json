@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "preferences": {
+    "destination": {
+      "value": "github-readme + site-about-section",
+      "confirmed_in": [
+        "livingbook-showcase"
+      ],
+      "updated_at": "2026-07-24T23:24:25.743Z"
+    },
+    "aspect": {
+      "value": "1920x1080",
+      "confirmed_in": [
+        "livingbook-showcase"
+      ],
+      "updated_at": "2026-07-24T23:24:25.776Z"
+    },
+    "language": {
+      "value": "en",
+      "confirmed_in": [
+        "livingbook-showcase"
+      ],
+      "updated_at": "2026-07-24T23:24:25.806Z"
+    },
+    "flow": {
+      "value": "automation",
+      "confirmed_in": [
+        "livingbook-showcase"
+      ],
+      "updated_at": "2026-07-24T23:24:25.837Z"
+    },
+    "storyboard": {
+      "value": "yes",
+      "confirmed_in": [
+        "livingbook-showcase"
+      ],
+      "updated_at": "2026-07-24T23:24:25.866Z"
+    },
+    "style_preset.product-launch-video": {
+      "value": "biennale-yellow",
+      "confirmed_in": [
+        "livingbook-showcase"
+      ],
+      "updated_at": "2026-07-24T23:29:05.696Z"
+    }
+  },
+  "sightings": {}
+}

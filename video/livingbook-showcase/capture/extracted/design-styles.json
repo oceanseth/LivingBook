@@ -1,0 +1,167 @@
+{
+  "typography": [
+    {
+      "role": "display",
+      "fontFamily": "Iowan Old Style",
+      "fontSize": "64px",
+      "fontWeight": "600",
+      "lineHeight": "67.2px",
+      "letterSpacing": "-1.92px",
+      "color": "#15131F",
+      "sampleText": "Books that talk back."
+    },
+    {
+      "role": "heading",
+      "fontFamily": "Iowan Old Style",
+      "fontSize": "22.4px",
+      "fontWeight": "600",
+      "lineHeight": "33.6px",
+      "letterSpacing": "-0.336px",
+      "color": "#15131F",
+      "sampleText": "Talk to a book or author"
+    },
+    {
+      "role": "body",
+      "fontFamily": "system-ui",
+      "fontSize": "18.4px",
+      "fontWeight": "400",
+      "lineHeight": "29.44px",
+      "letterSpacing": "normal",
+      "color": "#5D5A72",
+      "sampleText": "Real authors’ books, alive as talking video agents. Ask a bo"
+    }
+  ],
+  "spacing": {
+    "observed": [
+      4,
+      5,
+      8,
+      10,
+      14,
+      16,
+      17,
+      18,
+      28,
+      32
+    ],
+    "baseUnit": 4
+  },
+  "radius": [
+    "10px",
+    "999px"
+  ],
+  "shadows": [
+    {
+      "value": "rgba(20, 18, 45, 0.06) 0px 1px 2px 0px",
+      "count": 3
+    },
+    {
+      "value": "rgba(20, 18, 45, 0.1) 0px 4px 16px -4px, rgba(20, 18, 45, 0.05) 0px 1px 3px 0px",
+      "count": 2
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Login with Masky",
+      "background": "#7C3AED",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#FFFFFF",
+      "padding": "9.6px 18.4px",
+      "borderRadius": "10px",
+      "border": "1px solid rgba(0, 0, 0, 0)",
+      "boxShadow": "rgba(20, 18, 45, 0.06) 0px 1px 2px 0px",
+      "fontSize": "15.2px",
+      "fontWeight": "550",
+      "height": "43.9844px"
+    },
+    {
+      "label": "Talk to a book or author",
+      "background": "#7C3AED",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#FFFFFF",
+      "padding": "8px 16.8px",
+      "borderRadius": "999px",
+      "border": "0px none rgb(255, 255, 255)",
+      "boxShadow": "rgba(20, 18, 45, 0.06) 0px 1px 2px 0px",
+      "fontSize": "14.72px",
+      "fontWeight": "500",
+      "height": "38.0781px"
+    }
+  ],
+  "cards": [
+    {
+      "label": "card",
+      "background": "#FFFFFF",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#15131F",
+      "padding": "28px",
+      "borderRadius": "14px",
+      "border": "1px solid rgba(20, 18, 45, 0.11)",
+      "boxShadow": "rgba(20, 18, 45, 0.1) 0px 4px 16px -4px, rgba(20, 18, 45, 0.05) 0px 1px 3px 0px",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "height": "185.969px"
+    }
+  ],
+  "nav": {
+    "label": "navigation",
+    "background": "transparent",
+    "backgroundImage": "",
+    "backdropFilter": "blur(12px)",
+    "color": "#15131F",
+    "padding": "0px",
+    "borderRadius": "0px",
+    "border": "",
+    "boxShadow": "none",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "height": "65px"
+  },
+  "chips": [],
+  "statCells": [],
+  "tabs": [
+    {
+      "label": "Talk to a book or author",
+      "background": "#7C3AED",
+      "color": "#FFFFFF",
+      "padding": "8px 16.8px",
+      "borderRadius": "999px",
+      "border": "0px none rgb(255, 255, 255)",
+      "boxShadow": "rgba(20, 18, 45, 0.06) 0px 1px 2px 0px",
+      "fontSize": "14.72px",
+      "fontWeight": "500",
+      "height": "38.0781px"
+    },
+    {
+      "label": "News",
+      "background": "transparent",
+      "color": "#5D5A72",
+      "padding": "8px 16.8px",
+      "borderRadius": "999px",
+      "border": "0px none rgb(93, 90, 114)",
+      "boxShadow": "none",
+      "fontSize": "14.72px",
+      "fontWeight": "500",
+      "height": "38.0781px"
+    }
+  ],
+  "backgrounds": [
+    {
+      "value": "radial-gradient(60% 70% at 20% 0%, rgba(124, 58, 237, 0.14), rgba(0, 0, 0, 0) 70%), radial-gradient(50% 60% at 85% 10%, rgba(124, 58, 237, 0.09), rgba(0, 0, 0, 0) 70%)",
+      "area": 2197440
+    }
+  ],
+  "glass": [
+    {
+      "backdropFilter": "blur(12px)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "",
+      "borderRadius": "0px",
+      "boxShadow": "",
+      "area": 124800
+    }
+  ]
+}

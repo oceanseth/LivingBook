@@ -1,0 +1,10 @@
+[span] 📖 LivingBook
+[button] Login with Masky
+[h1] Books that talk back.
+[p] Real authors’ books, alive as talking video agents. Ask a book a question and it answers with the author’s exact words — on video, ready to share.
+[button] Talk to a book or author
+[h2] Talk to a book or author
+[button] Send
+[h2] Fresh from the living books
+[p] Real renders from today: the Bible answering a trending courtroom question, the self-evolving marketing agent’s take on the Red Sea chokepoint, and a generated podcast — the LivingBook Host interviewing the Bible itself.
+[span] Built on Masky · Actian VectorAI · Senso · Guild.ai · Band · AWS — a Self-Evolving Agents Hackathon project

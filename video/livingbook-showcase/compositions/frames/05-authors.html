@@ -1,0 +1,477 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      container-type: size;
+      --paper: #14122D;
+      --paper-deep: #250856;
+      --sun: #7C3AED;
+      --sun-soft: #2A0962;
+      --haze: #390C86;
+      --ink: #F2EFFA;
+      --ember: #DC2626;
+      --serif: "Iowan Old Style", "Palatino", "Palatino Linotype", Georgia, serif;
+      --mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    /* ---------- background clip ---------- */
+    .f05a-bg {
+      position: absolute;
+      inset: 0;
+      background: var(--paper);
+      overflow: hidden;
+    }
+    .f05a-bloom {
+      position: absolute;
+      left: 560px;
+      top: -220px;
+      width: 1460px;
+      height: 1300px;
+      background: radial-gradient(
+        ellipse 50% 50% at 50% 50%,
+        rgba(124, 58, 237, 0.8) 0%,
+        rgba(42, 9, 98, 0.75) 34%,
+        rgba(57, 12, 134, 0.38) 60%,
+        rgba(57, 12, 134, 0) 78%
+      );
+      transform-origin: 50% 50%;
+      will-change: transform, opacity;
+    }
+    .f05a-ember {
+      position: absolute;
+      left: -260px;
+      top: 700px;
+      width: 900px;
+      height: 760px;
+      background: radial-gradient(
+        ellipse 50% 50% at 50% 50%,
+        rgba(220, 38, 38, 0.18) 0%,
+        rgba(220, 38, 38, 0) 70%
+      );
+    }
+    .f05a-panel {
+      position: absolute;
+      left: 976px;
+      top: 0;
+      width: 480px;
+      height: 1080px;
+      background: var(--sun);
+      will-change: transform;
+    }
+
+    /* ---------- content clip ---------- */
+    .f05a-content {
+      position: absolute;
+      inset: 0;
+    }
+    .f05a-stage {
+      position: absolute;
+      inset: 0;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    /* left column */
+    .f05a-microlabel {
+      position: absolute;
+      left: 96px;
+      top: 96px;
+      font-family: var(--serif);
+      font-size: 19px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink);
+      will-change: transform, opacity;
+    }
+    .f05a-microrule {
+      position: absolute;
+      left: 96px;
+      top: 134px;
+      width: 208px;
+      height: 1px;
+      background: var(--ink);
+      transform-origin: left center;
+      will-change: transform;
+    }
+    .f05a-pagenum {
+      position: absolute;
+      right: 72px;
+      top: 96px;
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--ink);
+      opacity: 0.75;
+    }
+    .f05a-hgroup {
+      position: absolute;
+      left: 96px;
+      top: 372px;
+      width: 660px;
+      height: 130px;
+    }
+    .f05a-h {
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-family: var(--serif);
+      font-size: 92px;
+      font-weight: 600;
+      line-height: 1.02;
+      letter-spacing: -0.005em;
+      color: var(--ink);
+      white-space: nowrap;
+      will-change: transform, opacity;
+    }
+    .f05a-h em {
+      font-style: italic;
+    }
+
+    /* source rows — quiet ledger under the headline */
+    .f05a-rows {
+      position: absolute;
+      left: 96px;
+      top: 556px;
+      width: 372px;
+    }
+    .f05a-row {
+      border-top: 1px solid rgba(242, 239, 250, 0.2);
+      padding: 12px 0 13px;
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink);
+      will-change: transform, opacity;
+    }
+    .f05a-row .f05a-idx {
+      display: inline-block;
+      width: 44px;
+      opacity: 0.5;
+    }
+    .f05a-vcert {
+      position: absolute;
+      left: 96px;
+      top: 706px;
+      width: 500px;
+      will-change: transform, opacity;
+    }
+    .f05a-vcert-rule {
+      width: 372px;
+      height: 1px;
+      background: var(--ink);
+      transform-origin: left center;
+      margin-bottom: 13px;
+      will-change: transform;
+    }
+    .f05a-vcert-text {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+    }
+
+    /* device — hairline-stroked, square-cornered */
+    .f05a-device {
+      position: absolute;
+      left: 1128px;
+      top: 40px;
+      width: 384px;
+      height: 832px;
+      box-sizing: border-box;
+      border: 1px solid rgba(242, 239, 250, 0.85);
+      background: var(--paper-deep);
+      will-change: transform;
+    }
+    .f05a-viewport {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+    .f05a-zoom-outer {
+      position: absolute;
+      inset: 0;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+    .f05a-zoom-inner {
+      position: absolute;
+      inset: 0;
+      will-change: transform;
+    }
+    .f05a-strip {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      will-change: transform;
+    }
+    .f05a-screen {
+      display: block;
+      width: 100%;
+      height: 830px;
+      object-fit: cover;
+      object-position: top center;
+    }
+    .f05a-spotlight {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      background: radial-gradient(
+        ellipse 82% 22% at 50% 50%,
+        rgba(20, 18, 45, 0) 55%,
+        rgba(20, 18, 45, 0.55) 100%
+      );
+    }
+  </style>
+
+  <div id="root" data-composition-id="05-authors">
+    <!-- full-bleed ground -->
+    <div
+      class="clip f05a-bg"
+      data-start="0"
+      data-duration="8.683"
+      data-track-index="0"
+    >
+      <div class="f05a-bloom" id="f05a-bloom"></div>
+      <div class="f05a-ember" id="f05a-ember"></div>
+      <div class="f05a-panel" id="f05a-panel"></div>
+    </div>
+
+    <!-- content -->
+    <div
+      class="clip f05a-content"
+      data-start="0"
+      data-duration="8.683"
+      data-track-index="1"
+    >
+      <div class="f05a-stage" id="f05a-stage">
+        <div class="f05a-microlabel" id="f05a-microlabel">For Authors</div>
+        <div class="f05a-microrule" id="f05a-microrule"></div>
+        <div class="f05a-pagenum" id="f05a-pagenum">05</div>
+
+        <div class="f05a-hgroup">
+          <div class="f05a-h" id="f05a-h1">Sign <em>in.</em></div>
+          <div class="f05a-h" id="f05a-h2">Claim <em>yours.</em></div>
+          <div class="f05a-h" id="f05a-h3">All <em>of it.</em></div>
+        </div>
+
+        <div class="f05a-rows">
+          <div class="f05a-row" id="f05a-row1">
+            <span class="f05a-idx">01</span>Text
+          </div>
+          <div class="f05a-row" id="f05a-row2">
+            <span class="f05a-idx">02</span>Podcasts
+          </div>
+          <div class="f05a-row" id="f05a-row3">
+            <span class="f05a-idx">03</span>Live audio
+          </div>
+        </div>
+
+        <div class="f05a-vcert" id="f05a-vcert">
+          <div class="f05a-vcert-rule" id="f05a-vcert-rule"></div>
+          <div class="f05a-vcert-text">VoiceCert-attested spoken sessions</div>
+        </div>
+
+        <div class="f05a-device" id="f05a-device">
+          <div class="f05a-viewport">
+            <div class="f05a-zoom-outer" id="f05a-zoom-outer">
+              <div class="f05a-zoom-inner" id="f05a-zoom-inner">
+                <div class="f05a-strip" id="f05a-strip">
+                  <img
+                    class="f05a-screen"
+                    src="assets/media/sim-author-pairing.png"
+                    alt=""
+                  />
+                  <img
+                    class="f05a-screen"
+                    src="assets/media/sim-books-shelf.png"
+                    alt=""
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="f05a-spotlight" id="f05a-spotlight"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      var tl = gsap.timeline({ paused: true });
+
+      /* ---- device screen geometry (capture 1179x2556 shown at 382x830 inner viewport) ---- */
+      var IMG_W = 1179;
+      var IMG_H = 2556;
+      var VH = 830; /* viewport inner height; strip advances by exactly one screen */
+      var s = VH / IMG_H; /* cover scale, height-driven: 0.324726 */
+      /* "Out of Focus — AlyVredenburgh · 808 verbatim units" text block center, capture px */
+      var TARGET_X = 416;
+      var TARGET_Y = 1447;
+      var offsetX = (TARGET_X - IMG_W / 2) * s; /* -56.3 */
+      var offsetY = (TARGET_Y - IMG_H / 2) * s; /* +54.9 */
+      var ZOOM = 1.8; /* text block (~202px wide) x1.8 = 364px <= 382px viewport */
+
+      /* ================= Scene 1 (0.0-1.5s) — entrance ================= */
+      /* ground breathes up */
+      tl.fromTo(
+        "#f05a-bloom",
+        { opacity: 0.35, scale: 0.9 },
+        { opacity: 1, scale: 1, duration: 1.6, ease: "power2.out" },
+        0
+      );
+      tl.fromTo(
+        "#f05a-ember",
+        { opacity: 0 },
+        { opacity: 1, duration: 2.0, ease: "power1.inOut" },
+        0.5
+      );
+      /* violet panel band leads in from the right edge */
+      tl.fromTo(
+        "#f05a-panel",
+        { x: 960 },
+        { x: 0, duration: 0.9, ease: "power3.out" },
+        0
+      );
+      /* device slides in from the right edge, settles right-of-center */
+      tl.fromTo(
+        "#f05a-device",
+        { x: 810 },
+        { x: 0, duration: 1.15, ease: "power3.out" },
+        0.05
+      );
+      /* micro-label reveals top-left */
+      tl.fromTo(
+        "#f05a-microlabel",
+        { y: 18, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" },
+        0.6
+      );
+      tl.fromTo(
+        "#f05a-microrule",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.5, ease: "power3.out" },
+        0.7
+      );
+      tl.fromTo(
+        "#f05a-pagenum",
+        { opacity: 0 },
+        { opacity: 0.75, duration: 0.4, ease: "power1.out" },
+        0.8
+      );
+      /* headline 1 — "sign in with Masky" cue */
+      tl.fromTo(
+        "#f05a-h1",
+        { y: 44, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.55, ease: "power3.out" },
+        0.9
+      );
+
+      /* macro move underneath — slow push across the whole shot */
+      tl.fromTo(
+        "#f05a-stage",
+        { scale: 1 },
+        { scale: 1.018, duration: 8.683, ease: "none" },
+        0
+      );
+
+      /* ================= Scene 2 (1.5-7.0s) — screens advance on VO cues ================= */
+      /* "claim their books" — old screen pushes out, shelf pulls up */
+      tl.to(
+        "#f05a-h1",
+        { y: -36, opacity: 0, duration: 0.35, ease: "power2.in" },
+        2.15
+      );
+      tl.to(
+        "#f05a-strip",
+        { y: -VH, duration: 0.85, ease: "power3.out" },
+        2.15
+      );
+      tl.fromTo(
+        "#f05a-h2",
+        { y: 44, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.55, ease: "power3.out" },
+        2.5
+      );
+
+      /* "upload everything" — zoom onto the Out of Focus entry (808 units) */
+      tl.to(
+        "#f05a-h2",
+        { y: -36, opacity: 0, duration: 0.35, ease: "power2.in" },
+        4.0
+      );
+      tl.to(
+        "#f05a-zoom-outer",
+        { scale: ZOOM, duration: 1.2, ease: "power3.inOut" },
+        4.0
+      );
+      tl.to(
+        "#f05a-zoom-inner",
+        { x: -offsetX, y: -offsetY, duration: 1.2, ease: "power3.inOut" },
+        4.0
+      );
+      tl.fromTo(
+        "#f05a-h3",
+        { y: 44, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.55, ease: "power3.out" },
+        4.35
+      );
+
+      /* source rows land on "the text, podcasts, even live..." */
+      tl.fromTo(
+        "#f05a-row1",
+        { y: 16, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.45, ease: "power2.out" },
+        5.0
+      );
+      /* spotlight settles on the zoomed 808-units entry */
+      tl.to(
+        "#f05a-spotlight",
+        { opacity: 1, duration: 0.5, ease: "power1.inOut" },
+        5.45
+      );
+      tl.fromTo(
+        "#f05a-row2",
+        { y: 16, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.45, ease: "power2.out" },
+        5.65
+      );
+      tl.fromTo(
+        "#f05a-row3",
+        { y: 16, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.45, ease: "power2.out" },
+        6.35
+      );
+
+      /* ================= Scene 3 (7.0s-end) — attested-sessions label, still to the seam ================= */
+      tl.fromTo(
+        "#f05a-vcert-rule",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.5, ease: "power3.out" },
+        7.0
+      );
+      tl.fromTo(
+        "#f05a-vcert",
+        { y: 14, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" },
+        7.05
+      );
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["05-authors"] = tl;
+    })();
+  </script>
+</template>

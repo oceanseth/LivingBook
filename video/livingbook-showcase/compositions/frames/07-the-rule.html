@@ -1,0 +1,220 @@
+<template>
+  <style>
+    /* Fonts — declared via local() sources; no font files ship with this project */
+    @font-face {
+      font-family: "Iowan Old Style";
+      font-weight: 600;
+      font-style: normal;
+      src: local("Iowan Old Style Bold"), local("IowanOldStyle-Bold"),
+        local("Iowan Old Style");
+    }
+    @font-face {
+      font-family: "JetBrains Mono";
+      font-weight: 600;
+      font-style: normal;
+      src: local("JetBrainsMono-SemiBold"), local("JetBrains Mono SemiBold"),
+        local("JetBrainsMono-Bold"), local("Menlo-Bold"), local("Menlo");
+    }
+
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      container-type: size;
+    }
+
+    /* ---- ground: paper + haze bloom (dimmest frame of the video) ---- */
+    .f07r-bg {
+      position: absolute;
+      inset: 0;
+      background: #14122d;
+    }
+    .f07r-bloom {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        46% 60% at 74% 20%,
+        #390c86 0%,
+        #2a0962 42%,
+        rgba(20, 18, 45, 0) 74%
+      );
+      opacity: 0.3;
+    }
+
+    /* ---- stage: one center anchor for the statement relay ---- */
+    .f07r-stage {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding-bottom: 140px; /* optical center ~0.43 x height, well above caption keep-out */
+    }
+    .f07r-block {
+      display: grid;
+      grid-template-rows: auto auto;
+      justify-items: center;
+      row-gap: 3cqw;
+    }
+    .f07r-relay {
+      display: grid;
+      justify-items: center;
+    }
+    .f07r-line {
+      grid-area: 1 / 1;
+      font-family: "Iowan Old Style", serif;
+      font-weight: 600;
+      font-size: 2.9cqw;
+      line-height: 1;
+      color: #f2effa;
+      white-space: nowrap;
+      text-align: center;
+    }
+    .f07r-w {
+      display: inline-block;
+    }
+    .f07r-ember {
+      color: #dc2626;
+    }
+
+    /* ---- mono footnote that grounds the statements ---- */
+    .f07r-foot-wrap {
+      display: grid;
+      justify-items: center;
+      row-gap: 1.1cqw;
+    }
+    .f07r-foot-rule {
+      width: 16cqw;
+      height: 1px;
+      background: rgba(242, 239, 250, 0.2);
+      transform-origin: 50% 50%;
+    }
+    .f07r-foot {
+      font-family: "JetBrains Mono", monospace;
+      font-weight: 600;
+      font-size: 0.9cqw;
+      letter-spacing: 0.04em;
+      color: #f2effa;
+      opacity: 0.8;
+      white-space: nowrap;
+    }
+
+    /* ---- pagenum chrome, held above the caption keep-out band ---- */
+    .f07r-pagenum {
+      position: absolute;
+      right: 4cqw;
+      bottom: 208px;
+      font-family: "JetBrains Mono", monospace;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      color: #f2effa;
+      opacity: 0.75;
+    }
+  </style>
+
+  <div id="root" data-composition-id="07-the-rule">
+    <!-- full-bleed ground on its own clip (never on #root) -->
+    <div class="clip f07r-bg" data-start="0" data-duration="6.805" data-track-index="0">
+      <div class="f07r-bloom" id="f07r-bloom"></div>
+    </div>
+
+    <div class="clip f07r-stage" data-start="0" data-duration="6.805" data-track-index="1">
+      <div class="f07r-block">
+        <div class="f07r-relay">
+          <!-- Scene 1 — statement one, per-word stagger, quick then still -->
+          <div class="f07r-line" id="f07r-s1">
+            <span class="f07r-w">LLMs</span>
+            <span class="f07r-w">select</span>
+            <span class="f07r-w">and</span>
+            <span class="f07r-w">reason.</span>
+          </div>
+          <!-- Scene 2 — hard-cut replacement at the same anchor, same size -->
+          <div class="f07r-line" id="f07r-s2">
+            They <span class="f07r-ember">never</span> generate an author&rsquo;s words.
+          </div>
+        </div>
+
+        <!-- Scene 3 — mono-data footnote grounds the statements -->
+        <div class="f07r-foot-wrap">
+          <div class="f07r-foot-rule" id="f07r-foot-rule"></div>
+          <div class="f07r-foot" id="f07r-foot">
+            byte-identical substring check &middot; ungrounded quotes auto-rejected
+          </div>
+        </div>
+      </div>
+
+      <div class="f07r-pagenum">07</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+
+      /* Scene 1 (0.0–2.6s) — haze bloom settles to 30%; statement one lands
+         per-word (kinetic-beat-slam per-word staggered fade/blur), then still. */
+      tl.fromTo(
+        "#f07r-bloom",
+        { opacity: 0.12 },
+        { opacity: 0.3, duration: 0.9, ease: "sine.out" },
+        0
+      );
+      tl.fromTo(
+        "#f07r-s1 .f07r-w",
+        { opacity: 0, y: 16, filter: "blur(7px)" },
+        {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 0.42,
+          ease: "power3.out",
+          stagger: 0.09
+        },
+        0.18
+      );
+
+      /* Scene 2 (2.6s) — hard-cut swap: statement two replaces statement one
+         in place (instant, no roll/fade), "never" set in ember. */
+      tl.fromTo(
+        "#f07r-s1",
+        { opacity: 1 },
+        { opacity: 0, duration: 0.02, ease: "none" },
+        2.58
+      );
+      tl.fromTo(
+        "#f07r-s2",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.02, ease: "none" },
+        2.6
+      );
+      /* relay hold — word-spacing spreads slightly as the phrase holds */
+      tl.fromTo(
+        "#f07r-s2",
+        { wordSpacing: "0px" },
+        { wordSpacing: "5px", duration: 1.9, ease: "sine.out" },
+        2.62
+      );
+
+      /* Scene 3 (4.8s) — mono footnote reveals on its cue; then everything
+         holds dead still to the end (designated stillness beat, no exit). */
+      tl.fromTo(
+        "#f07r-foot-rule",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.5, ease: "power2.out" },
+        4.8
+      );
+      tl.fromTo(
+        "#f07r-foot",
+        { opacity: 0, y: 10 },
+        { opacity: 0.8, y: 0, duration: 0.55, ease: "power2.out" },
+        4.88
+      );
+
+      window.__timelines["07-the-rule"] = tl;
+    })();
+  </script>
+</template>

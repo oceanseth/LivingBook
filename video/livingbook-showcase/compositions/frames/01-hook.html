@@ -1,0 +1,345 @@
+<template>
+  <style>
+    /* 01-hook — Biennale Yellow (violet remix): paper ground, sun-bloom, ink serif type.
+       Fonts: brand ships no font files; use the captured site's own system serif stack. */
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      container-type: size;
+      --paper: #14122d;
+      --paper-deep: #250856;
+      --sun: #7c3aed;
+      --sun-soft: #2a0962;
+      --haze: #390c86;
+      --ink: #f2effa;
+      --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, ui-serif, serif;
+      --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    }
+
+    /* ── full-bleed ground (on a clip, never on #root) ─────────────────── */
+    .f01hook-bg {
+      position: absolute;
+      inset: 0;
+      background: var(--paper);
+      overflow: hidden;
+    }
+    .f01hook-bloom {
+      position: absolute;
+      width: 78cqw;
+      height: 78cqw;
+      left: -14cqw;
+      top: 8cqh;
+      z-index: 1;
+      opacity: 0;
+      background: radial-gradient(
+        circle closest-side,
+        rgba(124, 58, 237, 0.92) 0%,
+        var(--sun-soft) 44%,
+        rgba(57, 12, 134, 0.5) 66%,
+        rgba(20, 18, 45, 0) 80%
+      );
+      will-change: transform, opacity;
+    }
+    .f01hook-ember {
+      position: absolute;
+      width: 46cqw;
+      height: 46cqw;
+      right: -14cqw;
+      top: -16cqw;
+      z-index: 1;
+      opacity: 0;
+      background: radial-gradient(circle closest-side, rgba(220, 38, 38, 0.5) 0%, rgba(220, 38, 38, 0) 70%);
+    }
+
+    /* ── type stage ────────────────────────────────────────────────────── */
+    .f01hook-stage {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+    }
+    .f01hook-camera {
+      position: absolute;
+      inset: 0;
+      transform-origin: 50% 45%;
+      will-change: transform;
+    }
+
+    .f01hook-statement-wrap {
+      position: absolute;
+      inset: 0 0 22% 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .f01hook-statement {
+      max-width: 62cqw;
+      text-align: center;
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 4.6cqw;
+      line-height: 1.12;
+      letter-spacing: -0.005em;
+      color: var(--ink);
+    }
+    .f01hook-w {
+      display: inline-block;
+      will-change: transform, opacity, filter;
+    }
+
+    /* strike-through scaffold (css-marker-patterns, scribble strikethrough) */
+    .f01hook-strikewrap {
+      position: relative;
+      display: inline;
+    }
+    .f01hook-strike-svg {
+      position: absolute;
+      left: -1.5%;
+      top: 50%;
+      transform: translateY(-46%);
+      width: 103%;
+      height: 26px;
+      z-index: 3;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .f01hook-question-wrap {
+      position: absolute;
+      inset: 0 0 17% 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .f01hook-question {
+      text-align: center;
+      font-family: var(--serif);
+      font-weight: 600;
+      font-style: italic;
+      font-size: 7cqw;
+      line-height: 1.04;
+      letter-spacing: -0.005em;
+      color: var(--ink);
+      transform-origin: 50% 50%;
+      will-change: transform, opacity;
+    }
+
+    /* gradient-text-sweep: pixel-identical stacked copies in one grid cell */
+    .f01hook-tb-stack {
+      display: inline-grid;
+    }
+    .f01hook-tb {
+      grid-area: 1 / 1;
+      white-space: nowrap;
+    }
+    .f01hook-tb-base {
+      color: var(--ink);
+    }
+    .f01hook-tb-grad {
+      /* outer stops = ink so the resting field matches the base; one narrow violet band */
+      background-image: linear-gradient(
+        90deg,
+        #f2effa 0%,
+        #f2effa 44%,
+        #a78bfa 47.5%,
+        #7c3aed 50%,
+        #a78bfa 52.5%,
+        #f2effa 56%,
+        #f2effa 100%
+      );
+      background-size: 300% 100%;
+      background-position: 100% 50%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .f01hook-tb-violet {
+      color: #a78bfa;
+      opacity: 0;
+    }
+
+    /* pagenum — kept above the caption keep-out band */
+    .f01hook-pagenum {
+      position: absolute;
+      right: 4cqw;
+      bottom: 20%;
+      z-index: 4;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: rgba(242, 239, 250, 0.75);
+      opacity: 0;
+    }
+  </style>
+
+  <div id="root" data-composition-id="01-hook">
+    <!-- ground: paper + sun-bloom (low-left) + ember counter-bloom -->
+    <div class="clip f01hook-bg" data-start="0" data-duration="4.267" data-track-index="0">
+      <div class="f01hook-bloom" id="f01hook-bloom"></div>
+      <div class="f01hook-ember" id="f01hook-ember"></div>
+    </div>
+
+    <!-- type -->
+    <div class="clip f01hook-stage" data-start="0" data-duration="4.267" data-track-index="1">
+      <div class="f01hook-camera" id="f01hook-camera">
+        <!-- Scene 1+2 · statement build -->
+        <div class="f01hook-statement-wrap">
+          <div class="f01hook-statement" id="f01hook-statement">
+            <div>
+              <span class="f01hook-w f01hook-w1">Every</span>
+              <span class="f01hook-w f01hook-w1">book</span>
+              <span class="f01hook-w f01hook-w1">you</span>
+              <span class="f01hook-w f01hook-w1">love</span>
+            </div>
+            <div>
+              <span class="f01hook-w f01hook-w2">is</span>
+              <span class="f01hook-strikewrap">
+                <span class="f01hook-w f01hook-w2 f01hook-struck">frozen</span>
+                <span class="f01hook-w f01hook-w2 f01hook-struck">on</span>
+                <span class="f01hook-w f01hook-w2 f01hook-struck">a</span>
+                <span class="f01hook-w f01hook-w2 f01hook-struck">shelf.</span>
+                <svg class="f01hook-strike-svg" viewBox="0 0 500 24" preserveAspectRatio="none" aria-hidden="true">
+                  <path
+                    id="f01hook-strike-path"
+                    d="M0,13 Q42,7 84,12 Q126,17 168,11 Q210,6 252,12 Q294,18 336,12 Q378,7 420,13 Q460,17 500,11"
+                    fill="none"
+                    stroke="#F2EFFA"
+                    stroke-width="3.5"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scene 3 · the question -->
+        <div class="f01hook-question-wrap">
+          <div class="f01hook-question" id="f01hook-question">
+            <div>What if it could</div>
+            <div>
+              <span class="f01hook-tb-stack" data-layout-allow-occlusion>
+                <span class="f01hook-tb f01hook-tb-base" data-layout-allow-occlusion>talk back?</span>
+                <span class="f01hook-tb f01hook-tb-grad" id="f01hook-tb-grad" data-layout-allow-occlusion>talk back?</span>
+                <span class="f01hook-tb f01hook-tb-violet" id="f01hook-tb-violet" data-layout-allow-occlusion>talk back?</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="f01hook-pagenum" id="f01hook-pagenum">001</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      var D = 4.267;
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+      window.__timelines["01-hook"] = tl;
+
+      /* one tempo grid (kinetic-beat-slam): every cue is a multiple of PULSE */
+      var PULSE = 0.1;
+      var L1_BEATS = [1, 4, 7, 10].map(function (k) { return k * PULSE; }); // 0.1 0.4 0.7 1.0
+      var L2_BEATS = [18, 20, 22, 24, 26].map(function (k) { return k * PULSE; }); // 1.8 → 2.6
+      var STRIKE_AT = 27 * PULSE; // 2.7
+      var SWAP_AT = 32 * PULSE; // 3.2 — discrete state replacement
+      var SWEEP_AT = 35 * PULSE; // 3.5
+
+      /* ── macro camera: slow push-in under the whole shot ── */
+      tl.fromTo("#f01hook-camera", { scale: 1 }, { scale: 1.035, duration: D, ease: "none" }, 0);
+
+      /* ── Scene 1 (0–1.8s): sun-bloom ignites low-left (ambient-glow-bloom, slow) ── */
+      tl.fromTo(
+        "#f01hook-bloom",
+        { opacity: 0, scale: 0.82 },
+        { opacity: 0.9, scale: 1, duration: 1.55, ease: "power2.out" },
+        0.05
+      );
+      /* bounded breathe — finite phase tween, starts exactly at the bloom's rest state */
+      var bloomEl = document.getElementById("f01hook-bloom");
+      var ph = { p: 0 };
+      tl.to(
+        ph,
+        {
+          p: Math.PI * 2,
+          duration: 2.66,
+          ease: "none",
+          onUpdate: function () {
+            var s = Math.sin(ph.p);
+            bloomEl.style.opacity = String(0.9 + s * 0.04);
+            bloomEl.style.transform = "scale(" + (1 + s * 0.015) + ")";
+          },
+        },
+        1.6
+      );
+      tl.fromTo("#f01hook-ember", { opacity: 0 }, { opacity: 0.32, duration: 1.8, ease: "power1.inOut" }, 0.5);
+
+      /* "Every book you love" — per-word beat slam (scale + blur, power4.out) */
+      gsap.utils.toArray(".f01hook-w1").forEach(function (el, i) {
+        tl.fromTo(
+          el,
+          { autoAlpha: 0, scale: 1.42, filter: "blur(16px)" },
+          { autoAlpha: 1, scale: 1, filter: "blur(0px)", duration: 0.5, ease: "power4.out" },
+          L1_BEATS[i]
+        );
+      });
+
+      /* pagenum depth layer */
+      tl.fromTo("#f01hook-pagenum", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power1.out" }, 0.9);
+
+      /* ── Scene 2 (1.8–3.2s): "is frozen on a shelf." completes on its spoken cue ── */
+      gsap.utils.toArray(".f01hook-w2").forEach(function (el, i) {
+        tl.fromTo(
+          el,
+          { autoAlpha: 0, y: 48 },
+          { autoAlpha: 1, y: 0, duration: 0.45, ease: "expo.out" },
+          L2_BEATS[i]
+        );
+      });
+
+      /* ink strike-through draws left→right as the VO finishes the phrase */
+      var strikePath = document.getElementById("f01hook-strike-path");
+      var strikeLen = strikePath.getTotalLength();
+      gsap.set(strikePath, { strokeDasharray: strikeLen, strokeDashoffset: strikeLen });
+      tl.to(strikePath, { strokeDashoffset: 0, duration: 0.42, ease: "power1.inOut" }, STRIKE_AT);
+      /* struck phrase de-emphasizes under the line (color only — no opacity conflict) */
+      tl.to(
+        ".f01hook-struck",
+        { color: "rgba(242,239,250,0.55)", duration: 0.3, ease: "power2.out" },
+        STRIKE_AT + 0.18
+      );
+
+      /* ── Scene 3 (3.2s–end): hard-cut beat swap (discrete — the jump is INSTANT) ── */
+      tl.set("#f01hook-statement", { autoAlpha: 0 }, SWAP_AT);
+
+      /* question lands — smooth long-tail scale settle, no overshoot */
+      tl.fromTo(
+        "#f01hook-question",
+        { autoAlpha: 0, scale: 0 },
+        { autoAlpha: 1, scale: 1, duration: 0.62, ease: "power3.out" },
+        SWAP_AT
+      );
+
+      /* one violet gradient pass through "talk back?" (100% → 0% reads left→right), then settle solid */
+      tl.fromTo(
+        "#f01hook-tb-grad",
+        { backgroundPosition: "100% 50%" },
+        { backgroundPosition: "0% 50%", duration: 0.55, ease: "none" },
+        SWEEP_AT
+      );
+      tl.fromTo(
+        "#f01hook-tb-violet",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.22, ease: "power2.out" },
+        SWEEP_AT + 0.42
+      );
+      /* hold still to cut — no exit; the root transition owns it */
+    })();
+  </script>
+</template>
