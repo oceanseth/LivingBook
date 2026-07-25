@@ -12,11 +12,10 @@
 // The no-invention contract: answers quote stored units byte-identically;
 // the only generated text is the connective frame, template-composed here.
 import { createServer } from 'node:http';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { VectorAIClient } from '@actian/vectorai-client';
-const { PDFParse } = createRequire(import.meta.url)('pdf-parse');
 import { pipeline } from '@xenova/transformers';
+import { createStore, createVectorStore } from './store.mjs';
+const { PDFParse } = createRequire(import.meta.url)('pdf-parse');
 
 const PORT = process.env.PORT ?? 8787;
 const SERVICE_TOKEN = process.env.MASKY_SERVICE_TOKEN;
@@ -24,14 +23,14 @@ const NARRATOR_AVATAR_ID = process.env.MASKY_NARRATOR_AVATAR_ID;
 const NARRATOR_OWNER = process.env.MASKY_NARRATOR_OWNER;
 const MASKY = 'https://masky.ai/api';
 const SCORE_THRESHOLD = 0.35;
-const BOOKS_FILE = new URL('./local_data/books.json', import.meta.url).pathname;
 
 const embed = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
-const client = new VectorAIClient('localhost:6574', { restUrl: 'http://localhost:6573' });
+const DATA_DIR = new URL('./local_data', import.meta.url).pathname;
+const store = await createStore(DATA_DIR);
+const vectors = await createVectorStore(store);
 
-const CONVOS_FILE = new URL('./local_data/convos.json', import.meta.url).pathname;
-const convos = existsSync(CONVOS_FILE) ? JSON.parse(readFileSync(CONVOS_FILE, 'utf8')) : {};
-const saveConvos = () => writeFileSync(CONVOS_FILE, JSON.stringify(convos, null, 1));
+const convos = await store.load('convos', {});
+const saveConvos = () => store.save('convos', convos);
 
 // VoiceCert demo gate: production liveness attestation isn't live yet, so this
 // mints demo sessions the recording flow requires before any spoken ingestion.
@@ -40,25 +39,22 @@ const voicecertSessions = new Map();
 // the same Masky SSO token (device-code pattern; Expo Go can't take an https
 // OAuth redirect).
 const pairCodes = new Map();
-const FOLLOWS_FILE = new URL('./local_data/follows.json', import.meta.url).pathname;
-const follows = existsSync(FOLLOWS_FILE) ? JSON.parse(readFileSync(FOLLOWS_FILE, 'utf8')) : {};
-const saveFollows = () => writeFileSync(FOLLOWS_FILE, JSON.stringify(follows, null, 1));
+const follows = await store.load('follows', {});
+const saveFollows = () => store.save('follows', follows);
 
-const books = existsSync(BOOKS_FILE)
-  ? JSON.parse(readFileSync(BOOKS_FILE, 'utf8'))
-  : {
-      'bible-kjv': {
-        slug: 'bible-kjv',
-        title: 'The Holy Bible (KJV)',
-        author: 'Public Domain',
-        ownerSub: null,
-        units: 2769,
-        nextId: 100000,
-        createdAt: 0,
-      },
-    };
+const books = await store.load('books', {
+  'bible-kjv': {
+    slug: 'bible-kjv',
+    title: 'The Holy Bible (KJV)',
+    author: 'Public Domain',
+    ownerSub: null,
+    units: 2769,
+    nextId: 100000,
+    createdAt: 0,
+  },
+});
 for (const b of Object.values(books)) b.visibility ??= 'public';
-const saveBooks = () => writeFileSync(BOOKS_FILE, JSON.stringify(books, null, 1));
+const saveBooks = () => store.save('books', books);
 saveBooks();
 
 async function embedText(text) {
@@ -112,7 +108,7 @@ async function ask(slug, question, minScore = SCORE_THRESHOLD) {
   const book = books[slug];
   if (!book) throw new Error(`unknown book: ${slug}`);
   const vector = await embedText(question);
-  const results = await client.points.search(`book_${slug}`, vector, { limit: 5, withPayload: true });
+  const results = await vectors.search(slug, vector, 5);
   const passages = results
     .filter((r) => r.score >= minScore)
     .map((r) => {
@@ -174,7 +170,7 @@ async function newsReason(slug, story) {
     method: 'POST',
     headers: { Authorization: `Bearer ${process.env.PIONEER_API_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'pioneer/auto',
+      model: process.env.PIONEER_MODEL ?? 'claude-haiku-4-5',
       max_tokens: 60,
       messages: [
         {
@@ -227,7 +223,7 @@ async function newsReason(slug, story) {
     const pioneerRes = await fetch('https://api.pioneer.ai/v1/chat/completions', {
       method: 'POST',
       headers: { Authorization: `Bearer ${process.env.PIONEER_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'pioneer/auto', max_tokens: 600, messages }),
+      body: JSON.stringify({ model: process.env.PIONEER_MODEL ?? 'claude-haiku-4-5', max_tokens: 600, messages }),
     }).then((r) => r.json());
     const candidate = pioneerRes.choices?.[0]?.message?.content?.trim();
     if (!candidate) throw new Error(`pioneer failed: ${JSON.stringify(pioneerRes).slice(0, 200)}`);
@@ -288,15 +284,14 @@ async function render(question, token, { avatarId, avatarOwnerUserId, output = '
 }
 
 // ── Scout: every book watches the world for its author ──────────────────────
-const ALERTS_FILE = new URL('./local_data/alerts.json', import.meta.url).pathname;
-const alerts = existsSync(ALERTS_FILE) ? JSON.parse(readFileSync(ALERTS_FILE, 'utf8')) : {};
-const saveAlerts = () => writeFileSync(ALERTS_FILE, JSON.stringify(alerts, null, 1));
+const alerts = await store.load('alerts', {});
+const saveAlerts = () => store.save('alerts', alerts);
 
 async function pioneerChat(messages, max_tokens = 300) {
   const r = await fetch('https://api.pioneer.ai/v1/chat/completions', {
     method: 'POST',
     headers: { Authorization: `Bearer ${process.env.PIONEER_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'pioneer/auto', max_tokens, messages }),
+    body: JSON.stringify({ model: process.env.PIONEER_MODEL ?? 'claude-haiku-4-5', max_tokens, messages }),
   }).then((x) => x.json());
   return r.choices?.[0]?.message?.content?.trim();
 }
@@ -544,9 +539,7 @@ const server = createServer(async (req, res) => {
       if (!title) return res.writeHead(400, headers).end('{"error":"title required"}');
       const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
       if (books[slug]) return res.writeHead(409, headers).end('{"error":"book exists"}');
-      try {
-        await client.collections.create(`book_${slug}`, { dimension: 384, distanceMetric: 'COSINE' });
-      } catch { /* may exist from a prior run */ }
+      await vectors.ensure(slug);
       books[slug] = {
         slug,
         title,
@@ -596,7 +589,7 @@ const server = createServer(async (req, res) => {
           payload: { source_type: sourceType, source_title: title, ref: c.ref, text: c.text, ...(voicecert ? { voicecert } : {}) },
         });
       }
-      await client.points.upsert(`book_${book.slug}`, points);
+      await vectors.upsert(book.slug, points);
       book.units += points.length;
       if (!book.sampleText) book.sampleText = text.slice(0, 400);
       saveBooks();
