@@ -124,7 +124,7 @@ export default function App() {
     <div className="page">
       {overlayOn && (
         <div
-          className="intro-overlay"
+          className={heroFull || !heroRect ? 'intro-overlay full' : 'intro-overlay'}
           onClick={onHeroClick}
           style={
             heroFull || !heroRect

@@ -1098,3 +1098,9 @@ button:disabled {
 .intro-overlay {
   cursor: pointer;
 }
+
+.intro-overlay.full img {
+  /* Fit the whole graphic inside the viewport: height gates on desktop,
+     width gates on narrow/mobile screens; navy letterboxing fills the rest. */
+  object-fit: contain;
+}
