@@ -62,22 +62,6 @@ export default function NotificationMenu({ session }: { session: MaskySession })
     }
   }
 
-  async function approve(id: string) {
-    setBusy(id);
-    try {
-      await fetch(`${API}/api/alerts/${id}/approve`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-        body: '{}',
-      });
-      reload();
-    } finally {
-      setBusy(null);
-    }
-  }
 
   return (
     <div className="notifwrap" ref={ref}>
