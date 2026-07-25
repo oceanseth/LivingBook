@@ -13,8 +13,8 @@ import {
   View,
 } from 'react-native';
 
-const API =
-  process.env.EXPO_PUBLIC_API_URL ?? 'https://tag-rca-moon-filled.trycloudflare.com';
+import { base } from './api';
+
 const MASKY = 'https://masky.ai/api';
 
 
@@ -46,7 +46,7 @@ export default function Author({ onBookCreated }: { onBookCreated: () => void })
   const [busy, setBusy] = useState(false);
 
   async function api<T>(path: string, body?: unknown): Promise<T> {
-    const res = await fetch(`${API}${path}`, {
+    const res = await fetch(`${await base()}${path}`, {
       method: body ? 'POST' : 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -63,7 +63,7 @@ export default function Author({ onBookCreated }: { onBookCreated: () => void })
     setBusy(true);
     setStatus('');
     try {
-      const res = await fetch(`${API}/api/pair/claim`, {
+      const res = await fetch(`${await base()}/api/pair/claim`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: code.trim() }),

@@ -11,8 +11,8 @@ import {
   View,
 } from 'react-native';
 
-const API =
-  process.env.EXPO_PUBLIC_API_URL ?? 'https://tag-rca-moon-filled.trycloudflare.com';
+import { base } from './api';
+
 
 
 export interface Alert {
@@ -30,8 +30,8 @@ export interface Alert {
 
 export function useAlerts() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const reload = () =>
-    fetch(`${API}/api/alerts?all=1`)
+  const reload = async () =>
+    fetch(`${await base()}/api/alerts?all=1`)
       .then((r) => r.json())
       .then((d) => setAlerts(d.alerts ?? []))
       .catch(() => {});
@@ -53,7 +53,7 @@ export default function Alerts({ alerts, reload }: { alerts: Alert[]; reload: ()
   async function dismiss(alert: Alert) {
     setBusy(alert.id);
     try {
-      await fetch(`${API}/api/alerts/${alert.id}/dismiss`, { method: 'POST' });
+      await fetch(`${await base()}/api/alerts/${alert.id}/dismiss`, { method: 'POST' });
       reload();
     } finally {
       setBusy(null);
@@ -63,7 +63,7 @@ export default function Alerts({ alerts, reload }: { alerts: Alert[]; reload: ()
   async function approve(alert: Alert) {
     setBusy(alert.id);
     try {
-      const res = await fetch(`${API}/api/alerts/${alert.id}/approve`, {
+      const res = await fetch(`${await base()}/api/alerts/${alert.id}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reply: drafts[alert.id] ?? alert.suggestedReply }),
