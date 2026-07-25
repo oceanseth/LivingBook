@@ -29,23 +29,78 @@ export default function App() {
   const [tab, setTab] = useState<Tab>('talk');
   const [stuck, setStuck] = useState(false);
   // Intro: the hero starts fullscreen, then flies into the top-left logo slot.
+  // Clicking the hero holds it fullscreen until clicked again; clicking the
+  // landed logo expands it back to fullscreen.
   const logoRef = useRef<HTMLImageElement>(null);
-  const [introRect, setIntroRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
-  const [introDone, setIntroDone] = useState(false);
+  const heldRef = useRef(false);
+  const timersRef = useRef<number[]>([]);
+  const [heroRect, setHeroRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
+  const [heroFull, setHeroFull] = useState(true);
+  const [overlayOn, setOverlayOn] = useState(() => window.location.pathname === '/');
+
+  const clearHeroTimers = () => {
+    timersRef.current.forEach((t) => clearTimeout(t));
+    timersRef.current = [];
+  };
+  const measureLogo = () => {
+    const r = logoRef.current?.getBoundingClientRect();
+    return r ? { top: r.top, left: r.left, width: r.width, height: r.height } : null;
+  };
 
   useEffect(() => {
-    if (window.location.pathname !== '/') return setIntroDone(true);
-    const start = setTimeout(() => {
-      const r = logoRef.current?.getBoundingClientRect();
-      if (r) setIntroRect({ top: r.top, left: r.left, width: r.width, height: r.height });
-      else setIntroDone(true);
+    if (!overlayOn) return;
+    const start = window.setTimeout(() => {
+      const r = measureLogo();
+      if (!r) return setOverlayOn(false);
+      setHeroRect(r);
+      timersRef.current.push(
+        window.setTimeout(() => {
+          if (!heldRef.current) setHeroFull(false);
+        }, 200),
+        window.setTimeout(() => {
+          if (!heldRef.current) setOverlayOn(false);
+        }, 4900),
+      );
     }, 500);
-    const end = setTimeout(() => setIntroDone(true), 4700);
-    return () => {
-      clearTimeout(start);
-      clearTimeout(end);
-    };
+    timersRef.current.push(start);
+    return clearHeroTimers;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const onHeroClick = () => {
+    if (heroFull && !heldRef.current) {
+      // hold fullscreen until the next click
+      clearHeroTimers();
+      heldRef.current = true;
+      setHeroFull(true);
+    } else if (heroFull && heldRef.current) {
+      // release: fly to the header, then hand off to the real logo
+      heldRef.current = false;
+      const r = measureLogo();
+      if (r) setHeroRect(r);
+      setHeroFull(false);
+      timersRef.current.push(window.setTimeout(() => setOverlayOn(false), 4100));
+    } else {
+      // mid-flight or landed: expand back and hold
+      clearHeroTimers();
+      heldRef.current = true;
+      setHeroFull(true);
+    }
+  };
+
+  const onLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const r = measureLogo();
+    if (!r) return;
+    clearHeroTimers();
+    setHeroRect(r);
+    setHeroFull(false);
+    setOverlayOn(true);
+    heldRef.current = true;
+    requestAnimationFrame(() => requestAnimationFrame(() => setHeroFull(true)));
+  };
+
+  const introDone = !overlayOn;
 
   useEffect(() => {
     handleCallback()
@@ -67,13 +122,14 @@ export default function App() {
 
   return (
     <div className="page">
-      {!introDone && (
+      {overlayOn && (
         <div
           className="intro-overlay"
+          onClick={onHeroClick}
           style={
-            introRect
-              ? { ...introRect, borderRadius: 10 }
-              : { top: 0, left: 0, width: '100vw', height: '100vh', borderRadius: 0 }
+            heroFull || !heroRect
+              ? { top: 0, left: 0, width: '100vw', height: '100vh', borderRadius: 0 }
+              : { ...heroRect, borderRadius: 10 }
           }
         >
           <img src="/hero.jpg" alt="LivingBook — real authors, real news, real connection" />
@@ -81,7 +137,7 @@ export default function App() {
       )}
       <header className={stuck ? 'nav stuck' : 'nav'}>
         <div className="wrap nav-inner">
-          <a href="/" className="logolink">
+          <a href="/" className="logolink" onClick={onLogoClick} title="Expand">
             <img
               ref={logoRef}
               className="logo-img"

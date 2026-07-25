@@ -1094,3 +1094,7 @@ button:disabled {
     opacity: 1 !important;
   }
 }
+
+.intro-overlay {
+  cursor: pointer;
+}
