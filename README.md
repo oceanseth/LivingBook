@@ -9,6 +9,19 @@ agents — built on [Masky](https://masky.ai) — that authors embed on their ow
 and readers meet inside the LivingBook app. A submission to the **Self-Evolving Agents
 Hackathon** (SF, Jul 24 2026).
 
+## 🎬 The 90-second demo
+
+https://github.com/oceanseth/LivingBook/raw/main/media/livingbook-showcase.mp4
+
+[![LivingBook — 90-second showcase](media/showcase-poster.jpg)](https://livingbook.masky.ai/media/livingbook-showcase.mp4)
+
+**The real thing, unfaked:** a reader asked *Out of Focus* about America's psychiatrist
+shortage, and [Aly Vredenburgh's book answered on video](https://livingbook.masky.ai/media/author-answer-demo.mp4)
+— rendered by Masky, verbatim from the text
+([raw clip](media/author-answer-demo.mp4) ·
+[live session](https://masky.ai/live/c-26-07-ppup?token=eb510ddde3125754dd78cec3ebf18793c2863e31105802dd)).
+More on the [About page](https://livingbook.masky.ai).
+
 ## The concept
 
 A book shouldn't be a static file. On LivingBook, every book is a **living agent** with

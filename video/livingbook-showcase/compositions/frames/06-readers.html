@@ -1,0 +1,276 @@
+<template>
+  <style>
+@font-face { font-family: "Iowan Old Style"; src: local("Iowan Old Style"); }
+@font-face { font-family: "Iowan Old Style Roman"; src: local("Iowan Old Style"); }
+
+    /* 06-readers — Biennale Yellow frame layer. Root styled via #root only. */
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      container-type: size;
+      font-family: "Iowan Old Style", "Iowan Old Style Roman", Georgia, "Times New Roman", serif;
+      color: #F2EFFA;
+    }
+
+    /* ---- ground (full-bleed clip, lowest track) ---- */
+    .f06-readers-bg {
+      position: absolute;
+      inset: 0;
+      background: #14122D;
+      overflow: hidden;
+    }
+    .f06-readers-bloom {
+      position: absolute;
+      left: 10px;
+      top: -70px;
+      width: 1120px;
+      height: 1120px;
+      background: radial-gradient(
+        circle,
+        rgba(124, 58, 237, 0.9) 0%,
+        #2A0962 30%,
+        rgba(57, 12, 134, 0.4) 54%,
+        rgba(20, 18, 45, 0) 72%
+      );
+    }
+    .f06-readers-ember {
+      position: absolute;
+      right: -260px;
+      top: -300px;
+      width: 760px;
+      height: 760px;
+      background: radial-gradient(circle, rgba(220, 38, 38, 0.17) 0%, rgba(220, 38, 38, 0) 65%);
+    }
+
+    /* ---- violet poster-panel underprint (behind the device) ---- */
+    .f06-readers-panel {
+      position: absolute;
+      left: 310px;
+      top: -2px;
+      width: 520px;
+      height: 1084px;
+      background: #7C3AED;
+    }
+
+    /* ---- device plate (square-cornered, hairline-stroked; STATIC — the
+            hoisted screen recording is pinned to host coords) ---- */
+    .f06-readers-plate {
+      position: absolute;
+      left: 386px;
+      top: 120px;
+      width: 360px;
+      height: 748px;
+      box-sizing: border-box;
+      background: #250856;
+      border: 1px solid rgba(242, 239, 250, 0.6);
+      padding: 13px;
+    }
+    .f06-readers-aperture {
+      position: absolute;
+      left: 400px;
+      top: 134px;
+      width: 332px;
+      height: 720px;
+      overflow: hidden;
+      background: #250856;
+    }
+    .f06-readers-answer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* ---- right column ---- */
+    .f06-readers-microlabel {
+      position: absolute;
+      top: 122px;
+      right: 77px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(242, 239, 250, 0.9);
+      color: #F2EFFA;
+    }
+    .f06-readers-h1 {
+      position: absolute;
+      left: 900px;
+      top: 262px;
+      font-size: 96px;
+      font-weight: 600;
+      line-height: 1.02;
+      letter-spacing: -0.005em;
+      color: #F2EFFA;
+    }
+    .f06-readers-h1 em {
+      font-style: italic;
+    }
+    .f06-readers-rule1,
+    .f06-readers-rule2,
+    .f06-readers-rule3 {
+      position: absolute;
+      left: 900px;
+      width: 640px;
+      height: 1px;
+      background: rgba(242, 239, 250, 0.2);
+    }
+    .f06-readers-rule1 { top: 402px; }
+    .f06-readers-rule2 { top: 528px; }
+    .f06-readers-rule3 { top: 668px; }
+    .f06-readers-h2 {
+      position: absolute;
+      left: 900px;
+      top: 432px;
+      font-size: 55px;
+      font-weight: 600;
+      line-height: 1.1;
+      letter-spacing: -0.005em;
+      color: #F2EFFA;
+    }
+    .f06-readers-h3 {
+      position: absolute;
+      left: 900px;
+      top: 578px;
+      font-family: "JetBrains Mono", "SF Mono", Menlo, monospace;
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #F2EFFA;
+    }
+    .f06-readers-cite {
+      position: absolute;
+      left: 900px;
+      top: 692px;
+      font-family: "JetBrains Mono", "SF Mono", Menlo, monospace;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(242, 239, 250, 0.9);
+    }
+    .f06-readers-pagenum {
+      position: absolute;
+      right: 77px;
+      top: 856px;
+      font-family: "JetBrains Mono", "SF Mono", Menlo, monospace;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: rgba(242, 239, 250, 0.75);
+    }
+  </style>
+
+  <div data-hf-id="hf-tjti" id="root" data-composition-id="06-readers" data-start="0" data-duration="8.192" data-width="1920" data-height="1080">
+    <!-- approved frame video hoisted by assemble-index -->
+    <!-- track 0 — full-bleed ground with sun bloom + ember counter-bloom -->
+    <div data-hf-id="hf-zfee" id="f06-readers-bg" class="clip f06-readers-bg" data-start="0" data-duration="8.192" data-track-index="0">
+      <div data-hf-id="hf-i0jk" id="f06-readers-bloom" class="f06-readers-bloom"></div>
+      <div data-hf-id="hf-ljz1" class="f06-readers-ember"></div>
+    </div>
+
+    <!-- track 1 — violet poster-panel underprint (carries the 5→6 landing momentum) -->
+    <div data-hf-id="hf-j8c9" id="f06-readers-panel" class="clip f06-readers-panel" data-start="0" data-duration="8.192" data-track-index="1"></div>
+
+    <!-- device plate + aperture (static; the recording is hoisted to exactly the aperture rect) -->
+    <div data-hf-id="hf-19yw" class="f06-readers-plate"></div>
+    <div data-hf-id="hf-ikek" class="f06-readers-aperture">
+      <!-- final screen: Out of Focus §440 verbatim unit, revealed when the recording ends at 6.8s -->
+      <img data-hf-id="hf-bqea" id="f06-readers-answer" class="f06-readers-answer" src="assets/media/sim-talk-author-answer.png" alt="">
+    </div>
+
+    <!-- hero screen: real recording of the Talk tab — hoisted to the host root by
+         assemble-index; geometry pins it to the aperture (400,134 332x720). -->
+    <!-- approved frame video hoisted by assemble-index -->
+
+    <!-- right column -->
+    <div data-hf-id="hf-78xp" id="f06-readers-microlabel" class="f06-readers-microlabel">For readers</div>
+    <div data-hf-id="hf-yhnw" id="f06-readers-h1" class="f06-readers-h1">asks <em data-hf-id="hf-xuhx">anything</em></div>
+    <div data-hf-id="hf-1ycg" id="f06-readers-rule1" class="f06-readers-rule1"></div>
+    <div data-hf-id="hf-hpo6" id="f06-readers-h2" class="f06-readers-h2">the exact passage comes back</div>
+    <div data-hf-id="hf-qhou" id="f06-readers-rule2" class="f06-readers-rule2"></div>
+    <div data-hf-id="hf-ju79" id="f06-readers-h3" class="f06-readers-h3">Never invented</div>
+    <div data-hf-id="hf-h7vk" id="f06-readers-rule3" class="f06-readers-rule3"></div>
+    <div data-hf-id="hf-l6qu" id="f06-readers-cite" class="f06-readers-cite">Out of Focus §440</div>
+
+    <div data-hf-id="hf-nxo9" class="f06-readers-pagenum">06</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+
+      /* ---- initial states (seek-safe: baked at build, before any tween) ---- */
+      gsap.set("#f06-readers-panel", { x: 230, opacity: 0 });
+      gsap.set("#f06-readers-microlabel", { x: 60, opacity: 0 });
+      gsap.set("#f06-readers-h1", { x: 40, y: 30, opacity: 0 });
+      gsap.set("#f06-readers-h2", { y: 28, opacity: 0 });
+      gsap.set("#f06-readers-h3", { y: 12, scale: 0.92, opacity: 0, transformOrigin: "0% 50%" });
+      gsap.set("#f06-readers-cite", { y: 14, opacity: 0 });
+      gsap.set("#f06-readers-rule1", { scaleX: 0, transformOrigin: "0% 50%" });
+      gsap.set("#f06-readers-rule2", { scaleX: 0, transformOrigin: "0% 50%" });
+      gsap.set("#f06-readers-rule3", { scaleX: 0, transformOrigin: "0% 50%" });
+      /* final screen sits under the recording until 6.8s; parked mid-swap state */
+      gsap.set("#f06-readers-answer", { scale: 1.12, filter: "blur(8px)", transformOrigin: "50% 50%" });
+
+      /* ---- Scene 1 (0.0–1.2s): mirrored composition lands.
+             Cut-the-curve continuation: frame 5's device crossed leftward, so the
+             panel + label enter from +x and decelerate leftward (power4.out) while
+             the device holds still with the live recording already playing. ---- */
+      tl.to("#f06-readers-panel", { x: 0, opacity: 1, duration: 0.5, ease: "power4.out" }, 0);
+      tl.to("#f06-readers-microlabel", { x: 0, opacity: 1, duration: 0.5, ease: "power4.out" }, 0.3);
+
+      /* slow bloom breath under the whole shot */
+      tl.fromTo(
+        "#f06-readers-bloom",
+        { scale: 1, transformOrigin: "50% 50%" },
+        { scale: 1.07, duration: 8.192, ease: "none" },
+        0
+      );
+
+      /* ---- Scene 2 (1.2–6.8s): the recording runs; serif side-headlines land
+             on the VO cues (side-headline reveal: slide-up + fade). ---- */
+      /* "ask anything" — VO 0.76–1.9s */
+      tl.to("#f06-readers-h1", { x: 0, y: 0, opacity: 1, duration: 0.65, ease: "power3.out" }, 0.85);
+      tl.to("#f06-readers-rule1", { scaleX: 1, duration: 0.5, ease: "power2.out" }, 1.5);
+
+      /* "The exact passage comes back" — VO 1.97–3.86s */
+      tl.to("#f06-readers-h2", { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 2.15);
+
+      /* "retrieved," — VO 3.86s */
+      tl.to("#f06-readers-rule2", { scaleX: 1, duration: 0.5, ease: "power2.out" }, 3.95);
+
+      /* "never invented" — VO 4.97–5.86s: mono stamp pops */
+      tl.to(
+        "#f06-readers-h3",
+        { y: 0, scale: 1, opacity: 1, duration: 0.45, ease: "back.out(2)" },
+        5.0
+      );
+
+      /* ---- Scene 3 (6.8s–end): scale-swap seam — the recording unmounts at 6.8s
+             and the §440 verbatim answer settles in from a zoomed, blurred state
+             (incoming half of scale-swap-transition; the aperture clips the overscan). ---- */
+      tl.to(
+        "#f06-readers-answer",
+        { scale: 1, filter: "blur(0px)", duration: 0.55, ease: "power3.out" },
+        6.8
+      );
+      tl.to("#f06-readers-rule3", { scaleX: 1, duration: 0.45, ease: "power2.out" }, 6.9);
+      /* "the author" — VO 6.86–7.54s: citation ties the answer to the author */
+      tl.to("#f06-readers-cite", { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 7.0);
+
+      /* hold still to the cut — pad the timeline to the full frame duration */
+      tl.to({}, { duration: 0.01 }, 8.182);
+
+      window.__timelines["06-readers"] = tl;
+    })();
+  </script>
+</template>

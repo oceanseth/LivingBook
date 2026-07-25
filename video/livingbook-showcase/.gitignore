@@ -1,0 +1,9 @@
+node_modules/
+renders/
+user-media/
+assets/voice/
+assets/bgm/
+snapshots/
+.hyperframes/
+.thumbnails/
+.waveform-cache/

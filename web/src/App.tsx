@@ -12,14 +12,16 @@ import TalkToBook from './TalkToBook';
 import Books from './Books';
 import News from './News';
 import BookPage from './BookPage';
+import About from './About';
 import './App.css';
 
-type Tab = 'talk' | 'news' | 'books';
+type Tab = 'talk' | 'news' | 'books' | 'about';
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'talk', label: 'Talk to a book or author' },
   { id: 'news', label: 'News' },
   { id: 'books', label: 'Books' },
+  { id: 'about', label: 'About' },
 ];
 
 export default function App() {
@@ -206,6 +208,7 @@ export default function App() {
         {tab === 'talk' && <TalkToBook session={session} />}
         {tab === 'news' && <News session={session} />}
         {tab === 'books' && <Books session={session} />}
+        {tab === 'about' && <About />}
 
         <section className="panel showcase">
           <h2>Fresh from the living books</h2>

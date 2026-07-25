@@ -1,0 +1,454 @@
+<template>
+  <div data-hf-id="hf-afb7" data-composition-id="09-stack-alive" data-width="1920" data-height="1080" data-duration="21.492">
+    <style>
+      #root, [data-composition-id="09-stack-alive"] {
+        position: absolute;
+        inset: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        container-type: size;
+        --paper: #14122d;
+        --paper-deep: #250856;
+        --sun: #7c3aed;
+        --sun-soft: #2a0962;
+        --haze: #390c86;
+        --ink: #f2effa;
+        --serif: "Iowan Old Style", "Iowan Old Style Roman", Georgia, "Times New Roman", serif;
+        --mono: "JetBrains Mono", "Menlo", "SF Mono", "Courier New", monospace;
+        color: var(--ink);
+        font-family: var(--serif);
+      }
+      #root .clip, [data-composition-id="09-stack-alive"] .clip { position: absolute; inset: 0; }
+
+      /* ---------- background (full-bleed ground on its own clip) ---------- */
+      .sa09-bg { background: var(--paper); overflow: hidden; }
+      .sa09-bloom {
+        position: absolute;
+        left: 10px; top: -190px;
+        width: 1500px; height: 1500px;
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(124, 58, 237, 0.46) 0%,
+          rgba(42, 9, 98, 0.52) 32%,
+          rgba(57, 12, 134, 0.26) 56%,
+          rgba(20, 18, 45, 0) 74%
+        );
+        will-change: transform;
+      }
+      .sa09-ember {
+        position: absolute;
+        right: -260px; top: -300px;
+        width: 820px; height: 820px;
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(220, 38, 38, 0.17) 0%,
+          rgba(220, 38, 38, 0.07) 42%,
+          rgba(20, 18, 45, 0) 70%
+        );
+      }
+
+      /* ---------- camera scene ---------- */
+      .sa09-scene { overflow: hidden; }
+      .sa09-world {
+        position: absolute;
+        inset: 0;
+        transform-origin: 50% 50%;
+        will-change: transform;
+      }
+      .sa09-svg { position: absolute; inset: 0; width: 1920px; height: 1080px; }
+
+      /* strokes */
+      .sa09-pipe {
+        fill: none;
+        stroke: rgba(242, 239, 250, 0.26);
+        stroke-width: 1;
+      }
+      .sa09-wire {
+        fill: none;
+        stroke: rgba(242, 239, 250, 0.42);
+        stroke-width: 1;
+        stroke-linecap: round;
+      }
+      .sa09-wire-violet {
+        fill: none;
+        stroke: rgba(124, 58, 237, 0.8);
+        stroke-width: 1.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .sa09-check {
+        fill: none;
+        stroke: rgba(124, 58, 237, 0.95);
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .sa09-ring {
+        fill: none;
+        stroke: rgba(124, 58, 237, 0.75);
+        stroke-width: 2;
+        stroke-linecap: round;
+      }
+      .sa09-tick {
+        fill: none;
+        stroke: rgba(242, 239, 250, 0.8);
+        stroke-width: 1.5;
+        stroke-linecap: round;
+      }
+      .sa09-roll {
+        fill: none;
+        stroke: rgba(242, 239, 250, 0.88);
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .sa09-avring { fill: none; stroke: rgba(242, 239, 250, 0.68); stroke-width: 1.5; }
+      .sa09-avfill { fill: #7c3aed; fill-opacity: 0; stroke: none; }
+      .sa09-avgroup { transform-box: fill-box; transform-origin: center center; }
+      .sa09-play { fill: rgba(242, 239, 250, 0.85); stroke: none; }
+
+      /* nodes */
+      .sa09-node {
+        position: absolute;
+        border: 1px solid rgba(242, 239, 250, 0.34);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+      }
+      .sa09-node.sa09-pipevisited { border-color: rgba(124, 58, 237, 0.55); }
+      .sa09-tile { border: 1px solid rgba(124, 58, 237, 0.8); }
+      .sa09-name {
+        font-family: var(--mono);
+        font-weight: 600;
+        font-size: 16px;
+        letter-spacing: 0.14em;
+        line-height: 1;
+        color: var(--ink);
+        white-space: nowrap;
+      }
+      .sa09-sub {
+        font-family: var(--mono);
+        font-weight: 600;
+        font-size: 10.5px;
+        letter-spacing: 0.2em;
+        line-height: 1;
+        color: var(--ink);
+        opacity: 0.58;
+        white-space: nowrap;
+      }
+      .sa09-topalign { justify-content: flex-start; padding-top: 22px; }
+
+      /* callouts */
+      .sa09-callout {
+        position: absolute;
+        width: 600px;
+        text-align: center;
+        font-family: var(--mono);
+        font-weight: 600;
+        font-size: 13.5px;
+        letter-spacing: 0.1em;
+        line-height: 1.4;
+        text-transform: uppercase;
+        color: var(--ink);
+        opacity: 0;
+        white-space: nowrap;
+      }
+      .sa09-callout .sa09-d { opacity: 0.78; }
+
+      .sa09-vlabel {
+        position: absolute;
+        width: 44px;
+        text-align: center;
+        font-family: var(--mono);
+        font-weight: 600;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        color: var(--ink);
+        opacity: 0;
+      }
+
+      /* ---------- screen-space closing labels ---------- */
+      .sa09-toplabel {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 84px;
+        text-align: center;
+        font-family: var(--serif);
+        font-weight: 600;
+        font-size: 19px;
+        letter-spacing: 0.26em;
+        text-transform: uppercase;
+        color: var(--ink);
+        opacity: 0;
+      }
+      .sa09-hackline {
+        position: absolute;
+        right: 76px;
+        top: 848px;
+        font-family: var(--mono);
+        font-weight: 600;
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        color: var(--ink);
+        opacity: 0;
+      }
+    </style>
+
+    <!-- track 0 — full-bleed ground -->
+    <div data-hf-id="hf-uufz" class="clip sa09-bg" data-start="0" data-duration="21.492" data-track-index="0">
+      <div data-hf-id="hf-1qnm" class="sa09-bloom" id="sa09-bloom"></div>
+      <div data-hf-id="hf-2cur" class="sa09-ember"></div>
+    </div>
+
+    <!-- track 1 — the shared architecture canvas, act two -->
+    <div data-hf-id="hf-vdmx" class="clip sa09-scene" data-start="0" data-duration="21.492" data-track-index="1">
+      <div data-hf-id="hf-qgo2" class="sa09-world" id="sa09-world">
+        <svg data-hf-id="hf-v7c5" class="sa09-svg" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+          <!-- act-one pipe (already built): static hairline connectors on the midline -->
+          <path data-hf-id="hf-1vut" class="sa09-pipe" d="M 300 380 L 398 380" />
+          <path data-hf-id="hf-o5i3" class="sa09-pipe" d="M 642 380 L 728 380" />
+          <path data-hf-id="hf-40zz" class="sa09-pipe" d="M 932 380 L 1028 380" />
+          <path data-hf-id="hf-d7e9" class="sa09-pipe" d="M 1232 380 L 1358 380" />
+          <polygon data-hf-id="hf-rt65" class="sa09-play" points="1396,368 1396,392 1418,380" />
+
+          <!-- act-two hairlines, drawn ahead of the camera -->
+          <path data-hf-id="hf-lphu" class="sa09-wire sa09-draw" id="sa09-dive" d="M 700 430 L 432 686" />
+          <path data-hf-id="hf-9wuk" class="sa09-wire sa09-draw" id="sa09-w-vs" d="M 517 740 L 638 740" />
+          <path data-hf-id="hf-yp6r" class="sa09-wire sa09-draw" id="sa09-w-sb" d="M 842 740 L 973 740" />
+          <path data-hf-id="hf-lol9" class="sa09-wire sa09-draw" id="sa09-w-bg" d="M 1187 740 L 1313 740" />
+
+          <!-- the "it feeds itself" stroke: Senso back into the Actian knowledge base -->
+          <path data-hf-id="hf-7af1" class="sa09-wire-violet sa09-draw" id="sa09-loop" d="M 718 690 C 668 600 610 515 552 440" />
+          <path data-hf-id="hf-y4ft" class="sa09-wire-violet sa09-draw" id="sa09-loop-a1" d="M 552 440 L 556 458" />
+          <path data-hf-id="hf-vhyd" class="sa09-wire-violet sa09-draw" id="sa09-loop-a2" d="M 552 440 L 568 450" />
+
+          <!-- Guild ships each version back to the agent: closes the circuit -->
+          <path data-hf-id="hf-ey1y" class="sa09-wire-violet sa09-draw" id="sa09-close" d="M 1390 690 C 1370 560 1280 470 1150 434" />
+          <path data-hf-id="hf-ya86" class="sa09-wire-violet sa09-draw" id="sa09-close-a1" d="M 1150 434 L 1167 436" />
+          <path data-hf-id="hf-fkna" class="sa09-wire-violet sa09-draw" id="sa09-close-a2" d="M 1150 434 L 1161 448" />
+
+          <!-- VoiceCert check -->
+          <path data-hf-id="hf-4ato" class="sa09-check sa09-draw" id="sa09-checkmark" d="M 468 742 L 478 753 L 498 731" />
+
+          <!-- Band AI: two agents in a room -->
+          <g data-hf-id="hf-bc8s" class="sa09-avgroup" id="sa09-av1">
+            <circle data-hf-id="hf-6isu" class="sa09-avfill" cx="1052" cy="756" r="9" fill-opacity="0" />
+            <circle data-hf-id="hf-mj9b" class="sa09-avring" cx="1052" cy="756" r="9" />
+          </g>
+          <g data-hf-id="hf-k04n" class="sa09-avgroup" id="sa09-av2">
+            <circle data-hf-id="hf-q3pp" class="sa09-avfill" cx="1086" cy="756" r="9" fill-opacity="0" />
+            <circle data-hf-id="hf-t6ii" class="sa09-avring" cx="1086" cy="756" r="9" />
+          </g>
+
+          <!-- Guild version ring, drawn from 12 o'clock -->
+          <circle data-hf-id="hf-1gqr" class="sa09-ring sa09-draw" id="sa09-vring" cx="1530" cy="740" r="28" style="transform-origin: 1530px 740px; transform: rotate(-90deg)" />
+          <path data-hf-id="hf-f6gl" class="sa09-tick sa09-draw" id="sa09-tick1" d="M 1512 719 L 1504 710" />
+          <path data-hf-id="hf-byd4" class="sa09-tick sa09-draw" id="sa09-tick2" d="M 1548 719 L 1556 710" />
+
+          <!-- counter-clockwise rollback arrow inside the ring -->
+          <path data-hf-id="hf-4ntb" class="sa09-roll sa09-draw" id="sa09-rollarc" d="M 1552 746 A 23 23 0 1 0 1508 746" />
+          <path data-hf-id="hf-o7ql" class="sa09-roll sa09-draw" id="sa09-roll-a1" d="M 1508 746 L 1512 736" />
+          <path data-hf-id="hf-ufj6" class="sa09-roll sa09-draw" id="sa09-roll-a2" d="M 1508 746 L 1516 750" />
+        </svg>
+
+        <!-- midline ask-path (act one, rebuilt for the wide shot) -->
+        <div data-hf-id="hf-2e1c" class="sa09-node" style="left: 120px; top: 342px; width: 180px; height: 76px">
+          <div data-hf-id="hf-pwij" class="sa09-sub">READER</div>
+          <div data-hf-id="hf-vx5u" class="sa09-name" style="font-size: 14px">ASK ▸</div>
+        </div>
+        <div data-hf-id="hf-ipim" class="sa09-node sa09-pipevisited sa09-sponsor" id="sa09-node-actian" style="left: 400px; top: 332px; width: 240px; height: 96px">
+          <div data-hf-id="hf-bje8" class="sa09-name">ACTIAN VECTORAI</div>
+          <div data-hf-id="hf-uexb" class="sa09-sub">VERBATIM KB</div>
+        </div>
+        <div data-hf-id="hf-0mnt" class="sa09-node sa09-pipevisited sa09-sponsor" style="left: 730px; top: 332px; width: 200px; height: 96px">
+          <div data-hf-id="hf-o6jf" class="sa09-name">PIONEER</div>
+          <div data-hf-id="hf-48uc" class="sa09-sub">REASONING</div>
+        </div>
+        <div data-hf-id="hf-v887" class="sa09-node sa09-pipevisited sa09-sponsor" style="left: 1030px; top: 332px; width: 200px; height: 96px">
+          <div data-hf-id="hf-ye8i" class="sa09-name">MASKY</div>
+          <div data-hf-id="hf-mrm9" class="sa09-sub">AVATAR</div>
+        </div>
+        <div data-hf-id="hf-b3nw" class="sa09-node sa09-tile" style="left: 1360px; top: 330px; width: 90px; height: 100px"></div>
+
+        <!-- act two: the keep-alive row -->
+        <div data-hf-id="hf-1b8i" class="sa09-node sa09-sponsor" id="sa09-node-vc" style="left: 285px; top: 692px; width: 230px; height: 96px">
+          <div data-hf-id="hf-eodu" class="sa09-name" style="margin-right: 46px">VOICECERT</div>
+        </div>
+        <div data-hf-id="hf-m2od" class="sa09-node sa09-sponsor" id="sa09-node-senso" style="left: 640px; top: 692px; width: 200px; height: 96px">
+          <div data-hf-id="hf-b711" class="sa09-name">SENSO</div>
+        </div>
+        <div data-hf-id="hf-bp8k" class="sa09-node sa09-topalign sa09-sponsor" id="sa09-node-band" style="left: 975px; top: 692px; width: 210px; height: 96px">
+          <div data-hf-id="hf-el3m" class="sa09-name">BAND AI</div>
+        </div>
+        <div data-hf-id="hf-e33a" class="sa09-node sa09-sponsor" id="sa09-node-guild" style="left: 1315px; top: 692px; width: 150px; height: 96px">
+          <div data-hf-id="hf-mfs6" class="sa09-name">GUILD.AI</div>
+        </div>
+
+        <div data-hf-id="hf-p5pl" class="sa09-vlabel" id="sa09-v1" style="left: 1454px; top: 684px">V1</div>
+        <div data-hf-id="hf-zveh" class="sa09-vlabel" id="sa09-v2" style="left: 1564px; top: 684px">V2</div>
+
+        <!-- callouts -->
+        <div data-hf-id="hf-k8o4" class="sa09-callout" id="sa09-co-vc" style="left: 100px; top: 806px">
+          <span data-hf-id="hf-t78z">VOICECERT</span><span data-hf-id="hf-mzkb" class="sa09-d"> — LIVE HUMAN VERIFICATION</span>
+        </div>
+        <div data-hf-id="hf-o86i" class="sa09-callout" id="sa09-co-senso" style="left: 440px; top: 806px">
+          <span data-hf-id="hf-s91z">SENSO</span><span data-hf-id="hf-t884" class="sa09-d"> — VERIFIED GROUND TRUTH · 15-DOC KB</span>
+        </div>
+        <div data-hf-id="hf-rv6e" class="sa09-callout" id="sa09-co-band" style="left: 780px; top: 806px">
+          <span data-hf-id="hf-ix9g">BAND AI</span><span data-hf-id="hf-7992" class="sa09-d"> — AGENT-TO-AGENT PODCAST ROOMS</span>
+        </div>
+        <div data-hf-id="hf-dc5h" class="sa09-callout" id="sa09-co-guild" style="left: 1155px; top: 806px">
+          <span data-hf-id="hf-q6cc">GUILD.AI</span><span data-hf-id="hf-8mma" class="sa09-d"> — VERSIONED SELF-EVOLUTION</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- track 2 — screen-space closing labels -->
+    <div data-hf-id="hf-dlpz" class="clip" data-start="16.4" data-duration="5.092" data-track-index="2">
+      <div data-hf-id="hf-hwir" class="sa09-toplabel" id="sa09-seven">SEVEN SPONSOR TOOLS — ALL LIVE</div>
+      <div data-hf-id="hf-mc5i" class="sa09-hackline" id="sa09-hack">BUILT AT THE SELF-EVOLVING AGENTS HACKATHON · JUL 2026</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      (function () {
+        var world = document.getElementById("sa09-world");
+
+        /* svg-path-draw setup: measure every drawn path, hide via dashoffset */
+        document.querySelectorAll(".sa09-draw").forEach(function (p) {
+          var len = p.getTotalLength() * 1.02;
+          p.style.strokeDasharray = String(len);
+          p.style.strokeDashoffset = String(len);
+        });
+
+        /* viewport-change: single camera object, T = -offset * S, one writer */
+        var cam = { s: 2.35, x: 705, y: 144.5 };
+        function applyCamera() {
+          world.style.transform =
+            "translate(" + cam.x + "px, " + cam.y + "px) scale(" + cam.s + ")";
+        }
+        applyCamera(); /* seed frame 0: punched-in on the pipe, about to dive */
+
+        var tl = gsap.timeline({ paused: true });
+        window.__timelines = window.__timelines || {};
+        window.__timelines["09-stack-alive"] = tl;
+
+        function draw(id, pos, dur, ease) {
+          tl.to("#" + id, { strokeDashoffset: 0, duration: dur, ease: ease || "power2.out" }, pos);
+        }
+        function callout(id, pos) {
+          tl.fromTo(
+            "#" + id,
+            { opacity: 0, y: 12 },
+            { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" },
+            pos
+          );
+        }
+        function pulse(g, fill, pos) {
+          tl.to(g, { scale: 1.24, duration: 0.3, ease: "power2.out" }, pos);
+          tl.to(g, { scale: 1, duration: 0.38, ease: "power2.inOut" }, pos + 0.3);
+          tl.to(fill, { fillOpacity: 0.7, duration: 0.3, ease: "power2.out" }, pos);
+          tl.to(fill, { fillOpacity: 0, duration: 0.38, ease: "power1.inOut" }, pos + 0.3);
+        }
+
+        /* ---- camera track ---- */
+        /* Scene 1 — diagonal dive to VoiceCert ("VoiceCert" 0.1-0.6) */
+        tl.fromTo(
+          cam,
+          { s: 2.35, x: 705, y: 144.5 },
+          { s: 2.1, x: 1176, y: -480, duration: 1.15, ease: "power2.inOut", onUpdate: applyCamera },
+          0.05
+        );
+        tl.to(cam, { s: 2.16, duration: 2.4, ease: "power1.inOut", onUpdate: applyCamera }, 1.35);
+        /* Scene 2 — pan to Senso ("Senso" 4.26); wider stop so the Actian loop lands on screen */
+        tl.to(cam, { s: 1.9, x: 418, y: -310, duration: 1.1, ease: "power2.inOut", onUpdate: applyCamera }, 3.9);
+        tl.to(cam, { s: 1.94, duration: 2.2, ease: "power1.inOut", onUpdate: applyCamera }, 5.15);
+        /* Scene 3 — pan to Band AI ("Band AI" 7.94) */
+        tl.to(cam, { s: 2.1, x: -252, y: -480, duration: 1.1, ease: "power2.inOut", onUpdate: applyCamera }, 7.5);
+        tl.to(cam, { s: 2.15, duration: 3.0, ease: "power1.inOut", onUpdate: applyCamera }, 8.75);
+        /* Scene 4 — pan to Guild ("Guild" 12.36) */
+        tl.to(cam, { s: 2.1, x: -1039.5, y: -480, duration: 1.1, ease: "power2.inOut", onUpdate: applyCamera }, 11.95);
+        tl.to(cam, { s: 2.15, duration: 2.85, ease: "power1.inOut", onUpdate: applyCamera }, 13.2);
+        /* Scene 5 — one decelerating zoom-out to the full seven-node map ("seven" 16.4) */
+        tl.to(cam, { s: 1, x: 0, y: 0, duration: 2.2, ease: "power3.out", onUpdate: applyCamera }, 16.25);
+
+        /* ---- bloom parallax under the pans ---- */
+        tl.fromTo("#sa09-bloom", { x: 70 }, { x: -90, duration: 13.0, ease: "power1.inOut" }, 0.15);
+        tl.to("#sa09-bloom", { x: 0, scale: 1.04, duration: 2.2, ease: "power3.out" }, 16.25);
+
+        /* ---- Scene 1: VOICECERT (0-4.2) ---- */
+        draw("sa09-dive", 0.15, 0.85); /* hairline draws ahead of the dive */
+        tl.to("#sa09-node-vc", { borderColor: "rgba(124,58,237,0.85)", duration: 0.45 }, 0.95);
+        callout("sa09-co-vc", 1.1);
+        draw("sa09-checkmark", 1.55, 0.65); /* "real human spoke" 1.66-2.35 */
+
+        /* ---- Scene 2: SENSO (4.2-7.9) ---- */
+        draw("sa09-w-vs", 3.85, 0.6);
+        tl.to("#sa09-node-senso", { borderColor: "rgba(124,58,237,0.85)", duration: 0.45 }, 4.9);
+        callout("sa09-co-senso", 5.05);
+        /* loop-arrow back into the knowledge base: "verified ground truth" 5.82-7.67 */
+        draw("sa09-loop", 5.9, 1.15);
+        draw("sa09-loop-a1", 6.95, 0.28);
+        draw("sa09-loop-a2", 7.05, 0.28);
+
+        /* ---- Scene 3: BAND AI (7.9-12.3) ---- */
+        draw("sa09-w-sb", 7.5, 0.65);
+        tl.to("#sa09-node-band", { borderColor: "rgba(124,58,237,0.85)", duration: 0.45 }, 8.55);
+        callout("sa09-co-band", 8.7);
+        /* two agents trade turns through "agent-to-agent podcasts" */
+        pulse("#sa09-av1", "#sa09-av1 .sa09-avfill", 9.3);
+        pulse("#sa09-av2", "#sa09-av2 .sa09-avfill", 10.05);
+        pulse("#sa09-av1", "#sa09-av1 .sa09-avfill", 10.8);
+        pulse("#sa09-av2", "#sa09-av2 .sa09-avfill", 11.55);
+
+        /* ---- Scene 4: GUILD.AI (12.3-16.3) ---- */
+        draw("sa09-w-bg", 11.95, 0.6);
+        tl.to("#sa09-node-guild", { borderColor: "rgba(124,58,237,0.85)", duration: 0.45 }, 13.0);
+        callout("sa09-co-guild", 13.15);
+        /* version ring: "each new version" 13.31-14.02 */
+        draw("sa09-vring", 13.85, 1.0);
+        tl.fromTo("#sa09-v1", { opacity: 0 }, { opacity: 0.85, duration: 0.4, ease: "power1.out" }, 14.45);
+        draw("sa09-tick1", 14.55, 0.25);
+        draw("sa09-tick2", 14.75, 0.25);
+        tl.fromTo("#sa09-v2", { opacity: 0 }, { opacity: 0.85, duration: 0.4, ease: "power1.out" }, 14.9);
+        /* counter-clockwise rollback arrow: "with rollback" 15.51-16.4 */
+        draw("sa09-rollarc", 15.5, 0.6);
+        draw("sa09-roll-a1", 16.05, 0.22);
+        draw("sa09-roll-a2", 16.12, 0.22);
+
+        /* ---- Scene 5: the whole circuit (16.25-end) ---- */
+        /* Guild ships back to the agent — the loop closes as the camera pulls out */
+        draw("sa09-close", 16.5, 1.0);
+        draw("sa09-close-a1", 17.45, 0.25);
+        draw("sa09-close-a2", 17.52, 0.25);
+        /* "seven sponsor tools" 16.4-18.28 */
+        tl.fromTo(
+          "#sa09-seven",
+          { opacity: 0, y: 10 },
+          { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" },
+          16.9
+        );
+        /* "all live" 18.39-19.09: every sponsor station settles violet */
+        tl.to(".sa09-sponsor", { borderColor: "rgba(124,58,237,0.95)", duration: 0.28, ease: "power2.out" }, 18.45);
+        tl.to(".sa09-sponsor", { borderColor: "rgba(124,58,237,0.6)", duration: 0.65, ease: "power1.inOut" }, 18.85);
+        /* "one hackathon" 19.99 */
+        tl.fromTo(
+          "#sa09-hack",
+          { opacity: 0 },
+          { opacity: 0.8, duration: 0.6, ease: "power1.out" },
+          19.85
+        );
+        /* callouts collide at the wide framing — clear them as the zoom-out starts */
+        tl.to("#sa09-co-vc", { opacity: 0, duration: 0.4, ease: "power1.out" }, 4.95);
+        tl.to("#sa09-co-senso", { opacity: 0, duration: 0.4, ease: "power1.out" }, 8.6);
+        tl.to("#sa09-co-band", { opacity: 0, duration: 0.4, ease: "power1.out" }, 13.05);
+        tl.to(".sa09-callout", { opacity: 0, duration: 0.45, ease: "power1.out" }, 16.3);
+        /* hold the full map still to the seam — no exit (frame 10 follows) */
+      })();
+    </script>
+  </div>
+</template>

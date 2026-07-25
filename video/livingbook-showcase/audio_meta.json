@@ -1,5 +1,10 @@
 {
-  "bgm": null,
+  "bgm": {
+    "path": "assets/bgm/track.wav",
+    "volume": 0.12,
+    "mode": "generate",
+    "duration_s": 81.408
+  },
   "voices": [
     {
       "frame": 1,

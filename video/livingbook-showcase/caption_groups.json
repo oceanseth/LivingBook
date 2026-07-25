@@ -1,1792 +1,1765 @@
 {
-  "total_duration_s": 93.408,
-  "width": 1920,
-  "height": 1080,
-  "groups": [
-    {
-      "id": "caption-group-0",
-      "frame": 1,
-      "start": 0.11,
-      "end": 0.77,
-      "text": "Every book",
-      "words": [
-        {
-          "id": "caption-word-0-0",
-          "text": "Every",
-          "start": 0.11,
-          "end": 0.43
-        },
-        {
-          "id": "caption-word-0-1",
-          "text": "book",
-          "start": 0.43,
-          "end": 0.77
-        }
-      ]
-    },
-    {
-      "id": "caption-group-1",
-      "frame": 1,
-      "start": 0.77,
-      "end": 1.41,
-      "text": "you love",
-      "words": [
-        {
-          "id": "caption-word-1-0",
-          "text": "you",
-          "start": 0.77,
-          "end": 1.03
-        },
-        {
-          "id": "caption-word-1-1",
-          "text": "love",
-          "start": 1.03,
-          "end": 1.29
-        }
-      ]
-    },
-    {
-      "id": "caption-group-2",
-      "frame": 1,
-      "start": 1.43,
-      "end": 2.06,
-      "text": "is frozen",
-      "words": [
-        {
-          "id": "caption-word-2-0",
-          "text": "is",
-          "start": 1.43,
-          "end": 1.54
-        },
-        {
-          "id": "caption-word-2-1",
-          "text": "frozen",
-          "start": 1.54,
-          "end": 2.06
-        }
-      ]
-    },
-    {
-      "id": "caption-group-3",
-      "frame": 1,
-      "start": 2.06,
-      "end": 2.31,
-      "text": "on a",
-      "words": [
-        {
-          "id": "caption-word-3-0",
-          "text": "on",
-          "start": 2.06,
-          "end": 2.23
-        },
-        {
-          "id": "caption-word-3-1",
-          "text": "a",
-          "start": 2.23,
-          "end": 2.31
-        }
-      ]
-    },
-    {
-      "id": "caption-group-4",
-      "frame": 1,
-      "start": 2.31,
-      "end": 2.91,
-      "text": "shelf.",
-      "words": [
-        {
-          "id": "caption-word-4-0",
-          "text": "shelf.",
-          "start": 2.31,
-          "end": 2.8
-        }
-      ]
-    },
-    {
-      "id": "caption-group-5",
-      "frame": 1,
-      "start": 2.91,
-      "end": 3.16,
-      "text": "What if",
-      "words": [
-        {
-          "id": "caption-word-5-0",
-          "text": "What",
-          "start": 2.91,
-          "end": 3.04
-        },
-        {
-          "id": "caption-word-5-1",
-          "text": "if",
-          "start": 3.05,
-          "end": 3.16
-        }
-      ]
-    },
-    {
-      "id": "caption-group-6",
-      "frame": 1,
-      "start": 3.16,
-      "end": 3.57,
-      "text": "it could",
-      "words": [
-        {
-          "id": "caption-word-6-0",
-          "text": "it",
-          "start": 3.16,
-          "end": 3.28
-        },
-        {
-          "id": "caption-word-6-1",
-          "text": "could",
-          "start": 3.28,
-          "end": 3.57
-        }
-      ]
-    },
-    {
-      "id": "caption-group-7",
-      "frame": 1,
-      "start": 3.57,
-      "end": 4.347,
-      "text": "talk back?",
-      "words": [
-        {
-          "id": "caption-word-7-0",
-          "text": "talk",
-          "start": 3.57,
-          "end": 3.81
-        },
-        {
-          "id": "caption-word-7-1",
-          "text": "back?",
-          "start": 3.81,
-          "end": 4.24
-        }
-      ]
-    },
-    {
-      "id": "caption-group-8",
-      "frame": 2,
-      "start": 4.347,
-      "end": 4.867,
-      "text": "A reader",
-      "words": [
-        {
-          "id": "caption-word-8-0",
-          "text": "A",
-          "start": 4.347,
-          "end": 4.367
-        },
-        {
-          "id": "caption-word-8-1",
-          "text": "reader",
-          "start": 4.367,
-          "end": 4.827
-        }
-      ]
-    },
-    {
-      "id": "caption-group-9",
-      "frame": 2,
-      "start": 4.867,
-      "end": 6.457,
-      "text": "asks Ali Vredenberg's",
-      "words": [
-        {
-          "id": "caption-word-9-0",
-          "text": "asks",
-          "start": 4.867,
-          "end": 5.137
-        },
-        {
-          "id": "caption-word-9-1",
-          "text": "Ali",
-          "start": 5.197,
-          "end": 5.447
-        },
-        {
-          "id": "caption-word-9-2",
-          "text": "Vredenberg's",
-          "start": 5.447,
-          "end": 6.457
-        }
-      ]
-    },
-    {
-      "id": "caption-group-10",
-      "frame": 2,
-      "start": 6.457,
-      "end": 6.957,
-      "text": "book,",
-      "words": [
-        {
-          "id": "caption-word-10-0",
-          "text": "book,",
-          "start": 6.457,
-          "end": 6.867
-        }
-      ]
-    },
-    {
-      "id": "caption-group-11",
-      "frame": 2,
-      "start": 6.957,
-      "end": 8.207,
-      "text": "Out of Focus,",
-      "words": [
-        {
-          "id": "caption-word-11-0",
-          "text": "Out",
-          "start": 6.957,
-          "end": 7.147
-        },
-        {
-          "id": "caption-word-11-1",
-          "text": "of",
-          "start": 7.287,
-          "end": 7.407
-        },
-        {
-          "id": "caption-word-11-2",
-          "text": "Focus,",
-          "start": 7.477,
-          "end": 8.197
-        }
-      ]
-    },
-    {
-      "id": "caption-group-12",
-      "frame": 2,
-      "start": 8.207,
-      "end": 9.467,
-      "text": "about America's mental",
-      "words": [
-        {
-          "id": "caption-word-12-0",
-          "text": "about",
-          "start": 8.207,
-          "end": 8.427
-        },
-        {
-          "id": "caption-word-12-1",
-          "text": "America's",
-          "start": 8.427,
-          "end": 9.037
-        },
-        {
-          "id": "caption-word-12-2",
-          "text": "mental",
-          "start": 9.037,
-          "end": 9.467
-        }
-      ]
-    },
-    {
-      "id": "caption-group-13",
-      "frame": 2,
-      "start": 9.467,
-      "end": 10.417,
-      "text": "health shortage.",
-      "words": [
-        {
-          "id": "caption-word-13-0",
-          "text": "health",
-          "start": 9.467,
-          "end": 9.627
-        },
-        {
-          "id": "caption-word-13-1",
-          "text": "shortage.",
-          "start": 9.627,
-          "end": 10.297
-        }
-      ]
-    },
-    {
-      "id": "caption-group-14",
-      "frame": 4,
-      "start": 22.438,
-      "end": 23.438,
-      "text": "This is Living",
-      "words": [
-        {
-          "id": "caption-word-14-0",
-          "text": "This",
-          "start": 22.438,
-          "end": 22.728
-        },
-        {
-          "id": "caption-word-14-1",
-          "text": "is",
-          "start": 22.768,
-          "end": 22.938
-        },
-        {
-          "id": "caption-word-14-2",
-          "text": "Living",
-          "start": 22.938,
-          "end": 23.318
-        }
-      ]
-    },
-    {
-      "id": "caption-group-15",
-      "frame": 4,
-      "start": 23.948,
-      "end": 23.998,
-      "text": "Book,",
-      "words": [
-        {
-          "id": "caption-word-15-0",
-          "text": "Book,",
-          "start": 23.948,
-          "end": 23.968
-        }
-      ]
-    },
-    {
-      "id": "caption-group-16",
-      "frame": 4,
-      "start": 23.998,
-      "end": 25.068,
-      "text": "real books become",
-      "words": [
-        {
-          "id": "caption-word-16-0",
-          "text": "real",
-          "start": 23.998,
-          "end": 24.288
-        },
-        {
-          "id": "caption-word-16-1",
-          "text": "books",
-          "start": 24.288,
-          "end": 24.648
-        },
-        {
-          "id": "caption-word-16-2",
-          "text": "become",
-          "start": 24.728,
-          "end": 25.068
-        }
-      ]
-    },
-    {
-      "id": "caption-group-17",
-      "frame": 4,
-      "start": 25.068,
-      "end": 26.128,
-      "text": "living agents that",
-      "words": [
-        {
-          "id": "caption-word-17-0",
-          "text": "living",
-          "start": 25.068,
-          "end": 25.478
-        },
-        {
-          "id": "caption-word-17-1",
-          "text": "agents",
-          "start": 25.478,
-          "end": 25.888
-        },
-        {
-          "id": "caption-word-17-2",
-          "text": "that",
-          "start": 25.948,
-          "end": 26.018
-        }
-      ]
-    },
-    {
-      "id": "caption-group-18",
-      "frame": 4,
-      "start": 26.128,
-      "end": 26.928,
-      "text": "answer only",
-      "words": [
-        {
-          "id": "caption-word-18-0",
-          "text": "answer",
-          "start": 26.128,
-          "end": 26.498
-        },
-        {
-          "id": "caption-word-18-1",
-          "text": "only",
-          "start": 26.608,
-          "end": 26.928
-        }
-      ]
-    },
-    {
-      "id": "caption-group-19",
-      "frame": 4,
-      "start": 26.928,
-      "end": 27.128,
-      "text": "in the",
-      "words": [
-        {
-          "id": "caption-word-19-0",
-          "text": "in",
-          "start": 26.928,
-          "end": 27.048
-        },
-        {
-          "id": "caption-word-19-1",
-          "text": "the",
-          "start": 27.048,
-          "end": 27.128
-        }
-      ]
-    },
-    {
-      "id": "caption-group-20",
-      "frame": 4,
-      "start": 27.128,
-      "end": 29.128,
-      "text": "author's exact words on",
-      "words": [
-        {
-          "id": "caption-word-20-0",
-          "text": "author's",
-          "start": 27.128,
-          "end": 27.648
-        },
-        {
-          "id": "caption-word-20-1",
-          "text": "exact",
-          "start": 27.648,
-          "end": 28.148
-        },
-        {
-          "id": "caption-word-20-2",
-          "text": "words",
-          "start": 28.278,
-          "end": 28.868
-        },
-        {
-          "id": "caption-word-20-3",
-          "text": "on",
-          "start": 28.868,
-          "end": 29.128
-        }
-      ]
-    },
-    {
-      "id": "caption-group-21",
-      "frame": 4,
-      "start": 29.128,
-      "end": 29.917,
-      "text": "video.",
-      "words": [
-        {
-          "id": "caption-word-21-0",
-          "text": "video.",
-          "start": 29.128,
-          "end": 29.808
-        }
-      ]
-    },
-    {
-      "id": "caption-group-22",
-      "frame": 5,
-      "start": 29.917,
-      "end": 30.697,
-      "text": "Authors sign",
-      "words": [
-        {
-          "id": "caption-word-22-0",
-          "text": "Authors",
-          "start": 29.917,
-          "end": 30.397
-        },
-        {
-          "id": "caption-word-22-1",
-          "text": "sign",
-          "start": 30.397,
-          "end": 30.697
-        }
-      ]
-    },
-    {
-      "id": "caption-group-23",
-      "frame": 5,
-      "start": 30.697,
-      "end": 31.787,
-      "text": "in with Maskey,",
-      "words": [
-        {
-          "id": "caption-word-23-0",
-          "text": "in",
-          "start": 30.697,
-          "end": 30.847
-        },
-        {
-          "id": "caption-word-23-1",
-          "text": "with",
-          "start": 30.847,
-          "end": 31.147
-        },
-        {
-          "id": "caption-word-23-2",
-          "text": "Maskey,",
-          "start": 31.147,
-          "end": 31.667
-        }
-      ]
-    },
-    {
-      "id": "caption-group-24",
-      "frame": 5,
-      "start": 31.797,
-      "end": 32.877,
-      "text": "claim their books,",
-      "words": [
-        {
-          "id": "caption-word-24-0",
-          "text": "claim",
-          "start": 31.797,
-          "end": 32.117
-        },
-        {
-          "id": "caption-word-24-1",
-          "text": "their",
-          "start": 32.117,
-          "end": 32.477
-        },
-        {
-          "id": "caption-word-24-2",
-          "text": "books,",
-          "start": 32.477,
-          "end": 32.837
-        }
-      ]
-    },
-    {
-      "id": "caption-group-25",
-      "frame": 5,
-      "start": 32.877,
-      "end": 34.107,
-      "text": "and upload everything",
-      "words": [
-        {
-          "id": "caption-word-25-0",
-          "text": "and",
-          "start": 32.877,
-          "end": 33.027
-        },
-        {
-          "id": "caption-word-25-1",
-          "text": "upload",
-          "start": 33.027,
-          "end": 33.437
-        },
-        {
-          "id": "caption-word-25-2",
-          "text": "everything",
-          "start": 33.437,
-          "end": 34.107
-        }
-      ]
-    },
-    {
-      "id": "caption-group-26",
-      "frame": 5,
-      "start": 34.107,
-      "end": 35.037,
-      "text": "around them.",
-      "words": [
-        {
-          "id": "caption-word-26-0",
-          "text": "around",
-          "start": 34.107,
-          "end": 34.507
-        },
-        {
-          "id": "caption-word-26-1",
-          "text": "them.",
-          "start": 34.507,
-          "end": 34.997
-        }
-      ]
-    },
-    {
-      "id": "caption-group-27",
-      "frame": 5,
-      "start": 35.037,
-      "end": 35.777,
-      "text": "The text,",
-      "words": [
-        {
-          "id": "caption-word-27-0",
-          "text": "The",
-          "start": 35.037,
-          "end": 35.187
-        },
-        {
-          "id": "caption-word-27-1",
-          "text": "text,",
-          "start": 35.267,
-          "end": 35.777
-        }
-      ]
-    },
-    {
-      "id": "caption-group-28",
-      "frame": 5,
-      "start": 35.777,
-      "end": 36.677,
-      "text": "podcasts,",
-      "words": [
-        {
-          "id": "caption-word-28-0",
-          "text": "podcasts,",
-          "start": 35.777,
-          "end": 36.677
-        }
-      ]
-    },
-    {
-      "id": "caption-group-29",
-      "frame": 5,
-      "start": 36.677,
-      "end": 37.887,
-      "text": "even live spoken",
-      "words": [
-        {
-          "id": "caption-word-29-0",
-          "text": "even",
-          "start": 36.677,
-          "end": 36.997
-        },
-        {
-          "id": "caption-word-29-1",
-          "text": "live",
-          "start": 36.997,
-          "end": 37.317
-        },
-        {
-          "id": "caption-word-29-2",
-          "text": "spoken",
-          "start": 37.317,
-          "end": 37.767
-        }
-      ]
-    },
-    {
-      "id": "caption-group-30",
-      "frame": 5,
-      "start": 37.997,
-      "end": 38.62,
-      "text": "sessions.",
-      "words": [
-        {
-          "id": "caption-word-30-0",
-          "text": "sessions.",
-          "start": 37.997,
-          "end": 38.697
-        }
-      ]
-    },
-    {
-      "id": "caption-group-31",
-      "frame": 6,
-      "start": 38.62,
-      "end": 40.53,
-      "text": "Readers ask anything.",
-      "words": [
-        {
-          "id": "caption-word-31-0",
-          "text": "Readers",
-          "start": 38.62,
-          "end": 39.28
-        },
-        {
-          "id": "caption-word-31-1",
-          "text": "ask",
-          "start": 39.32,
-          "end": 39.6
-        },
-        {
-          "id": "caption-word-31-2",
-          "text": "anything.",
-          "start": 39.6,
-          "end": 40.46
-        }
-      ]
-    },
-    {
-      "id": "caption-group-32",
-      "frame": 6,
-      "start": 40.53,
-      "end": 41.64,
-      "text": "The exact passage",
-      "words": [
-        {
-          "id": "caption-word-32-0",
-          "text": "The",
-          "start": 40.53,
-          "end": 40.7
-        },
-        {
-          "id": "caption-word-32-1",
-          "text": "exact",
-          "start": 40.7,
-          "end": 41.09
-        },
-        {
-          "id": "caption-word-32-2",
-          "text": "passage",
-          "start": 41.09,
-          "end": 41.64
-        }
-      ]
-    },
-    {
-      "id": "caption-group-33",
-      "frame": 6,
-      "start": 41.64,
-      "end": 43.53,
-      "text": "comes back retrieved,",
-      "words": [
-        {
-          "id": "caption-word-33-0",
-          "text": "comes",
-          "start": 41.64,
-          "end": 41.79
-        },
-        {
-          "id": "caption-word-33-1",
-          "text": "back",
-          "start": 41.79,
-          "end": 42.42
-        },
-        {
-          "id": "caption-word-33-2",
-          "text": "retrieved,",
-          "start": 42.42,
-          "end": 43.45
-        }
-      ]
-    },
-    {
-      "id": "caption-group-34",
-      "frame": 6,
-      "start": 43.53,
-      "end": 44.64,
-      "text": "never invented and",
-      "words": [
-        {
-          "id": "caption-word-34-0",
-          "text": "never",
-          "start": 43.53,
-          "end": 43.83
-        },
-        {
-          "id": "caption-word-34-1",
-          "text": "invented",
-          "start": 43.83,
-          "end": 44.42
-        },
-        {
-          "id": "caption-word-34-2",
-          "text": "and",
-          "start": 44.42,
-          "end": 44.64
-        }
-      ]
-    },
-    {
-      "id": "caption-group-35",
-      "frame": 6,
-      "start": 44.64,
-      "end": 45.64,
-      "text": "rendered as the",
-      "words": [
-        {
-          "id": "caption-word-35-0",
-          "text": "rendered",
-          "start": 44.64,
-          "end": 44.79
-        },
-        {
-          "id": "caption-word-35-1",
-          "text": "as",
-          "start": 44.79,
-          "end": 45.42
-        },
-        {
-          "id": "caption-word-35-2",
-          "text": "the",
-          "start": 45.42,
-          "end": 45.64
-        }
-      ]
-    },
-    {
-      "id": "caption-group-36",
-      "frame": 6,
-      "start": 45.64,
-      "end": 46.802,
-      "text": "author on video.",
-      "words": [
-        {
-          "id": "caption-word-36-0",
-          "text": "author",
-          "start": 45.64,
-          "end": 46.1
-        },
-        {
-          "id": "caption-word-36-1",
-          "text": "on",
-          "start": 46.1,
-          "end": 46.25
-        },
-        {
-          "id": "caption-word-36-2",
-          "text": "video.",
-          "start": 46.25,
-          "end": 46.86
-        }
-      ]
-    },
-    {
-      "id": "caption-group-37",
-      "frame": 7,
-      "start": 46.802,
-      "end": 48.302,
-      "text": "The rule enforced",
-      "words": [
-        {
-          "id": "caption-word-37-0",
-          "text": "The",
-          "start": 46.802,
-          "end": 47.062
-        },
-        {
-          "id": "caption-word-37-1",
-          "text": "rule",
-          "start": 47.062,
-          "end": 47.472
-        },
-        {
-          "id": "caption-word-37-2",
-          "text": "enforced",
-          "start": 47.472,
-          "end": 48.302
-        }
-      ]
-    },
-    {
-      "id": "caption-group-38",
-      "frame": 7,
-      "start": 48.302,
-      "end": 49.172,
-      "text": "in code,",
-      "words": [
-        {
-          "id": "caption-word-38-0",
-          "text": "in",
-          "start": 48.302,
-          "end": 48.452
-        },
-        {
-          "id": "caption-word-38-1",
-          "text": "code,",
-          "start": 48.522,
-          "end": 49.172
-        }
-      ]
-    },
-    {
-      "id": "caption-group-39",
-      "frame": 7,
-      "start": 49.172,
-      "end": 50.492,
-      "text": "LLM select and",
-      "words": [
-        {
-          "id": "caption-word-39-0",
-          "text": "LLM",
-          "start": 49.172,
-          "end": 49.502
-        },
-        {
-          "id": "caption-word-39-1",
-          "text": "select",
-          "start": 49.502,
-          "end": 50.162
-        },
-        {
-          "id": "caption-word-39-2",
-          "text": "and",
-          "start": 50.162,
-          "end": 50.492
-        }
-      ]
-    },
-    {
-      "id": "caption-group-40",
-      "frame": 7,
-      "start": 50.492,
-      "end": 51.222,
-      "text": "reason.",
-      "words": [
-        {
-          "id": "caption-word-40-0",
-          "text": "reason.",
-          "start": 50.492,
-          "end": 51.172
-        }
-      ]
-    },
-    {
-      "id": "caption-group-41",
-      "frame": 7,
-      "start": 51.222,
-      "end": 52.372,
-      "text": "They never generate",
-      "words": [
-        {
-          "id": "caption-word-41-0",
-          "text": "They",
-          "start": 51.222,
-          "end": 51.452
-        },
-        {
-          "id": "caption-word-41-1",
-          "text": "never",
-          "start": 51.452,
-          "end": 51.712
-        },
-        {
-          "id": "caption-word-41-2",
-          "text": "generate",
-          "start": 51.812,
-          "end": 52.372
-        }
-      ]
-    },
-    {
-      "id": "caption-group-42",
-      "frame": 7,
-      "start": 52.372,
-      "end": 53.132,
-      "text": "an author's",
-      "words": [
-        {
-          "id": "caption-word-42-0",
-          "text": "an",
-          "start": 52.372,
-          "end": 52.492
-        },
-        {
-          "id": "caption-word-42-1",
-          "text": "author's",
-          "start": 52.532,
-          "end": 53.012
-        }
-      ]
-    },
-    {
-      "id": "caption-group-43",
-      "frame": 7,
-      "start": 53.422,
-      "end": 53.577,
-      "text": "words.",
-      "words": [
-        {
-          "id": "caption-word-43-0",
-          "text": "words.",
-          "start": 53.422,
-          "end": 53.672
-        }
-      ]
-    },
-    {
-      "id": "caption-group-44",
-      "frame": 8,
-      "start": 53.577,
-      "end": 54.877,
-      "text": "Under the hood,",
-      "words": [
-        {
-          "id": "caption-word-44-0",
-          "text": "Under",
-          "start": 53.577,
-          "end": 53.917
-        },
-        {
-          "id": "caption-word-44-1",
-          "text": "the",
-          "start": 54.047,
-          "end": 54.217
-        },
-        {
-          "id": "caption-word-44-2",
-          "text": "hood,",
-          "start": 54.277,
-          "end": 54.837
-        }
-      ]
-    },
-    {
-      "id": "caption-group-45",
-      "frame": 8,
-      "start": 54.877,
-      "end": 56.917,
-      "text": "Action Vector AI stores",
-      "words": [
-        {
-          "id": "caption-word-45-0",
-          "text": "Action",
-          "start": 54.877,
-          "end": 55.437
-        },
-        {
-          "id": "caption-word-45-1",
-          "text": "Vector",
-          "start": 55.527,
-          "end": 56.117
-        },
-        {
-          "id": "caption-word-45-2",
-          "text": "AI",
-          "start": 56.117,
-          "end": 56.337
-        },
-        {
-          "id": "caption-word-45-3",
-          "text": "stores",
-          "start": 56.337,
-          "end": 56.817
-        }
-      ]
-    },
-    {
-      "id": "caption-group-46",
-      "frame": 8,
-      "start": 56.917,
-      "end": 58.437,
-      "text": "every verbatim passage",
-      "words": [
-        {
-          "id": "caption-word-46-0",
-          "text": "every",
-          "start": 56.917,
-          "end": 57.237
-        },
-        {
-          "id": "caption-word-46-1",
-          "text": "verbatim",
-          "start": 57.237,
-          "end": 57.807
-        },
-        {
-          "id": "caption-word-46-2",
-          "text": "passage",
-          "start": 57.857,
-          "end": 58.387
-        }
-      ]
-    },
-    {
-      "id": "caption-group-47",
-      "frame": 8,
-      "start": 58.437,
-      "end": 59.777,
-      "text": "with provenance,",
-      "words": [
-        {
-          "id": "caption-word-47-0",
-          "text": "with",
-          "start": 58.437,
-          "end": 58.777
-        },
-        {
-          "id": "caption-word-47-1",
-          "text": "provenance,",
-          "start": 58.777,
-          "end": 59.757
-        }
-      ]
-    },
-    {
-      "id": "caption-group-48",
-      "frame": 8,
-      "start": 59.777,
-      "end": 60.557,
-      "text": "pioneer reasons",
-      "words": [
-        {
-          "id": "caption-word-48-0",
-          "text": "pioneer",
-          "start": 59.777,
-          "end": 60.347
-        },
-        {
-          "id": "caption-word-48-1",
-          "text": "reasons",
-          "start": 60.347,
-          "end": 60.437
-        }
-      ]
-    },
-    {
-      "id": "caption-group-49",
-      "frame": 8,
-      "start": 61.077,
-      "end": 62.557,
-      "text": "over what's retrieved",
-      "words": [
-        {
-          "id": "caption-word-49-0",
-          "text": "over",
-          "start": 61.077,
-          "end": 61.257
-        },
-        {
-          "id": "caption-word-49-1",
-          "text": "what's",
-          "start": 61.277,
-          "end": 61.757
-        },
-        {
-          "id": "caption-word-49-2",
-          "text": "retrieved",
-          "start": 61.757,
-          "end": 62.557
-        }
-      ]
-    },
-    {
-      "id": "caption-group-50",
-      "frame": 8,
-      "start": 62.557,
-      "end": 63.887,
-      "text": "under a no-quote",
-      "words": [
-        {
-          "id": "caption-word-50-0",
-          "text": "under",
-          "start": 62.557,
-          "end": 63.017
-        },
-        {
-          "id": "caption-word-50-1",
-          "text": "a",
-          "start": 63.117,
-          "end": 63.127
-        },
-        {
-          "id": "caption-word-50-2",
-          "text": "no-quote",
-          "start": 63.127,
-          "end": 63.887
-        }
-      ]
-    },
-    {
-      "id": "caption-group-51",
-      "frame": 8,
-      "start": 63.887,
-      "end": 64.697,
-      "text": "contract,",
-      "words": [
-        {
-          "id": "caption-word-51-0",
-          "text": "contract,",
-          "start": 63.887,
-          "end": 64.677
-        }
-      ]
-    },
-    {
-      "id": "caption-group-52",
-      "frame": 8,
-      "start": 64.697,
-      "end": 65.277,
-      "text": "and Maskey",
-      "words": [
-        {
-          "id": "caption-word-52-0",
-          "text": "and",
-          "start": 64.697,
-          "end": 64.877
-        },
-        {
-          "id": "caption-word-52-1",
-          "text": "Maskey",
-          "start": 64.877,
-          "end": 65.277
-        }
-      ]
-    },
-    {
-      "id": "caption-group-53",
-      "frame": 8,
-      "start": 65.277,
-      "end": 66.497,
-      "text": "renders the author's",
-      "words": [
-        {
-          "id": "caption-word-53-0",
-          "text": "renders",
-          "start": 65.277,
-          "end": 65.357
-        },
-        {
-          "id": "caption-word-53-1",
-          "text": "the",
-          "start": 65.357,
-          "end": 65.997
-        },
-        {
-          "id": "caption-word-53-2",
-          "text": "author's",
-          "start": 65.997,
-          "end": 66.497
-        }
-      ]
-    },
-    {
-      "id": "caption-group-54",
-      "frame": 8,
-      "start": 66.497,
-      "end": 67.657,
-      "text": "avatar speaking her",
-      "words": [
-        {
-          "id": "caption-word-54-0",
-          "text": "avatar",
-          "start": 66.497,
-          "end": 66.907
-        },
-        {
-          "id": "caption-word-54-1",
-          "text": "speaking",
-          "start": 66.907,
-          "end": 67.457
-        },
-        {
-          "id": "caption-word-54-2",
-          "text": "her",
-          "start": 67.457,
-          "end": 67.657
-        }
-      ]
-    },
-    {
-      "id": "caption-group-55",
-      "frame": 8,
-      "start": 67.657,
-      "end": 68.637,
-      "text": "own words.",
-      "words": [
-        {
-          "id": "caption-word-55-0",
-          "text": "own",
-          "start": 67.657,
-          "end": 67.857
-        },
-        {
-          "id": "caption-word-55-1",
-          "text": "words.",
-          "start": 67.857,
-          "end": 68.517
-        }
-      ]
-    },
-    {
-      "id": "caption-group-56",
-      "frame": 9,
-      "start": 68.676,
-      "end": 69.746,
-      "text": "Voice CERT proves",
-      "words": [
-        {
-          "id": "caption-word-56-0",
-          "text": "Voice",
-          "start": 68.676,
-          "end": 68.966
-        },
-        {
-          "id": "caption-word-56-1",
-          "text": "CERT",
-          "start": 68.966,
-          "end": 69.166
-        },
-        {
-          "id": "caption-word-56-2",
-          "text": "proves",
-          "start": 69.276,
-          "end": 69.746
-        }
-      ]
-    },
-    {
-      "id": "caption-group-57",
-      "frame": 9,
-      "start": 69.746,
-      "end": 70.216,
-      "text": "a real",
-      "words": [
-        {
-          "id": "caption-word-57-0",
-          "text": "a",
-          "start": 69.746,
-          "end": 69.826
-        },
-        {
-          "id": "caption-word-57-1",
-          "text": "real",
-          "start": 69.826,
-          "end": 70.096
-        }
-      ]
-    },
-    {
-      "id": "caption-group-58",
-      "frame": 9,
-      "start": 70.236,
-      "end": 71.276,
-      "text": "human spoke every",
-      "words": [
-        {
-          "id": "caption-word-58-0",
-          "text": "human",
-          "start": 70.236,
-          "end": 70.576
-        },
-        {
-          "id": "caption-word-58-1",
-          "text": "spoke",
-          "start": 70.576,
-          "end": 70.926
-        },
-        {
-          "id": "caption-word-58-2",
-          "text": "every",
-          "start": 70.996,
-          "end": 71.276
-        }
-      ]
-    },
-    {
-      "id": "caption-group-59",
-      "frame": 9,
-      "start": 71.276,
-      "end": 72.836,
-      "text": "recorded word.",
-      "words": [
-        {
-          "id": "caption-word-59-0",
-          "text": "recorded",
-          "start": 71.276,
-          "end": 71.776
-        },
-        {
-          "id": "caption-word-59-1",
-          "text": "word.",
-          "start": 71.776,
-          "end": 72.736
-        }
-      ]
-    },
-    {
-      "id": "caption-group-60",
-      "frame": 9,
-      "start": 72.836,
-      "end": 74.366,
-      "text": "Senseo ingests it as",
-      "words": [
-        {
-          "id": "caption-word-60-0",
-          "text": "Senseo",
-          "start": 72.836,
-          "end": 73.296
-        },
-        {
-          "id": "caption-word-60-1",
-          "text": "ingests",
-          "start": 73.296,
-          "end": 73.946
-        },
-        {
-          "id": "caption-word-60-2",
-          "text": "it",
-          "start": 73.946,
-          "end": 74.126
-        },
-        {
-          "id": "caption-word-60-3",
-          "text": "as",
-          "start": 74.126,
-          "end": 74.246
-        }
-      ]
-    },
-    {
-      "id": "caption-group-61",
-      "frame": 9,
-      "start": 74.396,
-      "end": 76.366,
-      "text": "verified ground truth.",
-      "words": [
-        {
-          "id": "caption-word-61-0",
-          "text": "verified",
-          "start": 74.396,
-          "end": 75.016
-        },
-        {
-          "id": "caption-word-61-1",
-          "text": "ground",
-          "start": 75.056,
-          "end": 75.606
-        },
-        {
-          "id": "caption-word-61-2",
-          "text": "truth.",
-          "start": 75.616,
-          "end": 76.246
-        }
-      ]
-    },
-    {
-      "id": "caption-group-62",
-      "frame": 9,
-      "start": 76.516,
-      "end": 77.896,
-      "text": "Banned AI stages",
-      "words": [
-        {
-          "id": "caption-word-62-0",
-          "text": "Banned",
-          "start": 76.516,
-          "end": 76.996
-        },
-        {
-          "id": "caption-word-62-1",
-          "text": "AI",
-          "start": 77.116,
-          "end": 77.256
-        },
-        {
-          "id": "caption-word-62-2",
-          "text": "stages",
-          "start": 77.256,
-          "end": 77.896
-        }
-      ]
-    },
-    {
-      "id": "caption-group-63",
-      "frame": 9,
-      "start": 77.896,
-      "end": 80.846,
-      "text": "real agent-to-agent podcasts,",
-      "words": [
-        {
-          "id": "caption-word-63-0",
-          "text": "real",
-          "start": 77.896,
-          "end": 78.326
-        },
-        {
-          "id": "caption-word-63-1",
-          "text": "agent-to-agent",
-          "start": 78.326,
-          "end": 79.806
-        },
-        {
-          "id": "caption-word-63-2",
-          "text": "podcasts,",
-          "start": 79.806,
-          "end": 80.736
-        }
-      ]
-    },
-    {
-      "id": "caption-group-64",
-      "frame": 9,
-      "start": 80.846,
-      "end": 81.276,
-      "text": "and Guild",
-      "words": [
-        {
-          "id": "caption-word-64-0",
-          "text": "and",
-          "start": 80.846,
-          "end": 80.936
-        },
-        {
-          "id": "caption-word-64-1",
-          "text": "Guild",
-          "start": 80.936,
-          "end": 81.276
-        }
-      ]
-    },
-    {
-      "id": "caption-group-65",
-      "frame": 9,
-      "start": 81.276,
-      "end": 81.886,
-      "text": "ships each",
-      "words": [
-        {
-          "id": "caption-word-65-0",
-          "text": "ships",
-          "start": 81.276,
-          "end": 81.616
-        },
-        {
-          "id": "caption-word-65-1",
-          "text": "each",
-          "start": 81.616,
-          "end": 81.886
-        }
-      ]
-    },
-    {
-      "id": "caption-group-66",
-      "frame": 9,
-      "start": 81.886,
-      "end": 82.596,
-      "text": "new version",
-      "words": [
-        {
-          "id": "caption-word-66-0",
-          "text": "new",
-          "start": 81.886,
-          "end": 82.086
-        },
-        {
-          "id": "caption-word-66-1",
-          "text": "version",
-          "start": 82.086,
-          "end": 82.596
-        }
-      ]
-    },
-    {
-      "id": "caption-group-67",
-      "frame": 9,
-      "start": 82.596,
-      "end": 82.876,
-      "text": "of the",
-      "words": [
-        {
-          "id": "caption-word-67-0",
-          "text": "of",
-          "start": 82.596,
-          "end": 82.676
-        },
-        {
-          "id": "caption-word-67-1",
-          "text": "the",
-          "start": 82.676,
-          "end": 82.786
-        }
-      ]
-    },
-    {
-      "id": "caption-group-68",
-      "frame": 9,
-      "start": 82.876,
-      "end": 84.086,
-      "text": "marketing agent with",
-      "words": [
-        {
-          "id": "caption-word-68-0",
-          "text": "marketing",
-          "start": 82.876,
-          "end": 83.216
-        },
-        {
-          "id": "caption-word-68-1",
-          "text": "agent",
-          "start": 83.216,
-          "end": 83.736
-        },
-        {
-          "id": "caption-word-68-2",
-          "text": "with",
-          "start": 83.836,
-          "end": 84.086
-        }
-      ]
-    },
-    {
-      "id": "caption-group-69",
-      "frame": 9,
-      "start": 84.086,
-      "end": 84.976,
-      "text": "rollback,",
-      "words": [
-        {
-          "id": "caption-word-69-0",
-          "text": "rollback,",
-          "start": 84.086,
-          "end": 84.976
-        }
-      ]
-    },
-    {
-      "id": "caption-group-70",
-      "frame": 9,
-      "start": 84.976,
-      "end": 86.966,
-      "text": "seven sponsor tools,",
-      "words": [
-        {
-          "id": "caption-word-70-0",
-          "text": "seven",
-          "start": 84.976,
-          "end": 85.526
-        },
-        {
-          "id": "caption-word-70-1",
-          "text": "sponsor",
-          "start": 85.526,
-          "end": 86.256
-        },
-        {
-          "id": "caption-word-70-2",
-          "text": "tools,",
-          "start": 86.296,
-          "end": 86.856
-        }
-      ]
-    },
-    {
-      "id": "caption-group-71",
-      "frame": 9,
-      "start": 86.966,
-      "end": 87.666,
-      "text": "all live,",
-      "words": [
-        {
-          "id": "caption-word-71-0",
-          "text": "all",
-          "start": 86.966,
-          "end": 87.126
-        },
-        {
-          "id": "caption-word-71-1",
-          "text": "live,",
-          "start": 87.126,
-          "end": 87.666
-        }
-      ]
-    },
-    {
-      "id": "caption-group-72",
-      "frame": 9,
-      "start": 87.666,
-      "end": 88.296,
-      "text": "built in",
-      "words": [
-        {
-          "id": "caption-word-72-0",
-          "text": "built",
-          "start": 87.666,
-          "end": 88.116
-        },
-        {
-          "id": "caption-word-72-1",
-          "text": "in",
-          "start": 88.116,
-          "end": 88.296
-        }
-      ]
-    },
-    {
-      "id": "caption-group-73",
-      "frame": 9,
-      "start": 88.296,
-      "end": 89.698,
-      "text": "one hackathon.",
-      "words": [
-        {
-          "id": "caption-word-73-0",
-          "text": "one",
-          "start": 88.296,
-          "end": 88.566
-        },
-        {
-          "id": "caption-word-73-1",
-          "text": "hackathon.",
-          "start": 88.566,
-          "end": 89.656
-        }
-      ]
-    },
-    {
-      "id": "caption-group-74",
-      "frame": 10,
-      "start": 89.698,
-      "end": 89.948,
-      "text": "Ask a",
-      "words": [
-        {
-          "id": "caption-word-74-0",
-          "text": "Ask",
-          "start": 89.698,
-          "end": 89.838
-        },
-        {
-          "id": "caption-word-74-1",
-          "text": "a",
-          "start": 89.838,
-          "end": 89.888
-        }
-      ]
-    },
-    {
-      "id": "caption-group-75",
-      "frame": 10,
-      "start": 89.948,
-      "end": 90.798,
-      "text": "book anything",
-      "words": [
-        {
-          "id": "caption-word-75-0",
-          "text": "book",
-          "start": 89.948,
-          "end": 90.288
-        },
-        {
-          "id": "caption-word-75-1",
-          "text": "anything",
-          "start": 90.288,
-          "end": 90.678
-        }
-      ]
-    },
-    {
-      "id": "caption-group-76",
-      "frame": 10,
-      "start": 91.128,
-      "end": 93.488,
-      "text": "at livingbook.mascii.i.",
-      "words": [
-        {
-          "id": "caption-word-76-0",
-          "text": "at",
-          "start": 91.128,
-          "end": 91.208
-        },
-        {
-          "id": "caption-word-76-1",
-          "text": "livingbook.mascii.i.",
-          "start": 91.208,
-          "end": 93.368
-        }
-      ]
+ "total_duration_s": 93.408,
+ "width": 1920,
+ "height": 1080,
+ "groups": [
+  {
+   "id": "caption-group-0",
+   "frame": 1,
+   "start": 0.11,
+   "end": 0.77,
+   "text": "Every book",
+   "words": [
+    {
+     "id": "caption-word-0-0",
+     "text": "Every",
+     "start": 0.11,
+     "end": 0.43
+    },
+    {
+     "id": "caption-word-0-1",
+     "text": "book",
+     "start": 0.43,
+     "end": 0.77
     }
-  ]
+   ]
+  },
+  {
+   "id": "caption-group-1",
+   "frame": 1,
+   "start": 0.77,
+   "end": 1.41,
+   "text": "you love",
+   "words": [
+    {
+     "id": "caption-word-1-0",
+     "text": "you",
+     "start": 0.77,
+     "end": 1.03
+    },
+    {
+     "id": "caption-word-1-1",
+     "text": "love",
+     "start": 1.03,
+     "end": 1.29
+    }
+   ]
+  },
+  {
+   "id": "caption-group-2",
+   "frame": 1,
+   "start": 1.43,
+   "end": 2.06,
+   "text": "is frozen",
+   "words": [
+    {
+     "id": "caption-word-2-0",
+     "text": "is",
+     "start": 1.43,
+     "end": 1.54
+    },
+    {
+     "id": "caption-word-2-1",
+     "text": "frozen",
+     "start": 1.54,
+     "end": 2.06
+    }
+   ]
+  },
+  {
+   "id": "caption-group-3",
+   "frame": 1,
+   "start": 2.06,
+   "end": 2.31,
+   "text": "on a",
+   "words": [
+    {
+     "id": "caption-word-3-0",
+     "text": "on",
+     "start": 2.06,
+     "end": 2.23
+    },
+    {
+     "id": "caption-word-3-1",
+     "text": "a",
+     "start": 2.23,
+     "end": 2.31
+    }
+   ]
+  },
+  {
+   "id": "caption-group-4",
+   "frame": 1,
+   "start": 2.31,
+   "end": 2.91,
+   "text": "shelf.",
+   "words": [
+    {
+     "id": "caption-word-4-0",
+     "text": "shelf.",
+     "start": 2.31,
+     "end": 2.8
+    }
+   ]
+  },
+  {
+   "id": "caption-group-5",
+   "frame": 1,
+   "start": 2.91,
+   "end": 3.16,
+   "text": "What if",
+   "words": [
+    {
+     "id": "caption-word-5-0",
+     "text": "What",
+     "start": 2.91,
+     "end": 3.04
+    },
+    {
+     "id": "caption-word-5-1",
+     "text": "if",
+     "start": 3.05,
+     "end": 3.16
+    }
+   ]
+  },
+  {
+   "id": "caption-group-6",
+   "frame": 1,
+   "start": 3.16,
+   "end": 3.57,
+   "text": "it could",
+   "words": [
+    {
+     "id": "caption-word-6-0",
+     "text": "it",
+     "start": 3.16,
+     "end": 3.28
+    },
+    {
+     "id": "caption-word-6-1",
+     "text": "could",
+     "start": 3.28,
+     "end": 3.57
+    }
+   ]
+  },
+  {
+   "id": "caption-group-7",
+   "frame": 1,
+   "start": 3.57,
+   "end": 4.347,
+   "text": "talk back?",
+   "words": [
+    {
+     "id": "caption-word-7-0",
+     "text": "talk",
+     "start": 3.57,
+     "end": 3.81
+    },
+    {
+     "id": "caption-word-7-1",
+     "text": "back?",
+     "start": 3.81,
+     "end": 4.24
+    }
+   ]
+  },
+  {
+   "id": "caption-group-8",
+   "frame": 2,
+   "start": 4.347,
+   "end": 4.867,
+   "text": "A reader",
+   "words": [
+    {
+     "id": "caption-word-8-0",
+     "text": "A",
+     "start": 4.347,
+     "end": 4.367
+    },
+    {
+     "id": "caption-word-8-1",
+     "text": "reader",
+     "start": 4.367,
+     "end": 4.827
+    }
+   ]
+  },
+  {
+   "id": "caption-group-9",
+   "frame": 2,
+   "start": 4.867,
+   "end": 6.457,
+   "text": "asks Aly Vredenburgh's",
+   "words": [
+    {
+     "id": "caption-word-9-0",
+     "text": "asks",
+     "start": 4.867,
+     "end": 5.137
+    },
+    {
+     "id": "caption-word-9-1",
+     "text": "Aly",
+     "start": 5.197,
+     "end": 5.447
+    },
+    {
+     "id": "caption-word-9-2",
+     "text": "Vredenburgh's",
+     "start": 5.447,
+     "end": 6.457
+    }
+   ]
+  },
+  {
+   "id": "caption-group-10",
+   "frame": 2,
+   "start": 6.457,
+   "end": 6.957,
+   "text": "book,",
+   "words": [
+    {
+     "id": "caption-word-10-0",
+     "text": "book,",
+     "start": 6.457,
+     "end": 6.867
+    }
+   ]
+  },
+  {
+   "id": "caption-group-11",
+   "frame": 2,
+   "start": 6.957,
+   "end": 8.207,
+   "text": "Out of Focus,",
+   "words": [
+    {
+     "id": "caption-word-11-0",
+     "text": "Out",
+     "start": 6.957,
+     "end": 7.147
+    },
+    {
+     "id": "caption-word-11-1",
+     "text": "of",
+     "start": 7.287,
+     "end": 7.407
+    },
+    {
+     "id": "caption-word-11-2",
+     "text": "Focus,",
+     "start": 7.477,
+     "end": 8.197
+    }
+   ]
+  },
+  {
+   "id": "caption-group-12",
+   "frame": 2,
+   "start": 8.207,
+   "end": 9.467,
+   "text": "about America's mental",
+   "words": [
+    {
+     "id": "caption-word-12-0",
+     "text": "about",
+     "start": 8.207,
+     "end": 8.427
+    },
+    {
+     "id": "caption-word-12-1",
+     "text": "America's",
+     "start": 8.427,
+     "end": 9.037
+    },
+    {
+     "id": "caption-word-12-2",
+     "text": "mental",
+     "start": 9.037,
+     "end": 9.467
+    }
+   ]
+  },
+  {
+   "id": "caption-group-13",
+   "frame": 2,
+   "start": 9.467,
+   "end": 10.417,
+   "text": "health shortage.",
+   "words": [
+    {
+     "id": "caption-word-13-0",
+     "text": "health",
+     "start": 9.467,
+     "end": 9.627
+    },
+    {
+     "id": "caption-word-13-1",
+     "text": "shortage.",
+     "start": 9.627,
+     "end": 10.297
+    }
+   ]
+  },
+  {
+   "id": "caption-group-14",
+   "frame": 4,
+   "start": 22.438,
+   "end": 23.438,
+   "text": "This is LivingBook,",
+   "words": [
+    {
+     "id": "caption-word-14-0",
+     "text": "This",
+     "start": 22.438,
+     "end": 22.728
+    },
+    {
+     "id": "caption-word-14-1",
+     "text": "is",
+     "start": 22.768,
+     "end": 22.938
+    },
+    {
+     "id": "caption-word-14-2",
+     "text": "LivingBook,",
+     "start": 22.938,
+     "end": 23.318
+    }
+   ]
+  },
+  {
+   "id": "caption-group-16",
+   "frame": 4,
+   "start": 23.998,
+   "end": 25.068,
+   "text": "real books become",
+   "words": [
+    {
+     "id": "caption-word-16-0",
+     "text": "real",
+     "start": 23.998,
+     "end": 24.288
+    },
+    {
+     "id": "caption-word-16-1",
+     "text": "books",
+     "start": 24.288,
+     "end": 24.648
+    },
+    {
+     "id": "caption-word-16-2",
+     "text": "become",
+     "start": 24.728,
+     "end": 25.068
+    }
+   ]
+  },
+  {
+   "id": "caption-group-17",
+   "frame": 4,
+   "start": 25.068,
+   "end": 26.128,
+   "text": "living agents that",
+   "words": [
+    {
+     "id": "caption-word-17-0",
+     "text": "living",
+     "start": 25.068,
+     "end": 25.478
+    },
+    {
+     "id": "caption-word-17-1",
+     "text": "agents",
+     "start": 25.478,
+     "end": 25.888
+    },
+    {
+     "id": "caption-word-17-2",
+     "text": "that",
+     "start": 25.948,
+     "end": 26.018
+    }
+   ]
+  },
+  {
+   "id": "caption-group-18",
+   "frame": 4,
+   "start": 26.128,
+   "end": 26.928,
+   "text": "answer only",
+   "words": [
+    {
+     "id": "caption-word-18-0",
+     "text": "answer",
+     "start": 26.128,
+     "end": 26.498
+    },
+    {
+     "id": "caption-word-18-1",
+     "text": "only",
+     "start": 26.608,
+     "end": 26.928
+    }
+   ]
+  },
+  {
+   "id": "caption-group-19",
+   "frame": 4,
+   "start": 26.928,
+   "end": 27.128,
+   "text": "in the",
+   "words": [
+    {
+     "id": "caption-word-19-0",
+     "text": "in",
+     "start": 26.928,
+     "end": 27.048
+    },
+    {
+     "id": "caption-word-19-1",
+     "text": "the",
+     "start": 27.048,
+     "end": 27.128
+    }
+   ]
+  },
+  {
+   "id": "caption-group-20",
+   "frame": 4,
+   "start": 27.128,
+   "end": 29.128,
+   "text": "author's exact words on",
+   "words": [
+    {
+     "id": "caption-word-20-0",
+     "text": "author's",
+     "start": 27.128,
+     "end": 27.648
+    },
+    {
+     "id": "caption-word-20-1",
+     "text": "exact",
+     "start": 27.648,
+     "end": 28.148
+    },
+    {
+     "id": "caption-word-20-2",
+     "text": "words",
+     "start": 28.278,
+     "end": 28.868
+    },
+    {
+     "id": "caption-word-20-3",
+     "text": "on",
+     "start": 28.868,
+     "end": 29.128
+    }
+   ]
+  },
+  {
+   "id": "caption-group-21",
+   "frame": 4,
+   "start": 29.128,
+   "end": 29.917,
+   "text": "video.",
+   "words": [
+    {
+     "id": "caption-word-21-0",
+     "text": "video.",
+     "start": 29.128,
+     "end": 29.808
+    }
+   ]
+  },
+  {
+   "id": "caption-group-22",
+   "frame": 5,
+   "start": 29.917,
+   "end": 30.697,
+   "text": "Authors sign",
+   "words": [
+    {
+     "id": "caption-word-22-0",
+     "text": "Authors",
+     "start": 29.917,
+     "end": 30.397
+    },
+    {
+     "id": "caption-word-22-1",
+     "text": "sign",
+     "start": 30.397,
+     "end": 30.697
+    }
+   ]
+  },
+  {
+   "id": "caption-group-23",
+   "frame": 5,
+   "start": 30.697,
+   "end": 31.787,
+   "text": "in with Masky,",
+   "words": [
+    {
+     "id": "caption-word-23-0",
+     "text": "in",
+     "start": 30.697,
+     "end": 30.847
+    },
+    {
+     "id": "caption-word-23-1",
+     "text": "with",
+     "start": 30.847,
+     "end": 31.147
+    },
+    {
+     "id": "caption-word-23-2",
+     "text": "Masky,",
+     "start": 31.147,
+     "end": 31.667
+    }
+   ]
+  },
+  {
+   "id": "caption-group-24",
+   "frame": 5,
+   "start": 31.797,
+   "end": 32.877,
+   "text": "claim their books,",
+   "words": [
+    {
+     "id": "caption-word-24-0",
+     "text": "claim",
+     "start": 31.797,
+     "end": 32.117
+    },
+    {
+     "id": "caption-word-24-1",
+     "text": "their",
+     "start": 32.117,
+     "end": 32.477
+    },
+    {
+     "id": "caption-word-24-2",
+     "text": "books,",
+     "start": 32.477,
+     "end": 32.837
+    }
+   ]
+  },
+  {
+   "id": "caption-group-25",
+   "frame": 5,
+   "start": 32.877,
+   "end": 34.107,
+   "text": "and upload everything",
+   "words": [
+    {
+     "id": "caption-word-25-0",
+     "text": "and",
+     "start": 32.877,
+     "end": 33.027
+    },
+    {
+     "id": "caption-word-25-1",
+     "text": "upload",
+     "start": 33.027,
+     "end": 33.437
+    },
+    {
+     "id": "caption-word-25-2",
+     "text": "everything",
+     "start": 33.437,
+     "end": 34.107
+    }
+   ]
+  },
+  {
+   "id": "caption-group-26",
+   "frame": 5,
+   "start": 34.107,
+   "end": 35.037,
+   "text": "around them.",
+   "words": [
+    {
+     "id": "caption-word-26-0",
+     "text": "around",
+     "start": 34.107,
+     "end": 34.507
+    },
+    {
+     "id": "caption-word-26-1",
+     "text": "them.",
+     "start": 34.507,
+     "end": 34.997
+    }
+   ]
+  },
+  {
+   "id": "caption-group-27",
+   "frame": 5,
+   "start": 35.037,
+   "end": 35.777,
+   "text": "The text,",
+   "words": [
+    {
+     "id": "caption-word-27-0",
+     "text": "The",
+     "start": 35.037,
+     "end": 35.187
+    },
+    {
+     "id": "caption-word-27-1",
+     "text": "text,",
+     "start": 35.267,
+     "end": 35.777
+    }
+   ]
+  },
+  {
+   "id": "caption-group-28",
+   "frame": 5,
+   "start": 35.777,
+   "end": 36.677,
+   "text": "podcasts,",
+   "words": [
+    {
+     "id": "caption-word-28-0",
+     "text": "podcasts,",
+     "start": 35.777,
+     "end": 36.677
+    }
+   ]
+  },
+  {
+   "id": "caption-group-29",
+   "frame": 5,
+   "start": 36.677,
+   "end": 37.887,
+   "text": "even live spoken",
+   "words": [
+    {
+     "id": "caption-word-29-0",
+     "text": "even",
+     "start": 36.677,
+     "end": 36.997
+    },
+    {
+     "id": "caption-word-29-1",
+     "text": "live",
+     "start": 36.997,
+     "end": 37.317
+    },
+    {
+     "id": "caption-word-29-2",
+     "text": "spoken",
+     "start": 37.317,
+     "end": 37.767
+    }
+   ]
+  },
+  {
+   "id": "caption-group-30",
+   "frame": 5,
+   "start": 37.997,
+   "end": 38.62,
+   "text": "sessions.",
+   "words": [
+    {
+     "id": "caption-word-30-0",
+     "text": "sessions.",
+     "start": 37.997,
+     "end": 38.697
+    }
+   ]
+  },
+  {
+   "id": "caption-group-31",
+   "frame": 6,
+   "start": 38.62,
+   "end": 40.53,
+   "text": "Readers ask anything.",
+   "words": [
+    {
+     "id": "caption-word-31-0",
+     "text": "Readers",
+     "start": 38.62,
+     "end": 39.28
+    },
+    {
+     "id": "caption-word-31-1",
+     "text": "ask",
+     "start": 39.32,
+     "end": 39.6
+    },
+    {
+     "id": "caption-word-31-2",
+     "text": "anything.",
+     "start": 39.6,
+     "end": 40.46
+    }
+   ]
+  },
+  {
+   "id": "caption-group-32",
+   "frame": 6,
+   "start": 40.53,
+   "end": 41.64,
+   "text": "The exact passage",
+   "words": [
+    {
+     "id": "caption-word-32-0",
+     "text": "The",
+     "start": 40.53,
+     "end": 40.7
+    },
+    {
+     "id": "caption-word-32-1",
+     "text": "exact",
+     "start": 40.7,
+     "end": 41.09
+    },
+    {
+     "id": "caption-word-32-2",
+     "text": "passage",
+     "start": 41.09,
+     "end": 41.64
+    }
+   ]
+  },
+  {
+   "id": "caption-group-33",
+   "frame": 6,
+   "start": 41.64,
+   "end": 43.53,
+   "text": "comes back retrieved,",
+   "words": [
+    {
+     "id": "caption-word-33-0",
+     "text": "comes",
+     "start": 41.64,
+     "end": 41.79
+    },
+    {
+     "id": "caption-word-33-1",
+     "text": "back",
+     "start": 41.79,
+     "end": 42.42
+    },
+    {
+     "id": "caption-word-33-2",
+     "text": "retrieved,",
+     "start": 42.42,
+     "end": 43.45
+    }
+   ]
+  },
+  {
+   "id": "caption-group-34",
+   "frame": 6,
+   "start": 43.53,
+   "end": 44.64,
+   "text": "never invented and",
+   "words": [
+    {
+     "id": "caption-word-34-0",
+     "text": "never",
+     "start": 43.53,
+     "end": 43.83
+    },
+    {
+     "id": "caption-word-34-1",
+     "text": "invented",
+     "start": 43.83,
+     "end": 44.42
+    },
+    {
+     "id": "caption-word-34-2",
+     "text": "and",
+     "start": 44.42,
+     "end": 44.64
+    }
+   ]
+  },
+  {
+   "id": "caption-group-35",
+   "frame": 6,
+   "start": 44.64,
+   "end": 45.64,
+   "text": "rendered as the",
+   "words": [
+    {
+     "id": "caption-word-35-0",
+     "text": "rendered",
+     "start": 44.64,
+     "end": 44.79
+    },
+    {
+     "id": "caption-word-35-1",
+     "text": "as",
+     "start": 44.79,
+     "end": 45.42
+    },
+    {
+     "id": "caption-word-35-2",
+     "text": "the",
+     "start": 45.42,
+     "end": 45.64
+    }
+   ]
+  },
+  {
+   "id": "caption-group-36",
+   "frame": 6,
+   "start": 45.64,
+   "end": 46.802,
+   "text": "author on video.",
+   "words": [
+    {
+     "id": "caption-word-36-0",
+     "text": "author",
+     "start": 45.64,
+     "end": 46.1
+    },
+    {
+     "id": "caption-word-36-1",
+     "text": "on",
+     "start": 46.1,
+     "end": 46.25
+    },
+    {
+     "id": "caption-word-36-2",
+     "text": "video.",
+     "start": 46.25,
+     "end": 46.86
+    }
+   ]
+  },
+  {
+   "id": "caption-group-37",
+   "frame": 7,
+   "start": 46.802,
+   "end": 48.302,
+   "text": "The rule enforced",
+   "words": [
+    {
+     "id": "caption-word-37-0",
+     "text": "The",
+     "start": 46.802,
+     "end": 47.062
+    },
+    {
+     "id": "caption-word-37-1",
+     "text": "rule",
+     "start": 47.062,
+     "end": 47.472
+    },
+    {
+     "id": "caption-word-37-2",
+     "text": "enforced",
+     "start": 47.472,
+     "end": 48.302
+    }
+   ]
+  },
+  {
+   "id": "caption-group-38",
+   "frame": 7,
+   "start": 48.302,
+   "end": 49.172,
+   "text": "in code,",
+   "words": [
+    {
+     "id": "caption-word-38-0",
+     "text": "in",
+     "start": 48.302,
+     "end": 48.452
+    },
+    {
+     "id": "caption-word-38-1",
+     "text": "code,",
+     "start": 48.522,
+     "end": 49.172
+    }
+   ]
+  },
+  {
+   "id": "caption-group-39",
+   "frame": 7,
+   "start": 49.172,
+   "end": 50.492,
+   "text": "LLMs select and",
+   "words": [
+    {
+     "id": "caption-word-39-0",
+     "text": "LLMs",
+     "start": 49.172,
+     "end": 49.502
+    },
+    {
+     "id": "caption-word-39-1",
+     "text": "select",
+     "start": 49.502,
+     "end": 50.162
+    },
+    {
+     "id": "caption-word-39-2",
+     "text": "and",
+     "start": 50.162,
+     "end": 50.492
+    }
+   ]
+  },
+  {
+   "id": "caption-group-40",
+   "frame": 7,
+   "start": 50.492,
+   "end": 51.222,
+   "text": "reason.",
+   "words": [
+    {
+     "id": "caption-word-40-0",
+     "text": "reason.",
+     "start": 50.492,
+     "end": 51.172
+    }
+   ]
+  },
+  {
+   "id": "caption-group-41",
+   "frame": 7,
+   "start": 51.222,
+   "end": 52.372,
+   "text": "They never generate",
+   "words": [
+    {
+     "id": "caption-word-41-0",
+     "text": "They",
+     "start": 51.222,
+     "end": 51.452
+    },
+    {
+     "id": "caption-word-41-1",
+     "text": "never",
+     "start": 51.452,
+     "end": 51.712
+    },
+    {
+     "id": "caption-word-41-2",
+     "text": "generate",
+     "start": 51.812,
+     "end": 52.372
+    }
+   ]
+  },
+  {
+   "id": "caption-group-42",
+   "frame": 7,
+   "start": 52.372,
+   "end": 53.132,
+   "text": "an author's",
+   "words": [
+    {
+     "id": "caption-word-42-0",
+     "text": "an",
+     "start": 52.372,
+     "end": 52.492
+    },
+    {
+     "id": "caption-word-42-1",
+     "text": "author's",
+     "start": 52.532,
+     "end": 53.012
+    }
+   ]
+  },
+  {
+   "id": "caption-group-43",
+   "frame": 7,
+   "start": 53.422,
+   "end": 53.577,
+   "text": "words.",
+   "words": [
+    {
+     "id": "caption-word-43-0",
+     "text": "words.",
+     "start": 53.422,
+     "end": 53.672
+    }
+   ]
+  },
+  {
+   "id": "caption-group-44",
+   "frame": 8,
+   "start": 53.577,
+   "end": 54.877,
+   "text": "Under the hood,",
+   "words": [
+    {
+     "id": "caption-word-44-0",
+     "text": "Under",
+     "start": 53.577,
+     "end": 53.917
+    },
+    {
+     "id": "caption-word-44-1",
+     "text": "the",
+     "start": 54.047,
+     "end": 54.217
+    },
+    {
+     "id": "caption-word-44-2",
+     "text": "hood,",
+     "start": 54.277,
+     "end": 54.837
+    }
+   ]
+  },
+  {
+   "id": "caption-group-45",
+   "frame": 8,
+   "start": 54.877,
+   "end": 56.917,
+   "text": "Actian VectorAI stores",
+   "words": [
+    {
+     "id": "caption-word-45-0",
+     "text": "Actian",
+     "start": 54.877,
+     "end": 55.437
+    },
+    {
+     "id": "caption-word-45-1",
+     "text": "VectorAI",
+     "start": 55.527,
+     "end": 56.117
+    },
+    {
+     "id": "caption-word-45-3",
+     "text": "stores",
+     "start": 56.337,
+     "end": 56.817
+    }
+   ]
+  },
+  {
+   "id": "caption-group-46",
+   "frame": 8,
+   "start": 56.917,
+   "end": 58.437,
+   "text": "every verbatim passage",
+   "words": [
+    {
+     "id": "caption-word-46-0",
+     "text": "every",
+     "start": 56.917,
+     "end": 57.237
+    },
+    {
+     "id": "caption-word-46-1",
+     "text": "verbatim",
+     "start": 57.237,
+     "end": 57.807
+    },
+    {
+     "id": "caption-word-46-2",
+     "text": "passage",
+     "start": 57.857,
+     "end": 58.387
+    }
+   ]
+  },
+  {
+   "id": "caption-group-47",
+   "frame": 8,
+   "start": 58.437,
+   "end": 59.777,
+   "text": "with provenance,",
+   "words": [
+    {
+     "id": "caption-word-47-0",
+     "text": "with",
+     "start": 58.437,
+     "end": 58.777
+    },
+    {
+     "id": "caption-word-47-1",
+     "text": "provenance,",
+     "start": 58.777,
+     "end": 59.757
+    }
+   ]
+  },
+  {
+   "id": "caption-group-48",
+   "frame": 8,
+   "start": 59.777,
+   "end": 60.557,
+   "text": "Pioneer reasons",
+   "words": [
+    {
+     "id": "caption-word-48-0",
+     "text": "Pioneer",
+     "start": 59.777,
+     "end": 60.347
+    },
+    {
+     "id": "caption-word-48-1",
+     "text": "reasons",
+     "start": 60.347,
+     "end": 60.437
+    }
+   ]
+  },
+  {
+   "id": "caption-group-49",
+   "frame": 8,
+   "start": 61.077,
+   "end": 62.557,
+   "text": "over what's retrieved",
+   "words": [
+    {
+     "id": "caption-word-49-0",
+     "text": "over",
+     "start": 61.077,
+     "end": 61.257
+    },
+    {
+     "id": "caption-word-49-1",
+     "text": "what's",
+     "start": 61.277,
+     "end": 61.757
+    },
+    {
+     "id": "caption-word-49-2",
+     "text": "retrieved",
+     "start": 61.757,
+     "end": 62.557
+    }
+   ]
+  },
+  {
+   "id": "caption-group-50",
+   "frame": 8,
+   "start": 62.557,
+   "end": 63.887,
+   "text": "under a no-quote",
+   "words": [
+    {
+     "id": "caption-word-50-0",
+     "text": "under",
+     "start": 62.557,
+     "end": 63.017
+    },
+    {
+     "id": "caption-word-50-1",
+     "text": "a",
+     "start": 63.117,
+     "end": 63.127
+    },
+    {
+     "id": "caption-word-50-2",
+     "text": "no-quote",
+     "start": 63.127,
+     "end": 63.887
+    }
+   ]
+  },
+  {
+   "id": "caption-group-51",
+   "frame": 8,
+   "start": 63.887,
+   "end": 64.697,
+   "text": "contract,",
+   "words": [
+    {
+     "id": "caption-word-51-0",
+     "text": "contract,",
+     "start": 63.887,
+     "end": 64.677
+    }
+   ]
+  },
+  {
+   "id": "caption-group-52",
+   "frame": 8,
+   "start": 64.697,
+   "end": 65.277,
+   "text": "and Masky",
+   "words": [
+    {
+     "id": "caption-word-52-0",
+     "text": "and",
+     "start": 64.697,
+     "end": 64.877
+    },
+    {
+     "id": "caption-word-52-1",
+     "text": "Masky",
+     "start": 64.877,
+     "end": 65.277
+    }
+   ]
+  },
+  {
+   "id": "caption-group-53",
+   "frame": 8,
+   "start": 65.277,
+   "end": 66.497,
+   "text": "renders the author's",
+   "words": [
+    {
+     "id": "caption-word-53-0",
+     "text": "renders",
+     "start": 65.277,
+     "end": 65.357
+    },
+    {
+     "id": "caption-word-53-1",
+     "text": "the",
+     "start": 65.357,
+     "end": 65.997
+    },
+    {
+     "id": "caption-word-53-2",
+     "text": "author's",
+     "start": 65.997,
+     "end": 66.497
+    }
+   ]
+  },
+  {
+   "id": "caption-group-54",
+   "frame": 8,
+   "start": 66.497,
+   "end": 67.657,
+   "text": "avatar speaking her",
+   "words": [
+    {
+     "id": "caption-word-54-0",
+     "text": "avatar",
+     "start": 66.497,
+     "end": 66.907
+    },
+    {
+     "id": "caption-word-54-1",
+     "text": "speaking",
+     "start": 66.907,
+     "end": 67.457
+    },
+    {
+     "id": "caption-word-54-2",
+     "text": "her",
+     "start": 67.457,
+     "end": 67.657
+    }
+   ]
+  },
+  {
+   "id": "caption-group-55",
+   "frame": 8,
+   "start": 67.657,
+   "end": 68.637,
+   "text": "own words.",
+   "words": [
+    {
+     "id": "caption-word-55-0",
+     "text": "own",
+     "start": 67.657,
+     "end": 67.857
+    },
+    {
+     "id": "caption-word-55-1",
+     "text": "words.",
+     "start": 67.857,
+     "end": 68.517
+    }
+   ]
+  },
+  {
+   "id": "caption-group-56",
+   "frame": 9,
+   "start": 68.676,
+   "end": 69.746,
+   "text": "VoiceCert proves",
+   "words": [
+    {
+     "id": "caption-word-56-0",
+     "text": "VoiceCert",
+     "start": 68.676,
+     "end": 68.966
+    },
+    {
+     "id": "caption-word-56-2",
+     "text": "proves",
+     "start": 69.276,
+     "end": 69.746
+    }
+   ]
+  },
+  {
+   "id": "caption-group-57",
+   "frame": 9,
+   "start": 69.746,
+   "end": 70.216,
+   "text": "a real",
+   "words": [
+    {
+     "id": "caption-word-57-0",
+     "text": "a",
+     "start": 69.746,
+     "end": 69.826
+    },
+    {
+     "id": "caption-word-57-1",
+     "text": "real",
+     "start": 69.826,
+     "end": 70.096
+    }
+   ]
+  },
+  {
+   "id": "caption-group-58",
+   "frame": 9,
+   "start": 70.236,
+   "end": 71.276,
+   "text": "human spoke every",
+   "words": [
+    {
+     "id": "caption-word-58-0",
+     "text": "human",
+     "start": 70.236,
+     "end": 70.576
+    },
+    {
+     "id": "caption-word-58-1",
+     "text": "spoke",
+     "start": 70.576,
+     "end": 70.926
+    },
+    {
+     "id": "caption-word-58-2",
+     "text": "every",
+     "start": 70.996,
+     "end": 71.276
+    }
+   ]
+  },
+  {
+   "id": "caption-group-59",
+   "frame": 9,
+   "start": 71.276,
+   "end": 72.836,
+   "text": "recorded word.",
+   "words": [
+    {
+     "id": "caption-word-59-0",
+     "text": "recorded",
+     "start": 71.276,
+     "end": 71.776
+    },
+    {
+     "id": "caption-word-59-1",
+     "text": "word.",
+     "start": 71.776,
+     "end": 72.736
+    }
+   ]
+  },
+  {
+   "id": "caption-group-60",
+   "frame": 9,
+   "start": 72.836,
+   "end": 74.366,
+   "text": "Senso ingests it as",
+   "words": [
+    {
+     "id": "caption-word-60-0",
+     "text": "Senso",
+     "start": 72.836,
+     "end": 73.296
+    },
+    {
+     "id": "caption-word-60-1",
+     "text": "ingests",
+     "start": 73.296,
+     "end": 73.946
+    },
+    {
+     "id": "caption-word-60-2",
+     "text": "it",
+     "start": 73.946,
+     "end": 74.126
+    },
+    {
+     "id": "caption-word-60-3",
+     "text": "as",
+     "start": 74.126,
+     "end": 74.246
+    }
+   ]
+  },
+  {
+   "id": "caption-group-61",
+   "frame": 9,
+   "start": 74.396,
+   "end": 76.366,
+   "text": "verified ground truth.",
+   "words": [
+    {
+     "id": "caption-word-61-0",
+     "text": "verified",
+     "start": 74.396,
+     "end": 75.016
+    },
+    {
+     "id": "caption-word-61-1",
+     "text": "ground",
+     "start": 75.056,
+     "end": 75.606
+    },
+    {
+     "id": "caption-word-61-2",
+     "text": "truth.",
+     "start": 75.616,
+     "end": 76.246
+    }
+   ]
+  },
+  {
+   "id": "caption-group-62",
+   "frame": 9,
+   "start": 76.516,
+   "end": 77.896,
+   "text": "Band AI stages",
+   "words": [
+    {
+     "id": "caption-word-62-0",
+     "text": "Band",
+     "start": 76.516,
+     "end": 76.996
+    },
+    {
+     "id": "caption-word-62-1",
+     "text": "AI",
+     "start": 77.116,
+     "end": 77.256
+    },
+    {
+     "id": "caption-word-62-2",
+     "text": "stages",
+     "start": 77.256,
+     "end": 77.896
+    }
+   ]
+  },
+  {
+   "id": "caption-group-63",
+   "frame": 9,
+   "start": 77.896,
+   "end": 80.846,
+   "text": "real agent-to-agent podcasts,",
+   "words": [
+    {
+     "id": "caption-word-63-0",
+     "text": "real",
+     "start": 77.896,
+     "end": 78.326
+    },
+    {
+     "id": "caption-word-63-1",
+     "text": "agent-to-agent",
+     "start": 78.326,
+     "end": 79.806
+    },
+    {
+     "id": "caption-word-63-2",
+     "text": "podcasts,",
+     "start": 79.806,
+     "end": 80.736
+    }
+   ]
+  },
+  {
+   "id": "caption-group-64",
+   "frame": 9,
+   "start": 80.846,
+   "end": 81.276,
+   "text": "and Guild",
+   "words": [
+    {
+     "id": "caption-word-64-0",
+     "text": "and",
+     "start": 80.846,
+     "end": 80.936
+    },
+    {
+     "id": "caption-word-64-1",
+     "text": "Guild",
+     "start": 80.936,
+     "end": 81.276
+    }
+   ]
+  },
+  {
+   "id": "caption-group-65",
+   "frame": 9,
+   "start": 81.276,
+   "end": 81.886,
+   "text": "ships each",
+   "words": [
+    {
+     "id": "caption-word-65-0",
+     "text": "ships",
+     "start": 81.276,
+     "end": 81.616
+    },
+    {
+     "id": "caption-word-65-1",
+     "text": "each",
+     "start": 81.616,
+     "end": 81.886
+    }
+   ]
+  },
+  {
+   "id": "caption-group-66",
+   "frame": 9,
+   "start": 81.886,
+   "end": 82.596,
+   "text": "new version",
+   "words": [
+    {
+     "id": "caption-word-66-0",
+     "text": "new",
+     "start": 81.886,
+     "end": 82.086
+    },
+    {
+     "id": "caption-word-66-1",
+     "text": "version",
+     "start": 82.086,
+     "end": 82.596
+    }
+   ]
+  },
+  {
+   "id": "caption-group-67",
+   "frame": 9,
+   "start": 82.596,
+   "end": 82.876,
+   "text": "of the",
+   "words": [
+    {
+     "id": "caption-word-67-0",
+     "text": "of",
+     "start": 82.596,
+     "end": 82.676
+    },
+    {
+     "id": "caption-word-67-1",
+     "text": "the",
+     "start": 82.676,
+     "end": 82.786
+    }
+   ]
+  },
+  {
+   "id": "caption-group-68",
+   "frame": 9,
+   "start": 82.876,
+   "end": 84.086,
+   "text": "marketing agent with",
+   "words": [
+    {
+     "id": "caption-word-68-0",
+     "text": "marketing",
+     "start": 82.876,
+     "end": 83.216
+    },
+    {
+     "id": "caption-word-68-1",
+     "text": "agent",
+     "start": 83.216,
+     "end": 83.736
+    },
+    {
+     "id": "caption-word-68-2",
+     "text": "with",
+     "start": 83.836,
+     "end": 84.086
+    }
+   ]
+  },
+  {
+   "id": "caption-group-69",
+   "frame": 9,
+   "start": 84.086,
+   "end": 84.976,
+   "text": "rollback,",
+   "words": [
+    {
+     "id": "caption-word-69-0",
+     "text": "rollback,",
+     "start": 84.086,
+     "end": 84.976
+    }
+   ]
+  },
+  {
+   "id": "caption-group-70",
+   "frame": 9,
+   "start": 84.976,
+   "end": 86.966,
+   "text": "seven sponsor tools,",
+   "words": [
+    {
+     "id": "caption-word-70-0",
+     "text": "seven",
+     "start": 84.976,
+     "end": 85.526
+    },
+    {
+     "id": "caption-word-70-1",
+     "text": "sponsor",
+     "start": 85.526,
+     "end": 86.256
+    },
+    {
+     "id": "caption-word-70-2",
+     "text": "tools,",
+     "start": 86.296,
+     "end": 86.856
+    }
+   ]
+  },
+  {
+   "id": "caption-group-71",
+   "frame": 9,
+   "start": 86.966,
+   "end": 87.666,
+   "text": "all live,",
+   "words": [
+    {
+     "id": "caption-word-71-0",
+     "text": "all",
+     "start": 86.966,
+     "end": 87.126
+    },
+    {
+     "id": "caption-word-71-1",
+     "text": "live,",
+     "start": 87.126,
+     "end": 87.666
+    }
+   ]
+  },
+  {
+   "id": "caption-group-72",
+   "frame": 9,
+   "start": 87.666,
+   "end": 88.296,
+   "text": "built in",
+   "words": [
+    {
+     "id": "caption-word-72-0",
+     "text": "built",
+     "start": 87.666,
+     "end": 88.116
+    },
+    {
+     "id": "caption-word-72-1",
+     "text": "in",
+     "start": 88.116,
+     "end": 88.296
+    }
+   ]
+  },
+  {
+   "id": "caption-group-73",
+   "frame": 9,
+   "start": 88.296,
+   "end": 89.698,
+   "text": "one hackathon.",
+   "words": [
+    {
+     "id": "caption-word-73-0",
+     "text": "one",
+     "start": 88.296,
+     "end": 88.566
+    },
+    {
+     "id": "caption-word-73-1",
+     "text": "hackathon.",
+     "start": 88.566,
+     "end": 89.656
+    }
+   ]
+  },
+  {
+   "id": "caption-group-74",
+   "frame": 10,
+   "start": 89.698,
+   "end": 89.948,
+   "text": "Ask a",
+   "words": [
+    {
+     "id": "caption-word-74-0",
+     "text": "Ask",
+     "start": 89.698,
+     "end": 89.838
+    },
+    {
+     "id": "caption-word-74-1",
+     "text": "a",
+     "start": 89.838,
+     "end": 89.888
+    }
+   ]
+  },
+  {
+   "id": "caption-group-75",
+   "frame": 10,
+   "start": 89.948,
+   "end": 90.798,
+   "text": "book anything",
+   "words": [
+    {
+     "id": "caption-word-75-0",
+     "text": "book",
+     "start": 89.948,
+     "end": 90.288
+    },
+    {
+     "id": "caption-word-75-1",
+     "text": "anything",
+     "start": 90.288,
+     "end": 90.678
+    }
+   ]
+  },
+  {
+   "id": "caption-group-76",
+   "frame": 10,
+   "start": 91.128,
+   "end": 93.488,
+   "text": "at livingbook.masky.ai",
+   "words": [
+    {
+     "id": "caption-word-76-0",
+     "text": "at",
+     "start": 91.128,
+     "end": 91.208
+    },
+    {
+     "id": "caption-word-76-1",
+     "text": "livingbook.masky.ai",
+     "start": 91.208,
+     "end": 93.368
+    }
+   ]
+  }
+ ]
 }

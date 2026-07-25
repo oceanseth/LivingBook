@@ -1,0 +1,621 @@
+<template>
+  <style>
+    /* ---- fonts (system-local; graceful fallbacks — no files ship with this project) ---- */
+    @font-face {
+      font-family: "Iowan Old Style";
+      src: local("Iowan Old Style"), local("IowanOldStyle-Roman");
+    }
+    @font-face {
+      font-family: "JetBrains Mono";
+      src: local("JetBrains Mono"), local("JetBrainsMono-Regular");
+    }
+
+    /* ---- root ---- */
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      font-family: "Iowan Old Style", Georgia, serif;
+      color: #F2EFFA;
+    }
+
+    /* ---- layers ---- */
+    .f08sap-layer {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+    #f08sap-bg {
+      background: #14122D;
+    }
+
+    /* parallax bloom bed (moves at 0.25x camera) */
+    #f08sap-bloomlayer {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 3400px;
+      height: 1080px;
+      will-change: transform;
+    }
+    .f08sap-bloom {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        rgba(124, 58, 237, 0.55) 0%,
+        rgba(42, 9, 98, 0.55) 34%,
+        rgba(57, 12, 134, 0.28) 58%,
+        rgba(20, 18, 45, 0) 74%
+      );
+    }
+    .f08sap-ember {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        rgba(220, 38, 38, 0.18) 0%,
+        rgba(220, 38, 38, 0.07) 45%,
+        rgba(20, 18, 45, 0) 70%
+      );
+    }
+
+    /* ---- world (virtual camera pans this) ---- */
+    #f08sap-world {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 7240px;
+      height: 1080px;
+      will-change: transform;
+      transform-origin: 50% 50%;
+    }
+    #f08sap-pipe {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 7240px;
+      height: 1080px;
+      display: block;
+    }
+    #f08sap-pipe line {
+      stroke: rgba(242, 239, 250, 0.45);
+      stroke-width: 1;
+      fill: none;
+      shape-rendering: crispEdges;
+    }
+
+    /* ---- stations ---- */
+    .f08sap-station {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+    .f08sap-micro {
+      font-family: "Iowan Old Style", Georgia, serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(242, 239, 250, 0.65);
+    }
+    .f08sap-nodebox {
+      position: relative;
+      border: 1px solid rgba(242, 239, 250, 0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: none;
+    }
+    .f08sap-nodeglow {
+      position: absolute;
+      inset: 0;
+      border: 1px solid #7C3AED;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .f08sap-nodename {
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #F2EFFA;
+      white-space: nowrap;
+    }
+
+    /* reader chip */
+    #f08sap-chip {
+      left: 740px;
+      top: 390px;
+      width: 440px;
+    }
+    #f08sap-chip .f08sap-micro {
+      margin-bottom: 10px;
+    }
+    #f08sap-chip .f08sap-nodebox {
+      width: 440px;
+      padding: 20px 26px;
+    }
+    .f08sap-q {
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      line-height: 1.5;
+      text-align: center;
+      color: rgba(242, 239, 250, 0.95);
+    }
+
+    /* sponsor nodes */
+    .f08sap-node {
+      width: 380px;
+      height: 110px;
+    }
+    #f08sap-node-actian { left: 2210px; top: 415px; }
+    #f08sap-node-pioneer { left: 3650px; top: 415px; }
+    #f08sap-node-masky { left: 5090px; top: 415px; }
+    .f08sap-node .f08sap-nodebox {
+      width: 380px;
+      height: 110px;
+    }
+
+    /* callouts (origin-anchored pop from node top edge) */
+    .f08sap-callout {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform-origin: 50% 100%;
+      will-change: transform;
+    }
+    .f08sap-cobox {
+      border: 1px solid rgba(242, 239, 250, 0.35);
+      padding: 16px 30px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      text-align: center;
+    }
+    .f08sap-coname {
+      font-family: "Iowan Old Style", Georgia, serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: rgba(242, 239, 250, 0.7);
+    }
+    .f08sap-coline {
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 21px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      color: #F2EFFA;
+      white-space: nowrap;
+    }
+    .f08sap-cosub {
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: rgba(242, 239, 250, 0.75);
+      white-space: nowrap;
+    }
+    .f08sap-cotick {
+      width: 1px;
+      height: 20px;
+      background: rgba(242, 239, 250, 0.4);
+    }
+    #f08sap-co-actian { left: 2120px; top: 262px; width: 560px; }
+    #f08sap-co-pioneer { left: 3530px; top: 262px; width: 620px; }
+    #f08sap-co-masky { left: 5060px; top: 284px; width: 440px; }
+
+    /* pioneer live rejection */
+    #f08sap-reject {
+      position: absolute;
+      left: 3650px;
+      top: 552px;
+      width: 380px;
+      text-align: center;
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-decoration: line-through;
+      text-decoration-color: rgba(242, 239, 250, 0.7);
+      color: rgba(242, 239, 250, 0.85);
+      opacity: 0;
+    }
+
+    /* answer video tile — 9:10 hairline rectangle */
+    #f08sap-tile {
+      position: absolute;
+      left: 6172px;
+      top: 350px;
+      width: 216px;
+      height: 240px;
+      border: 1px solid rgba(242, 239, 250, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #f08sap-tileglow-inner {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        circle,
+        rgba(124, 58, 237, 0.55) 0%,
+        rgba(124, 58, 237, 0.18) 55%,
+        rgba(20, 18, 45, 0) 78%
+      );
+      opacity: 0;
+    }
+    #f08sap-tileborder {
+      position: absolute;
+      inset: 0;
+      border: 1px solid #7C3AED;
+      opacity: 0;
+    }
+    #f08sap-play {
+      position: relative;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+    #f08sap-play polygon {
+      fill: none;
+      stroke: #F2EFFA;
+      stroke-width: 2;
+      stroke-linejoin: round;
+    }
+    #f08sap-answer-label {
+      position: absolute;
+      left: 6172px;
+      top: 304px;
+      width: 216px;
+      text-align: center;
+      opacity: 0;
+    }
+
+    /* pulse — travels the pipe */
+    #f08sap-pulse {
+      position: absolute;
+      left: 0;
+      top: 470px;
+      width: 0;
+      height: 0;
+      will-change: transform;
+    }
+    #f08sap-pulse-core {
+      position: absolute;
+      left: -60px;
+      top: -60px;
+      width: 120px;
+      height: 120px;
+      transform-origin: 50% 50%;
+      will-change: transform;
+      background: radial-gradient(
+        circle,
+        rgba(124, 58, 237, 0.85) 0%,
+        rgba(124, 58, 237, 0.35) 22%,
+        rgba(124, 58, 237, 0) 58%
+      );
+    }
+    #f08sap-pulse-dot {
+      position: absolute;
+      left: 53px;
+      top: 53px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #7C3AED;
+    }
+
+    /* ---- chrome (screen-fixed) ---- */
+    #f08sap-kicker {
+      position: absolute;
+      left: 76px;
+      top: 62px;
+      font-family: "Iowan Old Style", Georgia, serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: rgba(242, 239, 250, 0.85);
+      opacity: 0;
+    }
+    #f08sap-pagenum {
+      position: absolute;
+      right: 76px;
+      top: 846px;
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: rgba(242, 239, 250, 0.75);
+      opacity: 0;
+    }
+  </style>
+
+  <div data-hf-id="hf-dn3p" id="root" data-composition-id="08-stack-answer-path" data-width="1920" data-height="1080" data-duration="15.019">
+    <!-- full-bleed ground + parallax bloom bed -->
+    <div data-hf-id="hf-dwsu" class="clip f08sap-layer" id="f08sap-bg" data-start="0" data-duration="15.019" data-track-index="0">
+      <div data-hf-id="hf-8ml4" id="f08sap-bloomlayer">
+        <div data-hf-id="hf-paiy" class="f08sap-bloom" style="left: 60px; top: 120px; width: 1240px; height: 1240px;"></div>
+        <div data-hf-id="hf-tavi" class="f08sap-ember" style="left: 1120px; top: -260px; width: 820px; height: 820px;"></div>
+        <div data-hf-id="hf-00ly" class="f08sap-bloom" style="left: 1480px; top: 60px; width: 1180px; height: 1180px;"></div>
+        <div data-hf-id="hf-l8ks" class="f08sap-bloom" style="left: 2440px; top: 140px; width: 1260px; height: 1260px;"></div>
+      </div>
+    </div>
+
+    <!-- world canvas under the virtual camera -->
+    <div data-hf-id="hf-0knk" class="clip f08sap-layer" id="f08sap-scene" data-start="0" data-duration="15.019" data-track-index="1">
+      <div data-hf-id="hf-qhmg" id="f08sap-world">
+        <!-- hairline connectors (drawn just ahead of the pulse) -->
+        <svg data-hf-id="hf-5eye" id="f08sap-pipe" viewBox="0 0 7240 1080" xmlns="http://www.w3.org/2000/svg">
+          <line data-hf-id="hf-hea8" id="f08sap-c1" x1="1180" y1="470" x2="2210" y2="470" />
+          <line data-hf-id="hf-9diq" id="f08sap-c2" x1="2590" y1="470" x2="3650" y2="470" />
+          <line data-hf-id="hf-hct2" id="f08sap-c3" x1="4030" y1="470" x2="5090" y2="470" />
+          <line data-hf-id="hf-qf4u" id="f08sap-c4" x1="5470" y1="470" x2="6172" y2="470" />
+        </svg>
+
+        <!-- station 1: the reader's question chip -->
+        <div data-hf-id="hf-m4a0" class="f08sap-station" id="f08sap-chip">
+          <div data-hf-id="hf-4yyi" class="f08sap-micro">Reader</div>
+          <div data-hf-id="hf-g44m" class="f08sap-nodebox">
+            <div data-hf-id="hf-yxe3" class="f08sap-q">“What does Out of Focus say about the psychiatrist shortage?”</div>
+          </div>
+        </div>
+
+        <!-- station 2: Actian VectorAI -->
+        <div data-hf-id="hf-0skc" class="f08sap-station f08sap-node" id="f08sap-node-actian">
+          <div data-hf-id="hf-q1re" class="f08sap-nodebox">
+            <div data-hf-id="hf-c4yr" class="f08sap-nodeglow" id="f08sap-glow-actian"></div>
+            <div data-hf-id="hf-2k20" class="f08sap-micro">Vector DB</div>
+            <div data-hf-id="hf-bej7" class="f08sap-nodename">Actian VectorAI</div>
+          </div>
+        </div>
+        <div data-hf-id="hf-2g65" class="f08sap-callout" id="f08sap-co-actian">
+          <div data-hf-id="hf-27oo" class="f08sap-cobox">
+            <div data-hf-id="hf-nm5t" class="f08sap-coname">Actian VectorAI</div>
+            <div data-hf-id="hf-bdnk" class="f08sap-coline">2,769 verbatim units</div>
+            <div data-hf-id="hf-3j9k" class="f08sap-cosub" id="f08sap-cosub-actian">provenance on every unit</div>
+          </div>
+          <div data-hf-id="hf-b1gy" class="f08sap-cotick"></div>
+        </div>
+
+        <!-- station 3: Pioneer -->
+        <div data-hf-id="hf-mi4u" class="f08sap-station f08sap-node" id="f08sap-node-pioneer">
+          <div data-hf-id="hf-qg2f" class="f08sap-nodebox">
+            <div data-hf-id="hf-syc7" class="f08sap-nodeglow" id="f08sap-glow-pioneer"></div>
+            <div data-hf-id="hf-mx0z" class="f08sap-micro">Reasoning</div>
+            <div data-hf-id="hf-ygos" class="f08sap-nodename">Pioneer</div>
+          </div>
+        </div>
+        <div data-hf-id="hf-ejq1" class="f08sap-callout" id="f08sap-co-pioneer">
+          <div data-hf-id="hf-0qxs" class="f08sap-cobox">
+            <div data-hf-id="hf-a6h2" class="f08sap-coname">Pioneer</div>
+            <div data-hf-id="hf-p79d" class="f08sap-coline">grounded reasoning</div>
+            <div data-hf-id="hf-yb7c" class="f08sap-cosub" id="f08sap-cosub-pioneer">no-quote contract · refs only</div>
+          </div>
+          <div data-hf-id="hf-shyu" class="f08sap-cotick"></div>
+        </div>
+        <div data-hf-id="hf-jtwh" id="f08sap-reject">✕ quote-from-memory</div>
+
+        <!-- station 4: Masky -->
+        <div data-hf-id="hf-nl9l" class="f08sap-station f08sap-node" id="f08sap-node-masky">
+          <div data-hf-id="hf-qudg" class="f08sap-nodebox">
+            <div data-hf-id="hf-pxds" class="f08sap-nodeglow" id="f08sap-glow-masky"></div>
+            <div data-hf-id="hf-ntdc" class="f08sap-micro">Avatar</div>
+            <div data-hf-id="hf-20jt" class="f08sap-nodename">Masky</div>
+          </div>
+        </div>
+        <div data-hf-id="hf-q2c6" class="f08sap-callout" id="f08sap-co-masky">
+          <div data-hf-id="hf-zk0p" class="f08sap-cobox">
+            <div data-hf-id="hf-myun" class="f08sap-coname">Masky</div>
+            <div data-hf-id="hf-51af" class="f08sap-coline">identity + avatar render</div>
+          </div>
+          <div data-hf-id="hf-sw9v" class="f08sap-cotick"></div>
+        </div>
+
+        <!-- terminal: the answer video tile (9:10) -->
+        <div data-hf-id="hf-yfo2" class="f08sap-micro" id="f08sap-answer-label">The Answer</div>
+        <div data-hf-id="hf-mefc" id="f08sap-tile">
+          <div data-hf-id="hf-oi7w" id="f08sap-tileglow-inner"></div>
+          <div data-hf-id="hf-5r5u" id="f08sap-tileborder"></div>
+          <svg data-hf-id="hf-v1cd" id="f08sap-play" width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <polygon data-hf-id="hf-118u" points="22,14 50,32 22,50" />
+          </svg>
+        </div>
+
+        <!-- the violet pulse -->
+        <div data-hf-id="hf-g32f" id="f08sap-pulse">
+          <div data-hf-id="hf-lcfx" id="f08sap-pulse-core">
+            <div data-hf-id="hf-mvrp" id="f08sap-pulse-dot"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- screen-fixed chrome -->
+    <div data-hf-id="hf-cnpf" class="clip f08sap-layer" id="f08sap-chrome" data-start="0" data-duration="15.019" data-track-index="2">
+      <div data-hf-id="hf-rd69" id="f08sap-kicker">Livingbook · The Stack</div>
+      <div data-hf-id="hf-6u83" id="f08sap-pagenum">— 08</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+      window.__timelines["08-stack-answer-path"] = tl;
+
+      var DUR = 15.019;
+      var world = document.getElementById("f08sap-world");
+      var bloomLayer = document.getElementById("f08sap-bloomlayer");
+      var pulse = document.getElementById("f08sap-pulse");
+
+      /* ---- connectors: measure real geometry, dash out (svg-path-draw) ---- */
+      ["f08sap-c1", "f08sap-c2", "f08sap-c3", "f08sap-c4"].forEach(function (id) {
+        var l = document.getElementById(id);
+        var len = l.getTotalLength();
+        l.style.strokeDasharray = String(len);
+        l.style.strokeDashoffset = String(len);
+      });
+
+      /* ---- virtual camera: one world wrapper, one writer (viewport-change pan
+             sequenced as multi-phase stops, sine micro-drift overlaid) ---- */
+      var cam = { x: 0 };
+      var drift = { p: 0 };
+      function applyCamera() {
+        var dx = Math.sin(drift.p) * 6;
+        var dy = Math.sin(drift.p * 1.3) * 3.5;
+        world.style.transform = "translate(" + (cam.x + dx) + "px, " + dy + "px)";
+        bloomLayer.style.transform =
+          "translate(" + (cam.x * 0.25 + dx * 0.55) + "px, " + dy * 0.55 + "px)";
+      }
+      applyCamera(); /* seed frame 0 */
+
+      /* pan stops: station centers at world x 960 / 2400 / 3840 / 5280 / 6280
+         → cam.x = -(stationX - 960) */
+      tl.to(cam, { x: -1440, duration: 1.4, ease: "power2.inOut" }, 1.1);
+      tl.to(cam, { x: -2880, duration: 1.3, ease: "power2.inOut" }, 4.8);
+      tl.to(cam, { x: -4320, duration: 1.2, ease: "power2.inOut" }, 8.3);
+      tl.to(cam, { x: -5320, duration: 1.2, ease: "power2.inOut" }, 10.7);
+
+      /* ---- Scene 1 (0.0–2.0): chip pops, pulse leaves on "Under the hood" ---- */
+      tl.fromTo(
+        "#f08sap-chip",
+        { scale: 0, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.55, ease: "power3.out" },
+        0.12
+      );
+      tl.fromTo(
+        "#f08sap-kicker",
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" },
+        0.3
+      );
+      tl.fromTo(
+        "#f08sap-pagenum",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.6, ease: "power1.out" },
+        0.5
+      );
+
+      /* pulse pops at the chip's edge, then travels the pipe */
+      gsap.set(pulse, { x: 1180 });
+      tl.fromTo(
+        "#f08sap-pulse-core",
+        { scale: 0, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.4, ease: "power3.out" },
+        0.55
+      );
+      tl.fromTo(
+        pulse,
+        { x: 1180 },
+        { x: 2400, duration: 2.0, ease: "power1.inOut" },
+        0.8
+      );
+      /* connector draws just ahead of the pulse */
+      tl.to("#f08sap-c1", { strokeDashoffset: 0, duration: 1.8, ease: "power1.inOut" }, 0.6);
+
+      /* ---- Scene 2 (2.0–5.2): Actian station ---- */
+      tl.fromTo(
+        "#f08sap-co-actian",
+        { scale: 0, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.6, ease: "power3.out" },
+        2.65
+      );
+      tl.fromTo(
+        "#f08sap-cosub-actian",
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.45, ease: "power1.out" },
+        3.0
+      );
+      tl.to("#f08sap-glow-actian", { opacity: 1, duration: 0.4, ease: "power1.out" }, 2.9);
+
+      tl.to("#f08sap-c2", { strokeDashoffset: 0, duration: 1.5, ease: "power1.inOut" }, 4.4);
+      tl.to(pulse, { x: 3840, duration: 1.5, ease: "power1.inOut" }, 4.6);
+
+      /* ---- Scene 3 (5.2–8.4): Pioneer station + live rejection ---- */
+      tl.fromTo(
+        "#f08sap-co-pioneer",
+        { scale: 0, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.6, ease: "power3.out" },
+        6.15
+      );
+      tl.fromTo(
+        "#f08sap-cosub-pioneer",
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.45, ease: "power1.out" },
+        6.5
+      );
+      tl.to("#f08sap-glow-pioneer", { opacity: 1, duration: 0.4, ease: "power1.out" }, 6.35);
+      tl.fromTo(
+        "#f08sap-reject",
+        { opacity: 0, y: 6 },
+        { opacity: 0.62, y: 0, duration: 0.5, ease: "power1.out" },
+        7.2
+      );
+
+      tl.to("#f08sap-c3", { strokeDashoffset: 0, duration: 1.3, ease: "power1.inOut" }, 8.0);
+      tl.to(pulse, { x: 5280, duration: 1.3, ease: "power1.inOut" }, 8.2);
+
+      /* ---- Scene 4 (8.4–10.6): Masky station, pulse exits into last connector ---- */
+      tl.fromTo(
+        "#f08sap-co-masky",
+        { scale: 0, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.6, ease: "power3.out" },
+        9.55
+      );
+      tl.to("#f08sap-glow-masky", { opacity: 1, duration: 0.4, ease: "power1.out" }, 9.7);
+
+      tl.to("#f08sap-c4", { strokeDashoffset: 0, duration: 1.0, ease: "power1.inOut" }, 10.3);
+      tl.to(pulse, { x: 6280, duration: 1.1, ease: "power1.inOut" }, 10.5);
+
+      /* ---- Scene 5 (10.6–end): the answer tile lights as the pulse arrives ---- */
+      tl.to("#f08sap-tileborder", { opacity: 1, duration: 0.45, ease: "power1.out" }, 11.55);
+      tl.fromTo(
+        "#f08sap-tileglow-inner",
+        { opacity: 0 },
+        { opacity: 0.6, duration: 0.6, ease: "power1.out" },
+        11.55
+      );
+      /* the pulse is absorbed into the tile's glow */
+      tl.to("#f08sap-pulse-core", { opacity: 0, scale: 0.4, duration: 0.45, ease: "power1.in" }, 11.7);
+
+      tl.fromTo(
+        "#f08sap-play",
+        { scale: 0, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.5, ease: "power3.out" },
+        11.95
+      );
+      tl.fromTo(
+        "#f08sap-answer-label",
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.5, ease: "power1.out" },
+        12.5
+      );
+      /* quiet settle: the answer's glow deepens under the held camera */
+      tl.to("#f08sap-tileglow-inner", { opacity: 0.85, duration: 1.6, ease: "power1.inOut" }, 12.9);
+
+      /* drift driver spans the whole shot — the ONE transform writer.
+         Registered LAST so its onUpdate reads cam.x AFTER the pan tweens
+         have updated it in the same render pass (seek-safe). */
+      tl.to(
+        drift,
+        { p: Math.PI * 2 * 2, duration: DUR, ease: "none", onUpdate: applyCamera },
+        0
+      );
+    })();
+  </script>
+</template>

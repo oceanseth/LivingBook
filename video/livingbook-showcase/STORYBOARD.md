@@ -43,7 +43,7 @@ music: warm cinematic editorial, restrained pulse, literary
 - scene: Serif type lands beat by beat on a violet bloom; "frozen on a shelf" is struck through and "talk back" takes the frame
 - duration: 4.267s
 - transition_in: cut
-- status: outline
+- status: animated
 - voiceover: "Every book you love is frozen on a shelf. What if it could talk back?"
 - asset_candidates: none (pure type on frame.md system)
 - focal: the hook line itself
@@ -64,7 +64,7 @@ Scene 3 (3.2–5.0s): hard-cut beat swap (discrete-text-sequence): the statement
 - scene: The real reader question types into an ask-a-book input beneath the book's title
 - duration: 6.101s
 - transition_in: cut
-- status: outline
+- status: animated
 - voiceover: "A reader asks Aly Vredenburgh's book, Out of Focus, about America's mental-health shortage."
 - asset_candidates: assets/media/aly-poster.png (avatar still), assets/media/site-hero.png (site ask UI reference)
 - focal: the typed question in the ask input
@@ -87,7 +87,7 @@ Scene 3 (5.2–6.0s): the submit control (violet yellow-panel square, ink arrow 
 - scene: The real rendered Masky clip plays as hero; her exact words land as serif pull-quotes beside it
 - duration: 12s
 - transition_in: crossfade
-- status: outline
+- status: animated
 - voiceover: (silent — the clip's own audio plays)
 - asset_candidates: assets/media/masky-turn1.mp4 (master 17.9s; play 0–11.5s, cut on the "None." beat), assets/media/aly-poster.png (poster)
 - clip_audio: keep (duck BGM to ~15%, no VO)
@@ -112,7 +112,7 @@ Scene 4 (9.5–12.0s): clip reaches the cut point and holds its final frame; an 
 - scene: "Introducing" beat-cuts resolve on the LivingBook wordmark + claim
 - duration: 7.509s
 - transition_in: cut
-- status: outline
+- status: animated
 - voiceover: "This is LivingBook. Real books become living agents that answer only in the author's exact words — on video."
 - asset_candidates: assets/media/brand-favicon.svg (brand mark), assets/media/site-hero.png (hero cameo)
 - focal: the LivingBook wordmark
@@ -131,7 +131,7 @@ Scene 3 (3.2–7.0s): the claim line reveals beneath in three phrase-groups on t
 - scene: iPhone hero right-of-center; Books-tab screens advance through claim → upload → attach as the VO names each
 - duration: 8.683s
 - transition_in: wipe
-- status: outline
+- status: animated
 - voiceover: "Authors sign in with Masky, claim their books, and upload everything around them — the text, podcasts, even live spoken sessions."
 - asset_candidates: assets/media/sim-author-pairing.png (sign in with Masky pairing screen), assets/media/sim-books-shelf.png (claimed books shelf — Out of Focus 808 units, KJV 2,769 units)
 - focal: the device screens (author flow)
@@ -150,7 +150,7 @@ Scene 3 (7.0–9.0s): final screen (sources attached) holds; mono micro-label "V
 - scene: iPhone hero left-of-center; Talk-tab screens advance question → exact passage → rendered answer
 - duration: 8.192s
 - transition_in: cut
-- status: outline
+- status: animated
 - voiceover: "Readers ask anything. The exact passage comes back — retrieved, never invented — and rendered as the author on video."
 - asset_candidates: assets/media/sim-talk-ask.mp4 (10.1s real screen recording — typing a question, submitting, verbatim answer appearing), assets/media/sim-talk-author-answer.png (Out of Focus §440 verbatim unit answer)
 - focal: the live screen recording inside the device
@@ -173,7 +173,7 @@ Scene 3 (6.8–9.0s): on "rendered as the author on video", the screen swaps (sc
 - scene: Bare canvas; two statements land alone; a mono footnote grounds them
 - duration: 6.805s
 - transition_in: cut
-- status: outline
+- status: animated
 - voiceover: "The rule, enforced in code: LLMs select and reason. They never generate an author's words."
 - asset_candidates: none
 - focal: the second statement
@@ -195,7 +195,7 @@ Scene 3 (4.8–6.0s): mono-data footnote reveals below on its cue: "byte-identic
 - scene: Oversized architecture canvas, act one — the camera pans the ask path: Question → Actian → Pioneer → Masky → video
 - duration: 15.019s
 - transition_in: wipe
-- status: outline
+- status: animated
 - voiceover: "Under the hood: Actian VectorAI stores every verbatim passage with provenance. Pioneer reasons over what's retrieved — under a no-quote contract. And Masky renders the author's avatar speaking her own words."
 - asset_candidates: none (diagram drawn in the frame system)
 - focal: the sponsor stations, one per pan stop
@@ -219,7 +219,7 @@ Scene 5 (10.6–12.0s): the connector terminates in a small video tile (a 9:10 h
 - scene: Same canvas, act two — VoiceCert → Senso feed the knowledge base; Band AI rooms; the Guild version ring closes the self-evolving loop; zoom out to all seven
 - duration: 20.992s
 - transition_in: cut
-- status: outline
+- status: animated
 - voiceover: "VoiceCert proves a real human spoke every recorded word. Senso ingests it as verified ground truth. Band AI stages real agent-to-agent podcasts. And Guild ships each new version of the marketing agent — with rollback. Seven sponsor tools. All live. Built in one hackathon."
 - asset_candidates: none (same diagram canvas, second region)
 - focal: the closing full-map wide shot
@@ -237,9 +237,9 @@ Scene 5 (10.2–13.0s): one decelerating zoom-out (viewport-change) reveals the 
 - type: cta
 - blueprint: logo-assemble-lockup (Reproduce — CTA text-clear bloom)
 - scene: Tagline clears itself; the mark blooms from zero; lockup + URLs hold
-- duration: 3.84s
+- duration: 7s
 - transition_in: crossfade
-- status: outline
+- status: animated
 - voiceover: "Ask a book anything — at livingbook dot masky dot A I."
 - asset_candidates: assets/media/brand-favicon.svg, assets/media/site-hero.png (faint backdrop)
 - focal: the final lockup + URL

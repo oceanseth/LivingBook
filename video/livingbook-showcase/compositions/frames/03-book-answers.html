@@ -1,0 +1,317 @@
+<template>
+  <style>
+    /* Iowan Old Style ships with macOS — declare via local() so the renderer
+       resolves the installed face; range covers the brand's single 600 weight. */
+    @font-face {
+      font-family: "Iowan Old Style";
+      src: local("Iowan Old Style"), local("IowanOldStyle-Roman");
+      font-weight: 100 900;
+      font-style: normal;
+    }
+
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      container-type: size;
+    }
+
+    /* ── Track 0 · full-bleed ground (paper + the one sun bloom) ── */
+    #f03-book-answers-bg {
+      position: absolute;
+      inset: 0;
+      background: #14122D;
+      overflow: hidden;
+    }
+    #f03-book-answers-bloom {
+      position: absolute;
+      left: -268px;
+      top: -164px;
+      width: 1240px;
+      height: 1240px;
+      background: radial-gradient(
+        circle at 50% 50%,
+        rgba(124, 58, 237, 0.95) 0%,
+        rgba(124, 58, 237, 0.55) 20%,
+        rgba(42, 9, 98, 0.85) 42%,
+        rgba(57, 12, 134, 0.45) 60%,
+        rgba(57, 12, 134, 0) 76%
+      );
+    }
+
+    /* ── Track 1 · editorial layer ── */
+    #f03-book-answers-fg {
+      position: absolute;
+      inset: 0;
+      color: #F2EFFA;
+    }
+
+    /* Hairline mount frame around the portrait clip (video rect 128,200 448x512) */
+    .f03-book-answers-mount {
+      position: absolute;
+      background: rgba(242, 239, 250, 0.9);
+    }
+    #f03-book-answers-mount-top    { left: 118px; top: 190px;  width: 468px; height: 1px; transform-origin: left center; }
+    #f03-book-answers-mount-right  { left: 585px; top: 190px;  width: 1px;   height: 532px; transform-origin: center top; }
+    #f03-book-answers-mount-bottom { left: 118px; top: 721px;  width: 468px; height: 1px; transform-origin: right center; }
+    #f03-book-answers-mount-left   { left: 118px; top: 190px;  width: 1px;   height: 532px; transform-origin: center bottom; }
+
+    /* Weight-transfer rule — extends from the mount's top-right corner across the vacated field */
+    #f03-book-answers-ext-rule {
+      position: absolute;
+      left: 586px;
+      top: 190px;
+      width: 1258px;
+      height: 1px;
+      background: rgba(242, 239, 250, 0.28);
+      transform-origin: left center;
+    }
+
+    #f03-book-answers-micro-label {
+      position: absolute;
+      right: 76px;
+      top: 154px;
+      font-family: "Iowan Old Style", Georgia, serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #F2EFFA;
+    }
+
+    /* Catalogue caption beneath the portrait */
+    #f03-book-answers-clip-caption {
+      position: absolute;
+      left: 118px;
+      top: 740px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(242, 239, 250, 0.62);
+      opacity: 0;
+    }
+
+    /* Pull-quote column (right of the left 40% column) */
+    #f03-book-answers-qmark {
+      position: absolute;
+      left: 806px;
+      top: 226px;
+      font-family: "Iowan Old Style", Georgia, serif;
+      font-size: 170px;
+      font-weight: 600;
+      line-height: 1;
+      color: #F2EFFA;
+      opacity: 0;
+    }
+    .f03-book-answers-quote {
+      position: absolute;
+      left: 832px;
+      font-family: "Iowan Old Style", Georgia, serif;
+      font-weight: 600;
+      letter-spacing: -0.005em;
+      line-height: 1.3;
+      color: #F2EFFA;
+      opacity: 0;
+      white-space: nowrap;
+    }
+    #f03-book-answers-q1 { top: 352px; font-size: 46px; }
+    #f03-book-answers-q2 { top: 452px; font-size: 46px; }
+    #f03-book-answers-q3 { top: 552px; font-size: 72px; line-height: 1.1; }
+
+    /* Ember hairline underline beneath "None." (css-marker-patterns, highlight-bar
+       mechanism as a 1px underline; ember moment 1 of 2) */
+    #f03-book-answers-underline {
+      position: absolute;
+      left: 832px;
+      top: 650px;
+      width: 196px;
+      height: 1px;
+      background: #DC2626;
+      transform-origin: left center;
+    }
+
+    #f03-book-answers-pagenum {
+      position: absolute;
+      right: 76px;
+      top: 852px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: rgba(242, 239, 250, 0.75);
+    }
+  </style>
+
+  <div data-hf-id="hf-w29m" id="root" data-composition-id="03-book-answers" data-width="1920" data-height="1080" data-duration="12">
+    <!-- approved frame video hoisted by assemble-index -->
+    <!-- ground: paper + sun bloom (lowest track; never painted on #root) -->
+    <div data-hf-id="hf-665y" id="f03-book-answers-bg" class="clip" data-start="0" data-duration="12" data-track-index="0">
+      <div data-hf-id="hf-g2m4" id="f03-book-answers-bloom"></div>
+    </div>
+
+    <!-- the hero: Masky's rendered turn-1 clip, hairline-framed portrait.
+         Hoisted to the host root by assemble-index; its own audio plays
+         (clip_audio: keep) so it is NOT muted. -->
+    <!-- approved frame video hoisted by assemble-index -->
+
+    <!-- editorial layer -->
+    <div data-hf-id="hf-g04p" id="f03-book-answers-fg" class="clip" data-start="0" data-duration="12" data-track-index="1">
+      <div data-hf-id="hf-fhg8" id="f03-book-answers-mount-top" class="f03-book-answers-mount"></div>
+      <div data-hf-id="hf-3iw3" id="f03-book-answers-mount-right" class="f03-book-answers-mount"></div>
+      <div data-hf-id="hf-w9qi" id="f03-book-answers-mount-bottom" class="f03-book-answers-mount"></div>
+      <div data-hf-id="hf-w9vw" id="f03-book-answers-mount-left" class="f03-book-answers-mount"></div>
+
+      <div data-hf-id="hf-d7u7" id="f03-book-answers-ext-rule"></div>
+      <div data-hf-id="hf-hx56" id="f03-book-answers-micro-label">Rendered by Masky — her exact words, on video</div>
+      <div data-hf-id="hf-5tnv" id="f03-book-answers-clip-caption">Masky · Rendered answer · 00:12</div>
+
+      <div data-hf-id="hf-rqeh" id="f03-book-answers-qmark">“</div>
+      <div data-hf-id="hf-r5no" id="f03-book-answers-q1" class="f03-book-answers-quote">…over half of US counties</div>
+      <div data-hf-id="hf-4fc2" id="f03-book-answers-q2" class="f03-book-answers-quote">had no practicing psychiatrist.</div>
+      <div data-hf-id="hf-54wu" id="f03-book-answers-q3" class="f03-book-answers-quote">None.</div>
+      <div data-hf-id="hf-424d" id="f03-book-answers-underline"></div>
+
+      <div data-hf-id="hf-r05z" id="f03-book-answers-pagenum">03</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines = window.__timelines || {};
+      window.__timelines["03-book-answers"] = tl;
+
+      /* ── Scene 1 (0–2s) · quiet arrival: bloom wakes behind the portrait,
+             the hairline mount draws clockwise around the clip, pagenum lands.
+             The clip itself (and its audio) starts at t=0 via the hoisted video. ── */
+      tl.fromTo(
+        "#f03-book-answers-bloom",
+        { opacity: 0, scale: 0.85 },
+        { opacity: 0.9, scale: 1, duration: 1.6, ease: "power2.out" },
+        0
+      );
+      tl.fromTo(
+        "#f03-book-answers-mount-top",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.7, ease: "power3.inOut" },
+        0.35
+      );
+      tl.fromTo(
+        "#f03-book-answers-mount-right",
+        { scaleY: 0 },
+        { scaleY: 1, duration: 0.7, ease: "power3.inOut" },
+        0.55
+      );
+      tl.fromTo(
+        "#f03-book-answers-mount-bottom",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.7, ease: "power3.inOut" },
+        0.75
+      );
+      tl.fromTo(
+        "#f03-book-answers-mount-left",
+        { scaleY: 0 },
+        { scaleY: 1, duration: 0.7, ease: "power3.inOut" },
+        0.95
+      );
+      tl.fromTo(
+        "#f03-book-answers-pagenum",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.6, ease: "power2.out" },
+        1.3
+      );
+
+      /* ── Scene 2 (2–4s) · weight transfer (signature, adapted): the clip is the
+             fixed anchor; the light and the armature carry the weight rightward —
+             the sun bloom glides into the vacated field (power3), a hairline rule
+             extends from the mount's top edge across it, and the micro-label
+             reveals top-right. ── */
+      tl.fromTo(
+        "#f03-book-answers-ext-rule",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 1.15, ease: "power3.inOut" },
+        2.0
+      );
+      tl.to(
+        "#f03-book-answers-bloom",
+        { x: 520, scale: 1.12, duration: 2.0, ease: "power3.inOut" },
+        2.0
+      );
+      tl.fromTo(
+        "#f03-book-answers-micro-label",
+        { opacity: 0, y: 14 },
+        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
+        2.55
+      );
+
+      /* macro move underneath the back half: the bloom keeps drifting, slowly */
+      tl.to(
+        "#f03-book-answers-bloom",
+        { x: 560, scale: 1.135, duration: 7.6, ease: "sine.inOut" },
+        4.0
+      );
+
+      /* catalogue caption under the portrait — quiet mid-shot reveal */
+      tl.fromTo(
+        "#f03-book-answers-clip-caption",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.7, ease: "power2.out" },
+        5.7
+      );
+
+      /* ── Scene 3 (4–10s) · her exact words land as letterpress stamps, each on
+             the measured cue where she speaks it (discrete-text-sequence: sparse
+             states, reverse search each frame, instant jumps; earlier lines dim
+             to 60% as the next lands). ── */
+      const qmark = document.querySelector("#f03-book-answers-qmark");
+      const q1 = document.querySelector("#f03-book-answers-q1");
+      const q2 = document.querySelector("#f03-book-answers-q2");
+      const q3 = document.querySelector("#f03-book-answers-q3");
+
+      const STATES = [
+        { t: 0.0,  m: 0,    a: 0,   b: 0,   c: 0 },
+        { t: 4.35, m: 0.18, a: 0,   b: 0,   c: 0 },
+        { t: 4.45, m: 0.18, a: 1,   b: 0,   c: 0 },
+        { t: 8.4,  m: 0.18, a: 0.6, b: 1,   c: 0 },
+        { t: 9.98, m: 0.18, a: 0.6, b: 0.6, c: 1 },
+      ];
+      function stateAt(time) {
+        for (let i = STATES.length - 1; i >= 0; i--) {
+          if (time >= STATES[i].t) return STATES[i];
+        }
+        return STATES[0];
+      }
+      const driver = { t: 0 };
+      tl.to(
+        driver,
+        {
+          t: 12,
+          duration: 12,
+          ease: "none",
+          onUpdate: function () {
+            const s = stateAt(driver.t);
+            qmark.style.opacity = String(s.m);
+            q1.style.opacity = String(s.a);
+            q2.style.opacity = String(s.b);
+            q3.style.opacity = String(s.c);
+          },
+        },
+        0
+      );
+
+      /* ── Scene 4 (10–12s) · she has said "None." (9.96s); the ember hairline
+             draws beneath it while the clip holds the beat, then the frame reads
+             still — no exit, the root crossfade owns the cut. ── */
+      tl.fromTo(
+        "#f03-book-answers-underline",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.8, ease: "power2.inOut" },
+        10.55
+      );
+    })();
+  </script>
+</template>

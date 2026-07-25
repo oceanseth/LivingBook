@@ -114,38 +114,38 @@
     }
   </style>
 
-  <div id="root" data-composition-id="07-the-rule">
+  <div data-hf-id="hf-nxbp" id="root" data-composition-id="07-the-rule" data-width="1920" data-height="1080" data-duration="7.405">
     <!-- full-bleed ground on its own clip (never on #root) -->
-    <div class="clip f07r-bg" data-start="0" data-duration="6.805" data-track-index="0">
-      <div class="f07r-bloom" id="f07r-bloom"></div>
+    <div data-hf-id="hf-1b2s" class="clip f07r-bg" data-start="0" data-duration="7.405" data-track-index="0">
+      <div data-hf-id="hf-lgvi" class="f07r-bloom" id="f07r-bloom"></div>
     </div>
 
-    <div class="clip f07r-stage" data-start="0" data-duration="6.805" data-track-index="1">
-      <div class="f07r-block">
-        <div class="f07r-relay">
+    <div data-hf-id="hf-czuq" class="clip f07r-stage" data-start="0" data-duration="7.405" data-track-index="1">
+      <div data-hf-id="hf-z25p" class="f07r-block">
+        <div data-hf-id="hf-svrt" class="f07r-relay">
           <!-- Scene 1 — statement one, per-word stagger, quick then still -->
-          <div class="f07r-line" id="f07r-s1">
-            <span class="f07r-w">LLMs</span>
-            <span class="f07r-w">select</span>
-            <span class="f07r-w">and</span>
-            <span class="f07r-w">reason.</span>
+          <div data-hf-id="hf-sih8" class="f07r-line" id="f07r-s1">
+            <span data-hf-id="hf-9a84" class="f07r-w">LLMs</span>
+            <span data-hf-id="hf-id6g" class="f07r-w">select</span>
+            <span data-hf-id="hf-0889" class="f07r-w">and</span>
+            <span data-hf-id="hf-hyyu" class="f07r-w">reason.</span>
           </div>
           <!-- Scene 2 — hard-cut replacement at the same anchor, same size -->
-          <div class="f07r-line" id="f07r-s2">
-            They <span class="f07r-ember">never</span> generate an author&rsquo;s words.
+          <div data-hf-id="hf-m6jx" class="f07r-line" id="f07r-s2">
+            They <span data-hf-id="hf-fqe8" class="f07r-ember">never</span> generate an author’s words.
           </div>
         </div>
 
         <!-- Scene 3 — mono-data footnote grounds the statements -->
-        <div class="f07r-foot-wrap">
-          <div class="f07r-foot-rule" id="f07r-foot-rule"></div>
-          <div class="f07r-foot" id="f07r-foot">
-            byte-identical substring check &middot; ungrounded quotes auto-rejected
+        <div data-hf-id="hf-458f" class="f07r-foot-wrap">
+          <div data-hf-id="hf-6bu2" class="f07r-foot-rule" id="f07r-foot-rule"></div>
+          <div data-hf-id="hf-a4fu" class="f07r-foot" id="f07r-foot">
+            byte-identical substring check · ungrounded quotes auto-rejected
           </div>
         </div>
       </div>
 
-      <div class="f07r-pagenum">07</div>
+      <div data-hf-id="hf-tm9k" class="f07r-pagenum">07</div>
     </div>
   </div>
 
@@ -192,12 +192,6 @@
         2.6
       );
       /* relay hold — word-spacing spreads slightly as the phrase holds */
-      tl.fromTo(
-        "#f07r-s2",
-        { wordSpacing: "0px" },
-        { wordSpacing: "5px", duration: 1.9, ease: "sine.out" },
-        2.62
-      );
 
       /* Scene 3 (4.8s) — mono footnote reveals on its cue; then everything
          holds dead still to the end (designated stillness beat, no exit). */
