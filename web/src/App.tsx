@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   currentSession,
   handleCallback,
@@ -28,6 +28,24 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<Tab>('talk');
   const [stuck, setStuck] = useState(false);
+  // Intro: the hero starts fullscreen, then flies into the top-left logo slot.
+  const logoRef = useRef<HTMLImageElement>(null);
+  const [introRect, setIntroRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
+  const [introDone, setIntroDone] = useState(false);
+
+  useEffect(() => {
+    if (window.location.pathname !== '/') return setIntroDone(true);
+    const start = setTimeout(() => {
+      const r = logoRef.current?.getBoundingClientRect();
+      if (r) setIntroRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+      else setIntroDone(true);
+    }, 500);
+    const end = setTimeout(() => setIntroDone(true), 4700);
+    return () => {
+      clearTimeout(start);
+      clearTimeout(end);
+    };
+  }, []);
 
   useEffect(() => {
     handleCallback()
@@ -49,9 +67,29 @@ export default function App() {
 
   return (
     <div className="page">
+      {!introDone && (
+        <div
+          className="intro-overlay"
+          style={
+            introRect
+              ? { ...introRect, borderRadius: 10 }
+              : { top: 0, left: 0, width: '100vw', height: '100vh', borderRadius: 0 }
+          }
+        >
+          <img src="/hero.jpg" alt="LivingBook — real authors, real news, real connection" />
+        </div>
+      )}
       <header className={stuck ? 'nav stuck' : 'nav'}>
         <div className="wrap nav-inner">
-          <span className="logo">📖 LivingBook</span>
+          <a href="/" className="logolink">
+            <img
+              ref={logoRef}
+              className="logo-img"
+              src="/hero.jpg"
+              alt="LivingBook"
+              style={{ opacity: introDone ? 1 : 0 }}
+            />
+          </a>
           {session ? (
             <div className="account">
               <NotificationMenu session={session} />
