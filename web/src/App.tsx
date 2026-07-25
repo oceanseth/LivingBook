@@ -235,7 +235,7 @@ export default function App() {
 
       <footer className="foot wrap">
         <span>
-          Built on Masky · Actian VectorAI · Senso · Guild.ai · Band · AWS — a Self-Evolving
+          Built on Masky · VoiceCert · AWS — born at the Self-Evolving
           Agents Hackathon project
         </span>
       </footer>

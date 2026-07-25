@@ -6,6 +6,6 @@ RUN npm ci --omit=dev
 COPY . .
 # Bake the embedding model into the image (no runtime HF download)
 RUN node warmup.mjs
-ENV PORT=8787 STORE=pg VECTOR_STORE=pg
+ENV PORT=8787 STORE=pg
 EXPOSE 8787
 CMD ["node", "server.mjs"]

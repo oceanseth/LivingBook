@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// One full marketing-agent run: live news feed → Actian retrieval → Guild-governed
+// One full marketing-agent run: live news feed → vector retrieval → Guild-governed
 // decision (versioned agent) → Masky speak-mode video + draft post.
 //
 // Usage: node --env-file=../.env marketing-run.mjs
@@ -20,7 +20,7 @@ const titles = [...rss.matchAll(/<item>[\s\S]*?<title>([\s\S]*?)<\/title>/g)]
   .slice(0, 5);
 console.log('trends:', titles.map((t) => `\n  - ${t}`).join(''));
 
-// 2. Retrieve candidate verbatim passages per trend from Actian
+// 2. Retrieve candidate verbatim passages per trend from the vector store
 const trends = [];
 const passages = [];
 for (const topic of titles.slice(0, 3)) {

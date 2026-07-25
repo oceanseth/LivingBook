@@ -1,5 +1,10 @@
 # Offboard: Actian VectorAI → pgvector on RDS
 
+**STATUS: DONE 2026-07-25.** All 3,581 vectors migrated with score parity; container,
+image, client dependency, and code paths removed. Cold backup in `server/local_data/`
+(delete ~Aug 25). Final doc sweep happens in the cleanup phase.
+
+
 Why: the local container dies with the laptop; Community Edition caps at 5K
 vectors and the 1M trial ends ~Aug 23. pgvector on the existing Postgres 16
 instance is AWS-native, uncapped, and battle-boring.

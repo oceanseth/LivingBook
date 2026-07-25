@@ -1,7 +1,6 @@
-// Storage backends. STORE=file (default, local dev) keeps today's JSON files;
-// STORE=pg persists the same shapes as JSONB rows in Postgres. VECTOR_STORE
-// likewise selects Actian (local Docker) or pgvector on RDS. Server code sees
-// one tiny interface either way.
+// Storage backends. STORE=file (default, local dev) keeps JSON files; STORE=pg
+// persists the same shapes as JSONB rows in Postgres. Vectors always live in
+// pgvector on RDS.
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 
 function fileStore(dir) {
@@ -55,28 +54,8 @@ export async function createStore(dir) {
 }
 
 // ── vectors ──────────────────────────────────────────────────────────────────
-// Both backends return search hits as [{ score, payload }] with cosine
-// similarity scores, so retrieval thresholds are backend-independent.
-
-async function actianVectors() {
-  const { VectorAIClient } = await import('@actian/vectorai-client');
-  const client = new VectorAIClient('localhost:6574', { restUrl: 'http://localhost:6573' });
-  return {
-    async ensure(slug) {
-      try {
-        await client.collections.create(`book_${slug}`, { dimension: 384, distanceMetric: 'COSINE' });
-      } catch {
-        /* exists */
-      }
-    },
-    async upsert(slug, points) {
-      await client.points.upsert(`book_${slug}`, points);
-    },
-    async search(slug, vector, limit) {
-      return client.points.search(`book_${slug}`, vector, { limit, withPayload: true });
-    },
-  };
-}
+// pgvector on RDS. Search hits return [{ score, payload }] with cosine
+// similarity scores.
 
 async function pgVectors(sharedPool) {
   const pool = sharedPool ?? (await pgPool());
@@ -114,7 +93,5 @@ async function pgVectors(sharedPool) {
 }
 
 export async function createVectorStore(sharedStore) {
-  return (process.env.VECTOR_STORE ?? 'actian') === 'pg'
-    ? pgVectors(sharedStore?.pool)
-    : actianVectors();
+  return pgVectors(sharedStore?.pool);
 }

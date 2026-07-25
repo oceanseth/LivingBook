@@ -1,18 +1,17 @@
 #!/usr/bin/env node
-// Ingest the KJV Bible into Actian VectorAI DB as verbatim source units.
+// Ingest the KJV Bible into the vector store as verbatim source units.
 // Chunks are 5-verse windows; the payload keeps the EXACT text plus verse
 // provenance so answers can quote byte-identical passages (no-invention rule).
 //
-// Community Edition caps 5K vectors, so we ingest a high-question-volume
-// subset by default (Genesis, Psalms, Proverbs + the New Testament).
-// Pass --all to ingest everything (needs the 30-day/1M trial).
+// A high-question-volume subset is ingested by default (Genesis, Psalms,
+// Proverbs + the New Testament); pass --all to ingest everything.
 //
 // Usage: node server/ingest-bible.mjs [--all] [path/to/en_kjv.json]
 import { readFileSync } from 'node:fs';
-import { VectorAIClient } from '@actian/vectorai-client';
+import { createVectorStore } from './store.mjs';
 import { pipeline } from '@xenova/transformers';
 
-const COLLECTION = 'book_bible-kjv';
+const SLUG = 'bible-kjv';
 const DIM = 384; // all-MiniLM-L6-v2
 const WINDOW = 5;
 const SUBSET = new Set([
@@ -57,14 +56,7 @@ async function embedText(text) {
   return Array.from(out.data);
 }
 
-const client = new VectorAIClient('localhost:6574', { restUrl: 'http://localhost:6573' });
-
-try {
-  await client.collections.create(COLLECTION, { dimension: DIM, distanceMetric: 'COSINE' });
-  console.log(`created collection ${COLLECTION}`);
-} catch (e) {
-  console.log(`collection create: ${e.message} (continuing — may already exist)`);
-}
+const vectors = await createVectorStore();
 
 const BATCH = 64;
 let done = 0;
@@ -78,8 +70,8 @@ for (let i = 0; i < chunks.length; i += BATCH) {
       payload: { source_type: 'book', ...c },
     });
   }
-  await client.points.upsert(COLLECTION, points);
+  await vectors.upsert(SLUG, points);
   done += batch.length;
   if (done % 512 < BATCH) console.log(`upserted ${done}/${chunks.length}`);
 }
-console.log(`ingest complete: ${done} verbatim units in ${COLLECTION}`);
+console.log(`ingest complete: ${done} verbatim units in ${SLUG}`);

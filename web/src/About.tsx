@@ -38,7 +38,7 @@ export default function About() {
       <section className="panel">
         <h2>The stack</h2>
         <p className="sub">
-          <strong>Actian VectorAI DB</strong> stores every verbatim passage with provenance ·{' '}
+          <strong>pgvector on AWS</strong> stores every verbatim passage with provenance ·{' '}
           <strong>Pioneer</strong> reasons over what&rsquo;s retrieved under a no-quote
           contract · <strong>Masky</strong> is every identity and every avatar render ·{' '}
           <strong>VoiceCert</strong> proves a live human spoke each recorded word ·{' '}

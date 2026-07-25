@@ -163,7 +163,7 @@ async function newsReason(slug, story) {
   if (reasonCache.has(key)) return reasonCache.get(key);
   const book = books[slug];
   if (!book) throw new Error(`unknown book: ${slug}`);
-  // Hybrid retrieval per Actian's hybrid-RAG pattern: embed the raw story AND a
+  // Hybrid retrieval: embed the raw story AND a
   // Pioneer-reformulated thematic query (headlines full of proper nouns embed
   // poorly against a timeless corpus), then merge by best score.
   const reformRes = await fetch('https://api.pioneer.ai/v1/chat/completions', {

@@ -53,7 +53,7 @@ What stays (not sponsors, ours): **Masky** (identity + video rendering),
 ## Cleanup (only after every box above is checked)
 
 - [ ] Kill: cloudflared, tunnel-watchdog, caffeinate, local `node server.mjs`
-- [ ] Stop local Docker `vectorai` (keep `local_data/` as cold backup 30 days)
+- [x] Stop local Docker `vectorai` — DONE 2026-07-25 (container + image removed; `local_data/` kept as cold backup)
 - [ ] Delete web `api-config.js` indirection or point it at the permanent URL
 - [ ] Guild: deactivate time + API triggers; keep workspace/agent for the
       public Agent Hub listing (it costs nothing idle)
