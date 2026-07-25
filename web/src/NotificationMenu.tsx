@@ -115,14 +115,12 @@ export default function NotificationMenu({ session }: { session: MaskySession })
               </a>
               {a.status === 'pending' ? (
                 <>
-                  <p className="notifreply">“{a.suggestedReply.slice(0, 140)}…”</p>
-                  <button
-                    className="ghost small"
-                    disabled={busy === a.id}
-                    onClick={() => approve(a.id)}
-                  >
-                    {busy === a.id ? 'Rendering…' : '✓ Approve & render'}
-                  </button>
+                  <a className="notifreply" href={`/alerts/${a.id}`} title="Open full outreach page">
+                    “{a.suggestedReply.slice(0, 140)}…”
+                  </a>
+                  <a className="ghost small" href={`/alerts/${a.id}`}>
+                    ✎ Review &amp; approve
+                  </a>
                 </>
               ) : (
                 a.turnLiveUrl && (

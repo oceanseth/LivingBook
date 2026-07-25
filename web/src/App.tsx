@@ -12,6 +12,7 @@ import TalkToBook from './TalkToBook';
 import Books from './Books';
 import News from './News';
 import BookPage from './BookPage';
+import AlertPage from './AlertPage';
 import About from './About';
 import './App.css';
 
@@ -121,6 +122,8 @@ export default function App() {
 
   const bookMatch = window.location.pathname.match(/^\/b\/([a-z0-9-]+)\/?$/);
   if (bookMatch) return <BookPage slug={bookMatch[1]} session={session} />;
+  const alertMatch = window.location.pathname.match(/^\/alerts\/([a-z0-9_]+)\/?$/);
+  if (alertMatch) return <AlertPage id={alertMatch[1]} session={session} />;
 
   return (
     <div className="page">

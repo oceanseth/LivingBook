@@ -1138,3 +1138,63 @@ button:disabled {
 .notifdismiss:hover {
   opacity: 1;
 }
+
+.alertpage {
+  max-width: 680px;
+  width: 100%;
+  margin: 1rem auto;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.alerttitle {
+  font-size: 1.35rem;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.alerttitle a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.alertpage textarea {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #9993;
+  font-size: 1rem;
+  font-family: inherit;
+  background: transparent;
+  color: inherit;
+}
+
+.postwhere {
+  padding-left: 1.2rem;
+  font-size: 0.92rem;
+  opacity: 0.9;
+}
+
+.postwhere li {
+  margin-bottom: 0.4rem;
+}
+
+.alertactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  margin-top: 0.4rem;
+}
+
+a.notifreply {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+a.notifreply:hover {
+  color: #7c3aed;
+}

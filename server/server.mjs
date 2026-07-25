@@ -804,6 +804,12 @@ const server = createServer(async (req, res) => {
       mine.sort((a, b) => b.createdAt - a.createdAt);
       return res.writeHead(200, headers).end(JSON.stringify({ alerts: mine.slice(0, 20) }));
     }
+    const oneAlert = url.match(/^\/api\/alerts\/([a-z0-9_]+)$/);
+    if (req.method === 'GET' && oneAlert) {
+      const alert = alerts[oneAlert[1]];
+      if (!alert) return res.writeHead(404, headers).end('{"error":"unknown alert"}');
+      return res.writeHead(200, headers).end(JSON.stringify({ alert }));
+    }
     const dismissMatch = url.match(/^\/api\/alerts\/([a-z0-9_]+)\/dismiss$/);
     if (req.method === 'POST' && dismissMatch) {
       const alert = alerts[dismissMatch[1]];
@@ -818,6 +824,12 @@ const server = createServer(async (req, res) => {
       if (!alert) return res.writeHead(404, headers).end('{"error":"unknown alert"}');
       const book = books[alert.slug];
       const t = token || SERVICE_TOKEN;
+      if (data.mode === 'text') {
+        alert.status = 'approved';
+        alert.finalReply = `${(data.reply ?? alert.suggestedReply).trim()} — ask my book anything: https://livingbook.masky.ai/b/${alert.slug}`;
+        saveAlerts();
+        return res.writeHead(200, headers).end(JSON.stringify({ finalReply: alert.finalReply }));
+      }
       // Render the exact turn: the book speaks its matched passage, on-platform.
       const conv = await fetch(`${MASKY}/conversations`, {
         method: 'POST',
