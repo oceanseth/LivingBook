@@ -1,5 +1,12 @@
 # Offboard: Pioneer → Amazon Bedrock
 
+**STATUS: DONE 2026-07-25.** `llmChat()` shipped in image v3 with `LLM_PROVIDER=bedrock`
+default (Haiku 4.5 fast tier, Sonnet 5 smart tier, Converse API). One-time Anthropic
+use-case form submitted for the account (as Masky). Parity test passed live (Red Sea
+story → Acts 27 retrieval, refs-only reasoning, real articles). Deviation from step 2:
+no temperature is sent — Sonnet 5 rejects non-default sampling params. Remaining user
+action: cancel/downgrade the Pioneer sub (step 5).
+
 Why: Pioneer's `pioneer/auto` router is a paid per-token sub. Bedrock gives the
 same class of models inside our AWS bill/IAM, no separate vendor.
 

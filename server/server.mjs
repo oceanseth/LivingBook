@@ -153,7 +153,7 @@ async function news() {
   return items;
 }
 
-// News-tab grounded reasoning via Pioneer (pioneer/auto): the model may reason
+// News-tab grounded reasoning via llmChat (Bedrock by default): the model may reason
 // freely about RELEVANCE, but every quote must be one of the retrieved verbatim
 // units — enforced by substring post-check. Real related links come from a live
 // news search, so references are real, never invented.
@@ -163,24 +163,16 @@ async function newsReason(slug, story) {
   if (reasonCache.has(key)) return reasonCache.get(key);
   const book = books[slug];
   if (!book) throw new Error(`unknown book: ${slug}`);
-  // Hybrid retrieval: embed the raw story AND a
-  // Pioneer-reformulated thematic query (headlines full of proper nouns embed
+  // Hybrid retrieval: embed the raw story AND an
+  // LLM-reformulated thematic query (headlines full of proper nouns embed
   // poorly against a timeless corpus), then merge by best score.
-  const reformRes = await fetch('https://api.pioneer.ai/v1/chat/completions', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${process.env.PIONEER_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: process.env.PIONEER_MODEL ?? 'claude-haiku-4-5',
-      max_tokens: 60,
-      messages: [
-        {
-          role: 'user',
-          content: `Rewrite this news story as a short search query of timeless universal themes (no proper nouns, no dates), the way a concordance would index it. Reply with the query only.\nStory: ${story}`,
-        },
-      ],
-    }),
-  }).then((r) => r.json()).catch(() => null);
-  const essence = reformRes?.choices?.[0]?.message?.content?.trim().replace(/^"|"$/g, '') || story;
+  const reform = await llmChat([
+    {
+      role: 'user',
+      content: `Rewrite this news story as a short search query of timeless universal themes (no proper nouns, no dates), the way a concordance would index it. Reply with the query only.\nStory: ${story}`,
+    },
+  ], 60).catch(() => null);
+  const essence = reform?.content?.replace(/^"|"$/g, '') || story;
   const a = await ask(slug, story, 0.22);
   const b = await ask(slug, essence, 0.22);
   const bestByRef = new Map();
@@ -220,13 +212,9 @@ async function newsReason(slug, story) {
   let reasoning = null;
   let model = null;
   for (let attempt = 0; attempt < 2; attempt++) {
-    const pioneerRes = await fetch('https://api.pioneer.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${process.env.PIONEER_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: process.env.PIONEER_MODEL ?? 'claude-haiku-4-5', max_tokens: 600, messages }),
-    }).then((r) => r.json());
-    const candidate = pioneerRes.choices?.[0]?.message?.content?.trim();
-    if (!candidate) throw new Error(`pioneer failed: ${JSON.stringify(pioneerRes).slice(0, 200)}`);
+    const llmRes = await llmChat(messages, 600, { tier: 'smart' });
+    const candidate = llmRes.content;
+    if (!candidate) throw new Error(`llm reasoning failed (${LLM_PROVIDER})`);
     // No-invention post-check: the reasoner must not quote at all. Reject any
     // quotation-mark usage or any reproduced 40+char passage span.
     const quoted = [...candidate.matchAll(/[“"]([^”"]{12,})[”"]/g)].map((m) => m[1].trim());
@@ -241,7 +229,7 @@ async function newsReason(slug, story) {
         : undefined);
     if (!violation) {
       reasoning = candidate;
-      model = pioneerRes.model;
+      model = llmRes.model;
       break;
     }
     messages.push({ role: 'assistant', content: candidate });
@@ -287,13 +275,36 @@ async function render(question, token, { avatarId, avatarOwnerUserId, output = '
 const alerts = await store.load('alerts', {});
 const saveAlerts = () => store.save('alerts', alerts);
 
-async function pioneerChat(messages, max_tokens = 300) {
+// ── LLM provider: Bedrock Converse (default) or Pioneer (submission-era path) ──
+// tier 'fast' = query reformulation / keyword work; 'smart' = user-facing prose.
+const LLM_PROVIDER = process.env.LLM_PROVIDER ?? 'bedrock';
+const BEDROCK_FAST = process.env.BEDROCK_MODEL_FAST ?? 'us.anthropic.claude-haiku-4-5-20251001-v1:0';
+const BEDROCK_SMART = process.env.BEDROCK_MODEL_SMART ?? 'us.anthropic.claude-sonnet-5';
+let bedrock = null;
+async function llmChat(messages, maxTokens = 300, { tier = 'fast' } = {}) {
+  if (LLM_PROVIDER === 'bedrock') {
+    const { BedrockRuntimeClient, ConverseCommand } = await import('@aws-sdk/client-bedrock-runtime');
+    bedrock ??= new BedrockRuntimeClient({ region: process.env.AWS_REGION ?? 'us-east-1' });
+    const modelId = tier === 'smart' ? BEDROCK_SMART : BEDROCK_FAST;
+    const system = messages.filter((m) => m.role === 'system').map((m) => ({ text: m.content }));
+    const turns = messages
+      .filter((m) => m.role !== 'system')
+      .map((m) => ({ role: m.role, content: [{ text: m.content }] }));
+    // No sampling params: Sonnet 5 rejects non-default temperature/top_p.
+    const out = await bedrock.send(new ConverseCommand({
+      modelId,
+      ...(system.length ? { system } : {}),
+      messages: turns,
+      inferenceConfig: { maxTokens },
+    }));
+    return { content: out.output?.message?.content?.[0]?.text?.trim(), model: modelId };
+  }
   const r = await fetch('https://api.pioneer.ai/v1/chat/completions', {
     method: 'POST',
     headers: { Authorization: `Bearer ${process.env.PIONEER_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: process.env.PIONEER_MODEL ?? 'claude-haiku-4-5', max_tokens, messages }),
+    body: JSON.stringify({ model: process.env.PIONEER_MODEL ?? 'claude-haiku-4-5', max_tokens: maxTokens, messages }),
   }).then((x) => x.json());
-  return r.choices?.[0]?.message?.content?.trim();
+  return { content: r.choices?.[0]?.message?.content?.trim(), model: r.model };
 }
 
 async function guildSuggestReply(book, signal, passages) {
@@ -326,15 +337,15 @@ async function guildSuggestReply(book, signal, passages) {
         }
       }
     }
-  } catch { /* fall through to Pioneer */ }
-  const reply = await pioneerChat([
+  } catch { /* fall through to direct LLM drafting */ }
+  const drafted = await llmChat([
     {
       role: 'system',
       content: `Draft a <=240-char reply to a post/paper on behalf of the author of "${book.title}". Ground it ONLY in the provided passages (refer to them, do not fabricate). Warm, specific, no hashtags.`,
     },
     { role: 'user', content: JSON.stringify({ signal, passages: passages.slice(0, 2) }) },
-  ]);
-  return { reply, via: 'pioneer' };
+  ], 300, { tier: 'smart' });
+  return { reply: drafted.content, via: LLM_PROVIDER };
 }
 
 async function scoutBook(slug) {
@@ -349,12 +360,12 @@ async function scoutBook(slug) {
     }
     return [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([w]) => w).join(' ');
   };
-  let terms = await pioneerChat([
+  let terms = (await llmChat([
     {
       role: 'user',
       content: `Reply with ONLY a search query, nothing else — 3 to 6 words, no quotes, no explanation — for finding literature related to:\n${seed}`,
     },
-  ], 40).catch(() => null);
+  ], 40).catch(() => null))?.content;
   terms = terms?.split('\n').filter((l) => l.trim()).pop()?.replace(/[*_#"'`]/g, '').trim();
   if (!terms || terms.split(/\s+/).length > 8) terms = keywordTerms();
   const candidates = [];

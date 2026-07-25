@@ -57,7 +57,7 @@ What stays (not sponsors, ours): **Masky** (identity + video rendering),
 - [ ] Delete web `api-config.js` indirection or point it at the permanent URL
 - [ ] Guild: deactivate time + API triggers; keep workspace/agent for the
       public Agent Hub listing (it costs nothing idle)
-- [ ] Pioneer: downgrade/cancel sub once Bedrock path verified
+- [ ] Pioneer: downgrade/cancel sub — Bedrock path verified live 2026-07-25 (Seth's action)
 - [ ] Senso: GEO schedule already reduced; decide subscription
 - [ ] Rotate keys that traveled through chat during the hackathon:
       Masky client secret + mky_ key, trigger keys; refresh SSM entries
