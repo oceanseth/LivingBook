@@ -795,7 +795,7 @@ const server = createServer(async (req, res) => {
     }
     if (req.method === 'GET' && url.startsWith('/api/alerts')) {
       const all = url.includes('all=1');
-      let mine = Object.values(alerts);
+      let mine = Object.values(alerts).filter((a) => a.status !== 'dismissed');
       if (!all) {
         const user = await maskyUser(token);
         if (!user) return res.writeHead(401, headers).end('{"error":"auth required (or ?all=1 demo mode)"}');
@@ -803,6 +803,14 @@ const server = createServer(async (req, res) => {
       }
       mine.sort((a, b) => b.createdAt - a.createdAt);
       return res.writeHead(200, headers).end(JSON.stringify({ alerts: mine.slice(0, 20) }));
+    }
+    const dismissMatch = url.match(/^\/api\/alerts\/([a-z0-9_]+)\/dismiss$/);
+    if (req.method === 'POST' && dismissMatch) {
+      const alert = alerts[dismissMatch[1]];
+      if (!alert) return res.writeHead(404, headers).end('{"error":"unknown alert"}');
+      alert.status = 'dismissed';
+      saveAlerts();
+      return res.writeHead(200, headers).end('{"ok":true}');
     }
     const approveMatch = url.match(/^\/api\/alerts\/([a-z0-9_]+)\/approve$/);
     if (req.method === 'POST' && approveMatch) {

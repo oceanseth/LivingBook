@@ -49,6 +49,19 @@ export default function NotificationMenu({ session }: { session: MaskySession })
 
   const pending = alerts.filter((a) => a.status === 'pending').length;
 
+  async function dismiss(id: string) {
+    setBusy(id);
+    try {
+      await fetch(`${API}/api/alerts/${id}/dismiss`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.accessToken}` },
+      });
+      reload();
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function approve(id: string) {
     setBusy(id);
     try {
@@ -84,9 +97,19 @@ export default function NotificationMenu({ session }: { session: MaskySession })
           {alerts.length === 0 && <p className="sub">No signals yet. The scout runs hourly.</p>}
           {alerts.slice(0, 8).map((a) => (
             <div key={a.id} className="notifitem">
-              <p className="notifkind">
-                {a.kind === 'mention' ? '🗣 Mention' : '🔭 Related'} · {a.bookTitle}
-              </p>
+              <div className="notifrow">
+                <p className="notifkind">
+                  {a.kind === 'mention' ? '🗣 Mention' : '🔭 Related'} · {a.bookTitle}
+                </p>
+                <button
+                  className="notifdismiss"
+                  title="Dismiss"
+                  disabled={busy === a.id}
+                  onClick={() => dismiss(a.id)}
+                >
+                  ✕
+                </button>
+              </div>
               <a href={a.signal.url} target="_blank" rel="noreferrer" className="notiftitle">
                 {a.signal.title}
               </a>

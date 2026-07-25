@@ -50,6 +50,16 @@ export default function Alerts({ alerts, reload }: { alerts: Alert[]; reload: ()
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
 
+  async function dismiss(alert: Alert) {
+    setBusy(alert.id);
+    try {
+      await fetch(`${API}/api/alerts/${alert.id}/dismiss`, { method: 'POST' });
+      reload();
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function approve(alert: Alert) {
     setBusy(alert.id);
     try {
@@ -104,6 +114,9 @@ export default function Alerts({ alerts, reload }: { alerts: Alert[]; reload: ()
                 )}
               </Pressable>
               <Text style={st.via}>drafted via {a.suggestedVia}</Text>
+              <Pressable style={st.dismiss} onPress={() => dismiss(a)} disabled={busy === a.id}>
+                <Text style={st.dismissText}>✕ Dismiss</Text>
+              </Pressable>
             </>
           ) : (
             <>
@@ -151,4 +164,6 @@ const st = StyleSheet.create({
   via: { fontSize: 11, color: '#5d5a72', marginTop: 6 },
   final: { fontSize: 13, color: '#333', marginTop: 8, lineHeight: 19 },
   link: { color: '#7c3aed', fontSize: 14, marginTop: 8, fontWeight: '600' },
+  dismiss: { alignSelf: 'flex-start', marginTop: 6 },
+  dismissText: { color: '#5d5a72', fontSize: 12 },
 });

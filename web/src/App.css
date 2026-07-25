@@ -1118,3 +1118,23 @@ button:disabled {
   align-items: center;
   gap: 0.5rem;
 }
+
+.notifrow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notifdismiss {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.5;
+  font-size: 0.85rem;
+  padding: 0 0.2rem;
+}
+
+.notifdismiss:hover {
+  opacity: 1;
+}
