@@ -1,5 +1,7 @@
 # 📖 LivingBook
 
+![LivingBook — Real Authors. Real News. Real Connection.](docs/hero.png)
+
 > *"Some of the best ideas in the world come from the most unexpected places."*
 
 **Books that talk back.** LivingBook brings real authors' books to life as talking video
