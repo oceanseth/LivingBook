@@ -54,7 +54,10 @@ What stays (not sponsors, ours): **Masky** (identity + video rendering),
 
 - [ ] Kill: cloudflared, tunnel-watchdog, caffeinate, local `node server.mjs`
 - [x] Stop local Docker `vectorai` — DONE 2026-07-25 (container + image removed; `local_data/` kept as cold backup)
-- [ ] Delete web `api-config.js` indirection or point it at the permanent URL
+- [x] Web `api-config.js` → same-origin '' + `api-config.json` → permanent URL, fixed
+      in repo source (public/) so rebuilds can't revert — DONE 2026-07-26. Root cause
+      of the laptop-off outage: a Jul 25 build sync re-uploaded the repo's stale
+      tunnel-pointing api-config.js over the manual fix.
 - [ ] Guild: deactivate time + API triggers; keep workspace/agent for the
       public Agent Hub listing (it costs nothing idle)
 - [ ] Pioneer: downgrade/cancel sub — Bedrock path verified live 2026-07-25 (Seth's action)

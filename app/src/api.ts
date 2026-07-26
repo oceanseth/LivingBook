@@ -1,7 +1,7 @@
 // Shared API client — same endpoints the web app uses (server/server.mjs).
-// The API base resolves at runtime from the site's auto-managed config (the
-// tunnel hostname rotates); EXPO_PUBLIC_API_URL overrides for dev.
-const FALLBACK = 'https://tag-rca-moon-filled.trycloudflare.com';
+// The API base resolves at runtime from the site's config; the fallback is the
+// permanent CloudFront domain. EXPO_PUBLIC_API_URL overrides for dev.
+const FALLBACK = 'https://livingbook.masky.ai';
 let apiBase: string | null = process.env.EXPO_PUBLIC_API_URL ?? null;
 
 export async function base(): Promise<string> {

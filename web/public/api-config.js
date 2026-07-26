@@ -1,3 +1,3 @@
-// Runtime API endpoint — update this file (S3 upload + invalidation) when the
-// tunnel rotates; no rebuild needed.
-window.__API__ = 'https://tag-rca-moon-filled.trycloudflare.com';
+// Runtime API endpoint. Empty string = same-origin: CloudFront routes /api/*
+// to the App Runner service. Update via S3 upload + invalidation, no rebuild.
+window.__API__ = '';
