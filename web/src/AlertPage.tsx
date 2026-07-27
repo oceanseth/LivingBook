@@ -32,12 +32,14 @@ export default function AlertPage({ id, session }: { id: string; session: MaskyS
 
   const reload = () =>
     fetch(`${API}/api/alerts/${id}`)
-      .then((r) => r.json())
-      .then((d) => {
+      .then(async (r) => {
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(d.error ?? `HTTP ${r.status}`);
         setAlert(d.alert ?? null);
-        if (d.alert && !reply) setReply(d.alert.suggestedReply);
+        if (!d.alert) throw new Error('unknown alert');
+        if (!reply) setReply(d.alert.suggestedReply);
       })
-      .catch(() => {});
+      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
   useEffect(() => {
     reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -73,7 +75,7 @@ export default function AlertPage({ id, session }: { id: string; session: MaskyS
           <a className="bookpage-home" href="/">📖 LivingBook</a>
         </div>
         <div className="bookpage-center">
-          <p className="sub">Loading alert…</p>
+          {error ? <p className="error">Couldn&rsquo;t load this alert: {error}</p> : <p className="sub">Loading alert…</p>}
         </div>
       </div>
     );

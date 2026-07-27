@@ -797,7 +797,7 @@ const server = createServer(async (req, res) => {
       const result = await scoutBook(data.slug);
       return res.writeHead(200, headers).end(JSON.stringify(result));
     }
-    if (req.method === 'GET' && url.startsWith('/api/alerts')) {
+    if (req.method === 'GET' && (url === '/api/alerts' || url.startsWith('/api/alerts?'))) {
       const all = url.includes('all=1');
       let mine = Object.values(alerts).filter((a) => a.status !== 'dismissed');
       if (!all) {
