@@ -1198,3 +1198,18 @@ a.notifreply {
 a.notifreply:hover {
   color: #7c3aed;
 }
+
+/* ── Listen (audiobook) ─────────────────────────────────────────────── */
+.listen { text-align: left; }
+.listen-chapters { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-direction: column; gap: 14px; }
+.listen-chapters li { border-top: 1px solid var(--border); padding-top: 12px; }
+.listen-chapters li.listen-hidden { display: none; }
+.listen-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.listen-preview { color: var(--muted); font-size: 0.92rem; margin: 6px 0 0; }
+.listen-gate { display: block; margin-top: 6px; font-size: 0.85rem; color: var(--muted); }
+.listen-owner { border: 1px dashed var(--border-strong); border-radius: var(--radius-sm); padding: 12px 14px; margin: 10px 0 4px; }
+.listen-owner h3 { margin: 0 0 6px; }
+.listen-release { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; font-size: 0.9rem; margin: 8px 0; }
+.listen-release label { display: flex; gap: 5px; align-items: center; cursor: pointer; }
+.listen-tribeurl { width: 100%; max-width: 420px; padding: 7px 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); }
+.linklike { background: none; border: none; padding: 0; color: var(--accent); cursor: pointer; font: inherit; text-decoration: underline; }

@@ -15,12 +15,14 @@ import { createServer } from 'node:http';
 import { createRequire } from 'node:module';
 import { pipeline } from '@xenova/transformers';
 import { createStore, createVectorStore } from './store.mjs';
+import { createAudiobooks } from './audiobook.mjs';
 const { PDFParse } = createRequire(import.meta.url)('pdf-parse');
 
 const PORT = process.env.PORT ?? 8787;
 const SERVICE_TOKEN = process.env.MASKY_SERVICE_TOKEN;
 const NARRATOR_AVATAR_ID = process.env.MASKY_NARRATOR_AVATAR_ID;
 const NARRATOR_OWNER = process.env.MASKY_NARRATOR_OWNER;
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN; // admin ops on ownerless books (bible-kjv)
 const MASKY = 'https://masky.ai/api';
 const SCORE_THRESHOLD = 0.35;
 
@@ -472,6 +474,24 @@ async function scoutSweep(reason) {
 setTimeout(() => scoutSweep('startup'), 3 * 60 * 1000);
 setInterval(() => scoutSweep('hourly'), 3600 * 1000);
 
+// ── Audiobooks ──────────────────────────────────────────────────────────────
+const audiobooks = createAudiobooks({
+  store,
+  vectors,
+  books,
+  serviceToken: SERVICE_TOKEN,
+  narrator: { avatarId: NARRATOR_AVATAR_ID, owner: NARRATOR_OWNER },
+});
+await audiobooks.ready;
+
+// Owner of the book — or the admin token for ownerless/public-domain books.
+async function audiobookAuthor(book, token, req) {
+  if (ADMIN_TOKEN && req.headers['x-admin-token'] === ADMIN_TOKEN) return { admin: true, sub: null };
+  const user = await maskyUser(token);
+  if (user && book.ownerSub && user.sub === book.ownerSub) return { admin: false, sub: user.sub };
+  return null;
+}
+
 const server = createServer(async (req, res) => {
   const headers = {
     'Content-Type': 'application/json',
@@ -564,6 +584,68 @@ const server = createServer(async (req, res) => {
       };
       saveBooks();
       return res.writeHead(200, headers).end(JSON.stringify({ book: books[slug] }));
+    }
+
+    // ── Audiobook routes ────────────────────────────────────────────────────
+    const abMatch = url.match(/^\/api\/books\/([a-z0-9-]+)\/audiobook(\/.*)?$/);
+    if (abMatch) {
+      const book = books[abMatch[1]];
+      if (!book) return res.writeHead(404, headers).end('{"error":"unknown book"}');
+      const slug = book.slug;
+      const sub = (await maskyUser(token))?.sub ?? null;
+      const author = await audiobookAuthor(book, token, req);
+      const rest = abMatch[2] ?? '';
+
+      if (req.method === 'GET' && rest === '') {
+        await audiobooks.refresh(slug).catch(() => {});
+        const view = audiobooks.publicView(audiobooks.get(slug), sub, Boolean(author));
+        return res.writeHead(200, headers).end(JSON.stringify({ audiobook: view }));
+      }
+      if (req.method === 'POST' && rest === '/estimate') {
+        if (!author) return res.writeHead(403, headers).end('{"error":"author only"}');
+        return res.writeHead(200, headers).end(JSON.stringify({ estimate: await audiobooks.estimate(slug) }));
+      }
+      if (req.method === 'POST' && rest === '/render') {
+        if (!author) return res.writeHead(403, headers).end('{"error":"author only"}');
+        // Payment: rendering spends the author's Masky credits. Today the
+        // service avatar renders (bills the service account); per-author
+        // billing arrives with the authors' own `generate`-scoped tokens.
+        const ab = await audiobooks.startRender(slug, {
+          test: data.test !== false, // short-circuit: previews only, until full render ships
+          release: data.release ?? 'free',
+        });
+        return res.writeHead(202, headers).end(JSON.stringify({ audiobook: audiobooks.publicView(ab, sub, true) }));
+      }
+      if (req.method === 'POST' && rest === '/settings') {
+        if (!author) return res.writeHead(403, headers).end('{"error":"author only"}');
+        const ab = audiobooks.setSettings(slug, { release: data.release, tribeUrl: data.tribeUrl });
+        return res.writeHead(200, headers).end(JSON.stringify({ audiobook: audiobooks.publicView(ab, sub, true) }));
+      }
+      if (req.method === 'POST' && rest === '/grant') {
+        if (!author) return res.writeHead(403, headers).end('{"error":"author only"}');
+        if (!data.sub) return res.writeHead(400, headers).end('{"error":"sub required"}');
+        audiobooks.grant(slug, data.sub, data.via ?? 'manual');
+        return res.writeHead(200, headers).end('{"ok":true}');
+      }
+      if (req.method === 'GET' && rest === '/download') {
+        if (!author) return res.writeHead(403, headers).end('{"error":"author only"}');
+        return res.writeHead(200, headers).end(JSON.stringify(await audiobooks.downloadManifest(slug)));
+      }
+      const audioMatch = rest.match(/^\/chapter\/(\d+)\/audio$/);
+      if (req.method === 'GET' && audioMatch) {
+        const idx = Number(audioMatch[1]);
+        const scope = (req.url.includes('scope=full') ? 'full' : 'preview');
+        if (scope === 'full') {
+          const access = audiobooks.canListenFull(audiobooks.get(slug), sub, Boolean(author));
+          if (!access.ok) return res.writeHead(403, headers).end(JSON.stringify({ error: 'no access', release: access.why }));
+        }
+        try {
+          return res.writeHead(200, headers).end(JSON.stringify(await audiobooks.chapterAudioUrl(slug, idx, scope)));
+        } catch (e) {
+          return res.writeHead(409, headers).end(JSON.stringify({ error: e.message }));
+        }
+      }
+      return res.writeHead(404, headers).end('{"error":"unknown audiobook route"}');
     }
 
     const contentMatch = url.match(/^\/api\/books\/([a-z0-9-]+)\/content$/);
