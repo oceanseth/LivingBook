@@ -189,9 +189,30 @@ export default function Listen({ slug, session, isOwner }: { slug: string; sessi
             />
           )}
           <div className="alertactions">
-            <a className="ghost" href={`${API}/api/books/${slug}/audiobook/download`} target="_blank" rel="noreferrer">
-              ⬇ Download render manifest
-            </a>
+            <button
+              className="ghost"
+              disabled={busy === 'download'}
+              onClick={async () => {
+                setBusy('download');
+                setError(null);
+                try {
+                  const r = await fetch(`${API}/api/books/${slug}/audiobook/download`, { headers: authHeaders });
+                  const d = await r.json().catch(() => ({}));
+                  if (!r.ok) throw new Error(d.error ?? `HTTP ${r.status}`);
+                  const a = document.createElement('a');
+                  a.href = URL.createObjectURL(new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }));
+                  a.download = `${slug}-audiobook-manifest.json`;
+                  a.click();
+                  URL.revokeObjectURL(a.href);
+                } catch (e) {
+                  setError(e instanceof Error ? e.message : String(e));
+                } finally {
+                  setBusy(null);
+                }
+              }}
+            >
+              {busy === 'download' ? 'Fetching…' : '⬇ Download render manifest'}
+            </button>
           </div>
         </div>
       )}
