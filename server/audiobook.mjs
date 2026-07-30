@@ -27,11 +27,20 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
   const maskyHeaders = { Authorization: `Bearer ${serviceToken}`, 'Content-Type': 'application/json' };
 
   // ── estimation ────────────────────────────────────────────────────────────
+  // "Book text" = units tagged source_type 'book' — plus units whose
+  // source_title equals the book title: ingest normalizes book/PDF uploads to
+  // that title, so this catches uploads saved before the ingest coercion fix
+  // (e.g. a PDF uploaded with the dropdown still on 'podcast').
+  // The filename test catches pre-normalization uploads where a PDF landed as
+  // e.g. source_type 'podcast', source_title 'my book FINAL.pdf'.
+  const BOOK_TEXT_WHERE =
+    "book_slug=$1 AND (coalesce(payload->>'source_type','book') = 'book' OR payload->>'source_title' = $2 OR payload->>'source_title' ~* '\\.(pdf|docx?|txt|md|epub)\\s*$')";
+
   async function bookTextStats(slug) {
     // Sum the stored verbatim units — the exact text a full render would speak.
     const r = await pool.query(
-      "SELECT count(*)::int AS units, coalesce(sum(length(payload->>'text')),0)::bigint AS chars FROM units WHERE book_slug=$1 AND coalesce(payload->>'source_type','book') = 'book'",
-      [slug],
+      `SELECT count(*)::int AS units, coalesce(sum(length(payload->>'text')),0)::bigint AS chars FROM units WHERE ${BOOK_TEXT_WHERE}`,
+      [slug, books[slug]?.title ?? ''],
     );
     return { units: r.rows[0].units, chars: Number(r.rows[0].chars) };
   }
@@ -72,8 +81,8 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
     // job (see SKILL.md § Chapter detection); until an author re-uploads with
     // structure, fall back to one chapter per source document.
     const r = await pool.query(
-      "SELECT payload->>'source_title' AS title, min(id)::int AS first_id, count(*)::int AS units, sum(length(payload->>'text'))::bigint AS chars, (array_agg(payload->>'text' ORDER BY id))[1] AS first_text FROM units WHERE book_slug=$1 AND coalesce(payload->>'source_type','book')='book' GROUP BY 1 ORDER BY 2",
-      [slug],
+      `SELECT payload->>'source_title' AS title, min(id)::int AS first_id, count(*)::int AS units, sum(length(payload->>'text'))::bigint AS chars, (array_agg(payload->>'text' ORDER BY id))[1] AS first_text FROM units WHERE ${BOOK_TEXT_WHERE} GROUP BY 1 ORDER BY 2`,
+      [slug, books[slug]?.title ?? ''],
     );
     return r.rows.map((row, idx) => ({
       idx,

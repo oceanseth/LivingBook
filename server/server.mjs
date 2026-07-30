@@ -605,6 +605,26 @@ const server = createServer(async (req, res) => {
         if (!author) return res.writeHead(403, headers).end('{"error":"author only"}');
         return res.writeHead(200, headers).end(JSON.stringify({ estimate: await audiobooks.estimate(slug) }));
       }
+      if (req.method === 'POST' && rest === '/normalize') {
+        // One-time repair for pre-coercion uploads: units whose source_title is
+        // a raw filename ARE the book text — retag them as such so audiobook
+        // detection, estimates, and answer framing all treat them correctly.
+        if (!author) return res.writeHead(403, headers).end('{"error":"author only"}');
+        const r = await store.pool.query(
+          "UPDATE units SET payload = payload || jsonb_build_object('source_type','book','source_title',$2::text) WHERE book_slug=$1 AND payload->>'source_title' ~* '\\.(pdf|docx?|txt|md|epub)\\s*$'",
+          [slug, book.title],
+        );
+        return res.writeHead(200, headers).end(JSON.stringify({ normalized: r.rowCount }));
+      }
+      if (req.method === 'GET' && rest === '/sources') {
+        // Author diagnostics: what's actually ingested, by source type + title.
+        if (!author) return res.writeHead(403, headers).end('{"error":"author only"}');
+        const r = await store.pool.query(
+          "SELECT coalesce(payload->>'source_type','?') AS source_type, payload->>'source_title' AS source_title, count(*)::int AS units, sum(length(payload->>'text'))::bigint AS chars FROM units WHERE book_slug=$1 GROUP BY 1,2 ORDER BY 3 DESC",
+          [slug],
+        );
+        return res.writeHead(200, headers).end(JSON.stringify({ sources: r.rows }));
+      }
       if (req.method === 'POST' && rest === '/render') {
         if (!author) return res.writeHead(403, headers).end('{"error":"author only"}');
         // Payment: rendering spends the author's Masky credits. Today the
@@ -672,7 +692,10 @@ const server = createServer(async (req, res) => {
         }
         voicecert = { sessionId: voicecertSessionId, method: vc.method, attestedAt: vc.issuedAt };
       }
-      if (sourceType === 'book' || data.pdfBase64 || /\.(pdf|docx?|txt|md|epub)\s*$/i.test(title)) title = book.title;
+      // A PDF (or file-named) upload IS the book text, whatever the dropdown
+      // said — coerce so audiobook detection and framing treat it as the book.
+      if (data.pdfBase64 || /\.(pdf|docx?|txt|md|epub)\s*$/i.test(title)) sourceType = 'book';
+      if (sourceType === 'book') title = book.title;
       const chunks = chunkText(text, title);
       const points = [];
       for (const c of chunks) {

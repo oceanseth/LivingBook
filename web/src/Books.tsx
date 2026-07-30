@@ -46,7 +46,7 @@ export function useBooks(token?: string) {
 export default function Books({ session }: { session: MaskySession | null }) {
   const { books, reload } = useBooks(session?.accessToken);
   const [title, setTitle] = useState('');
-  const [upload, setUpload] = useState({ slug: '', title: '', sourceType: 'podcast', text: '' });
+  const [upload, setUpload] = useState({ slug: '', title: '', sourceType: 'book', text: '' });
   const [pdf, setPdf] = useState<{ name: string; base64: string } | null>(null);
   const [avatars, setAvatars] = useState<MaskyAvatar[]>([]);
   const [avatarSlug, setAvatarSlug] = useState('');
