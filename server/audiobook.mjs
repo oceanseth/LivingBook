@@ -19,6 +19,7 @@ const AUDIO_CREDITS_PER_SEC = Number(process.env.MASKY_AUDIO_CREDITS_PER_SEC ?? 
 const TURN_TEXT_LIMIT = 499; // one speak turn = one un-chunked audio clip
 
 export function createAudiobooks({ store, vectors, books, serviceToken, narrator }) {
+  const pool = store.pool ?? vectors.pool; // pg pool (STORE=pg in prod; absent in file-store dev)
   let audiobooks = {};
   const ready = store.load('audiobooks', {}).then((v) => (audiobooks = v));
   const save = () => store.save('audiobooks', audiobooks);
@@ -28,7 +29,7 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
   // ── estimation ────────────────────────────────────────────────────────────
   async function bookTextStats(slug) {
     // Sum the stored verbatim units — the exact text a full render would speak.
-    const r = await vectors.pool.query(
+    const r = await pool.query(
       "SELECT count(*)::int AS units, coalesce(sum(length(payload->>'text')),0)::bigint AS chars FROM units WHERE book_slug=$1 AND coalesce(payload->>'source_type','book') = 'book'",
       [slug],
     );
@@ -70,7 +71,7 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
     // Heading-based chapter detection from the original text is the skill's
     // job (see SKILL.md § Chapter detection); until an author re-uploads with
     // structure, fall back to one chapter per source document.
-    const r = await vectors.pool.query(
+    const r = await pool.query(
       "SELECT payload->>'source_title' AS title, min(id)::int AS first_id, count(*)::int AS units, sum(length(payload->>'text'))::bigint AS chars, (array_agg(payload->>'text' ORDER BY id))[1] AS first_text FROM units WHERE book_slug=$1 AND coalesce(payload->>'source_type','book')='book' GROUP BY 1 ORDER BY 2",
       [slug],
     );

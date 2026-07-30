@@ -65,8 +65,9 @@ export default function Listen({ slug, session, isOwner }: { slug: string; sessi
       const r = await fetch(`${API}/api/books/${slug}/audiobook/chapter/${idx}/audio?scope=${scope}`, {
         headers: authHeaders,
       });
-      const d = await r.json();
+      const d = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(d.error ?? `HTTP ${r.status}`);
+      if (!d.audioUrl) throw new Error('audio not available yet');
       if (audioRef.current) audioRef.current.pause();
       const el = new Audio(d.audioUrl);
       audioRef.current = el;
