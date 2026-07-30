@@ -701,7 +701,7 @@ const server = createServer(async (req, res) => {
       }
       if (req.method === 'POST' && rest === '/settings') {
         if (!author) return res.writeHead(403, headers).end('{"error":"author only"}');
-        const ab = audiobooks.setSettings(slug, { release: data.release, tribeUrl: data.tribeUrl, donationMin: data.donationMin });
+        const ab = audiobooks.setSettings(slug, { release: data.release, tribeUrl: data.tribeUrl, donationMin: data.donationMin, buyLinks: data.buyLinks });
         return res.writeHead(200, headers).end(JSON.stringify({ audiobook: audiobooks.publicView(ab, sub, true) }));
       }
       if (req.method === 'POST' && rest === '/grant') {

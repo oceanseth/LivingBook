@@ -1225,3 +1225,9 @@ a.notifreply:hover {
 .listen-playall { margin: 4px 0 2px; }
 .listen-donmin { display: block; margin: 8px 0; font-size: 0.9rem; }
 .listen-donmin input { width: 90px; padding: 5px 8px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); margin-left: 6px; }
+.listen-buylinks-edit { margin: 12px 0; }
+.listen-buylinks-edit h4 { margin: 0 0 2px; }
+.listen-buyit { border-top: 1px solid var(--border); margin-top: 14px; padding-top: 12px; }
+.listen-buyit h3 { margin: 0 0 8px; }
+.listen-buyrow { display: flex; gap: 10px; flex-wrap: wrap; }
+.listen-buyrow .cta { text-decoration: none; }

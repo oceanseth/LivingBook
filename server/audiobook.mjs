@@ -414,6 +414,7 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
       test: ab.test,
       release: ab.release,
       donationMin: ab.donationMin ?? null,
+      buyLinks: ab.buyLinks ?? [],
       tribeOwner: books[ab.slug]?.avatarOwner ?? null,
       tribeUrl: ab.tribeUrl,
       estimate: isOwner ? ab.estimate : undefined,
@@ -507,7 +508,7 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
     chapterAudioUrl,
     canListenFull,
     publicView,
-    setSettings(slug, { release, tribeUrl, donationMin }) {
+    setSettings(slug, { release, tribeUrl, donationMin, buyLinks }) {
       const ab = audiobooks[slug];
       if (!ab) throw new Error('no audiobook yet');
       if (release) {
@@ -519,6 +520,12 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
         const n = Number(donationMin);
         if (!Number.isFinite(n) || n < 0) throw new Error('bad donationMin');
         ab.donationMin = n;
+      }
+      if (buyLinks !== undefined) {
+        if (!Array.isArray(buyLinks) || buyLinks.length > 10) throw new Error('bad buyLinks');
+        ab.buyLinks = buyLinks
+          .map((l) => ({ label: String(l.label ?? '').slice(0, 60), url: String(l.url ?? '') }))
+          .filter((l) => /^https?:\/\//i.test(l.url));
       }
       ab.updatedAt = Date.now();
       save();

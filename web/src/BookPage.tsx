@@ -50,9 +50,6 @@ export default function BookPage({ slug, session }: { slug: string; session: Mas
             bookTitle={book.title}
           />
           <TalkToBook session={session} fixedSlug={slug} />
-          <p className="bookpage-soon">
-            Coming for authors: the whole book as a video book, scene by scene.
-          </p>
         </div>
       )}
     </div>

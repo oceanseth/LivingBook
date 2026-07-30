@@ -32,6 +32,7 @@ interface Audiobook {
   test: boolean;
   release: 'free' | 'tribe' | 'donation';
   donationMin: number | null;
+  buyLinks: { label: string; url: string }[];
   tribeOwner: string | null;
   tribeUrl: string | null;
   estimate?: { chars: number; seconds: number; hours: number; credits: number; creditsPerSecond: number; note: string };
@@ -69,6 +70,7 @@ export default function Listen({
   const [choosingAvatar, setChoosingAvatar] = useState(false);
   const [picked, setPicked] = useState<PickedAvatar | null>(null);
   const [avatarImage, setAvatarImage] = useState<string | null>(bookAvatarImage ?? null);
+  const [linkDraft, setLinkDraft] = useState<{ label: string; url: string }[] | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playAllRef = useRef(false);
   const abRef = useRef<Audiobook | null>(null);
@@ -310,11 +312,12 @@ export default function Listen({
     <section className="panel listen">
       <h2>🎧 Listen{ab.test ? ' — chapter previews' : ''}</h2>
       <p className="sub">
-        Every chapter&rsquo;s opening, read by the book&rsquo;s own voice — free. {ab.release === 'free'
-          ? 'Full chapters are free too.'
-          : ab.release === 'tribe'
-            ? 'Full chapters are for tribe members.'
-            : 'Full chapters unlock with a donation to the author.'}
+        Every chapter&rsquo;s opening, read by the book&rsquo;s own voice — free.{' '}
+        {ab.release === 'tribe'
+          ? 'Full chapters are for tribe members.'
+          : ab.release === 'donation'
+            ? 'Full chapters unlock with a donation to the author.'
+            : ''}
         {ab.status !== 'ready' && ' Rendering is in progress — new takes appear automatically.'}
       </p>
 
@@ -424,6 +427,55 @@ export default function Listen({
               />
             </label>
           )}
+          <div className="listen-buylinks-edit">
+            <h4>Buy links</h4>
+            <p className="sub">Where readers can buy the book — shown as a &ldquo;Buy it&rdquo; section on this page.</p>
+            {(linkDraft ?? ab.buyLinks ?? []).map((l, i) => (
+              <div className="askrow" key={i}>
+                <input
+                  placeholder="Label (e.g. Amazon)"
+                  value={l.label}
+                  onChange={(e) => {
+                    const next = [...(linkDraft ?? ab.buyLinks ?? [])];
+                    next[i] = { ...next[i], label: e.target.value };
+                    setLinkDraft(next);
+                  }}
+                />
+                <input
+                  placeholder="https://…"
+                  value={l.url}
+                  onChange={(e) => {
+                    const next = [...(linkDraft ?? ab.buyLinks ?? [])];
+                    next[i] = { ...next[i], url: e.target.value };
+                    setLinkDraft(next);
+                  }}
+                />
+                <button
+                  className="ghost"
+                  onClick={() => setLinkDraft((linkDraft ?? ab.buyLinks ?? []).filter((_, j) => j !== i))}
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+            <div className="alertactions">
+              <button className="ghost" onClick={() => setLinkDraft([...(linkDraft ?? ab.buyLinks ?? []), { label: '', url: '' }])}>
+                + Add link
+              </button>
+              {linkDraft && (
+                <button
+                  className="cta"
+                  disabled={busy !== null}
+                  onClick={async () => {
+                    await authorPost('/settings', { buyLinks: linkDraft.filter((l) => l.url.trim()) });
+                    setLinkDraft(null);
+                  }}
+                >
+                  Save buy links
+                </button>
+              )}
+            </div>
+          </div>
           <div className="alertactions">
             <button
               className="ghost"
@@ -517,6 +569,32 @@ export default function Listen({
         </div>
       )}
 
+      {(ab.buyLinks?.length ?? 0) > 0 && (
+        <div className="listen-buyit">
+          <h3>📖 Buy it</h3>
+          <div className="listen-buyrow">
+            {ab.buyLinks.map((l, i) => (
+              <a key={i} className="cta" href={l.url} target="_blank" rel="noreferrer">
+                {l.label || new URL(l.url).hostname.replace(/^www\./, '')}
+              </a>
+            ))}
+          </div>
+          {(ab.donationMin ?? 0) > 0 && ab.tribeOwner && (
+            <p className="sub">
+              Or support the author directly:{' '}
+              {session ? (
+                <button className="linklike" disabled={busy !== null} onClick={donate}>
+                  {busy === 'donate' ? 'Waiting for confirmation…' : `donate Masky credits${ab.release === 'donation' ? ` (${ab.donationMin} total unlocks the full audiobook)` : ''}`}
+                </button>
+              ) : (
+                <button className="linklike" onClick={() => login()}>
+                  Login with Masky to donate credits to the author.
+                </button>
+              )}
+            </p>
+          )}
+        </div>
+      )}
       {notice && <p className="notice">{notice}</p>}
       {error && <p className="error">{error}</p>}
       {picked && session && (
