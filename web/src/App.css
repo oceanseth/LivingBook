@@ -1213,3 +1213,4 @@ a.notifreply:hover {
 .listen-release label { display: flex; gap: 5px; align-items: center; cursor: pointer; }
 .listen-tribeurl { width: 100%; max-width: 420px; padding: 7px 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); }
 .linklike { background: none; border: none; padding: 0; color: var(--accent); cursor: pointer; font: inherit; text-decoration: underline; }
+.listen-chtitle { margin: 0; font-size: 1.05rem; }

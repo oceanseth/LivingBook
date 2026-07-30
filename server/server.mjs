@@ -616,6 +616,44 @@ const server = createServer(async (req, res) => {
         );
         return res.writeHead(200, headers).end(JSON.stringify({ normalized: r.rowCount }));
       }
+      if (req.method === 'POST' && rest === '/patch-unit') {
+        // Surgical repair of a PDF-extraction artifact in ONE unit's text
+        // (e.g. a drop-cap letter lost by the extractor). Exact-substring
+        // find/replace, author-only, logged. NOT for editing prose — the
+        // stored text must stay the author's real words.
+        if (!author) return res.writeHead(403, headers).end('{"error":"author only"}');
+        const { id, find, replace } = data;
+        if (!Number.isFinite(id) || typeof find !== 'string' || typeof replace !== 'string' || !find) {
+          return res.writeHead(400, headers).end('{"error":"id, find, replace required"}');
+        }
+        const cur = await store.pool.query("SELECT payload->>'text' AS text FROM units WHERE book_slug=$1 AND id=$2", [slug, id]);
+        if (!cur.rows.length) return res.writeHead(404, headers).end('{"error":"unknown unit"}');
+        if (!cur.rows[0].text.includes(find)) return res.writeHead(409, headers).end('{"error":"find text not present"}');
+        const next = cur.rows[0].text.replace(find, replace);
+        await store.pool.query(
+          "UPDATE units SET payload = payload || jsonb_build_object('text', $3::text) WHERE book_slug=$1 AND id=$2",
+          [slug, id, next],
+        );
+        console.log('patch-unit', slug, id, JSON.stringify({ find, replace }));
+        return res.writeHead(200, headers).end('{"ok":true}');
+      }
+      if (req.method === 'GET' && rest === '/units') {
+        // Author diagnostics: inspect stored unit text (?q=substring or ?ids=18,19).
+        if (!author) return res.writeHead(403, headers).end('{"error":"author only"}');
+        const params = new URLSearchParams(req.url.split('?')[1] ?? '');
+        const q = params.get('q');
+        const ids = (params.get('ids') ?? '').split(',').map(Number).filter(Number.isFinite);
+        const r = q
+          ? await store.pool.query(
+              "SELECT id::int, payload->>'text' AS text FROM units WHERE book_slug=$1 AND payload->>'text' ILIKE $2 ORDER BY id LIMIT 20",
+              [slug, `%${q}%`],
+            )
+          : await store.pool.query(
+              "SELECT id::int, payload->>'text' AS text FROM units WHERE book_slug=$1 AND id = ANY($2) ORDER BY id",
+              [slug, ids.length ? ids : [1]],
+            );
+        return res.writeHead(200, headers).end(JSON.stringify({ units: r.rows }));
+      }
       if (req.method === 'GET' && rest === '/sources') {
         // Author diagnostics: what's actually ingested, by source type + title.
         if (!author) return res.writeHead(403, headers).end('{"error":"author only"}');

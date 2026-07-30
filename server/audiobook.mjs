@@ -103,11 +103,21 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
     // contents shows dot leaders or several headings in one unit; running page
     // headers repeat an already-seen number. Both must not start chapters.
     const all = []; // { unitIdx, heading, type, num, after }
+    const tocNames = {}; // chapter number -> name harvested from TOC entries
     for (let i = 0; i < r.rows.length; i++) {
       const text = r.rows[i].text;
       const inUnit = [...text.matchAll(HEADING)];
       const isToc = inUnit.length >= 2 || /(\.\s*){5,}|…/.test(text);
-      if (isToc) continue;
+      if (isToc) {
+        // Harvest "Chapter N: Name ....… 42" entries — the TOC is the one
+        // place the PDF states chapter names explicitly.
+        for (const t of text.matchAll(new RegExp(`chapter\\s+(${NUM})\\s*[:.–—-]?\\s*([A-Za-z][^…]{1,60}?)\\s*(?:\\.{2,}|…|\\d{1,3}\\b)`, 'gi'))) {
+          const num = toInt(t[1]);
+          const name = t[2].replace(/[\s.…\d]+$/, '').trim();
+          if (name && !tocNames[num]) tocNames[num] = name;
+        }
+        continue;
+      }
       for (const m of inUnit) {
         all.push({ unitIdx: i, heading: m[1].trim(), type: m[2].toLowerCase(), num: toInt(m[3]), after: text.slice((m.index ?? 0) + m[0].length) });
       }
@@ -160,8 +170,16 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
     for (let s = 0; s < starts.length; s++) {
       const st = starts[s];
       const lastUnit = s + 1 < starts.length ? Math.max(starts[s + 1].unitIdx - 1, st.unitIdx) : r.rows.length - 1;
-      const preview = st.after.length > 120 ? st.after : `${st.after} ${r.rows[st.unitIdx + 1]?.text ?? ''}`;
-      chapters.push(mk(chapters.length, title(st.heading), st.unitIdx, lastUnit, preview.trim()));
+      let preview = (st.after.length > 120 ? st.after : `${st.after} ${r.rows[st.unitIdx + 1]?.text ?? ''}`).trim();
+      // TOC gave us the real name → "Chapter 1: Our Stories"; and when the
+      // body text opens by repeating that name, strip it so the preview is
+      // prose, not the title again.
+      const name = st.type === 'chapter' ? tocNames[st.num] : null;
+      const chTitle = name ? `${title(st.heading)}: ${name}` : title(st.heading);
+      if (name && preview.toLowerCase().startsWith(name.toLowerCase())) {
+        preview = preview.slice(name.length).replace(/^[\s.:–—-]+/, '');
+      }
+      chapters.push(mk(chapters.length, chTitle, st.unitIdx, lastUnit, preview));
     }
     return chapters;
   }

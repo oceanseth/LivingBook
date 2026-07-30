@@ -221,7 +221,7 @@ export default function Listen({ slug, session, isOwner }: { slug: string; sessi
         {ab.chapters.map((ch) => (
           <li key={ch.id} className={open ? '' : ch.idx > 9 ? 'listen-hidden' : ''}>
             <div className="listen-row">
-              <strong>{ch.title}</strong>
+              <h3 className="listen-chtitle">{ch.title}</h3>
               {ch.previewStatus === 'ready' ? (
                 playing === ch.idx ? (
                   <button className="ghost" onClick={stop}>⏸ Stop</button>
