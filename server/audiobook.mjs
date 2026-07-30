@@ -76,26 +76,94 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
         estSeconds: 0,
       }));
     }
-    // Generic detection: refs are "<source_title> §N" chunks in ingestion order.
-    // Heading-based chapter detection from the original text is the skill's
-    // job (see SKILL.md § Chapter detection); until an author re-uploads with
-    // structure, fall back to one chapter per source document.
+    // Generic detection: scan the book's ordered unit text for chapter
+    // headings (chunking collapsed whitespace, so headings sit inline). A
+    // chapter starts at the unit whose text carries the heading; its preview
+    // is the prose right after it. No headings found → one chapter, the whole
+    // book. Per-chapter unit id ranges feed the future full render.
     const r = await pool.query(
-      `SELECT payload->>'source_title' AS title, min(id)::int AS first_id, count(*)::int AS units, sum(length(payload->>'text'))::bigint AS chars, (array_agg(payload->>'text' ORDER BY id))[1] AS first_text FROM units WHERE ${BOOK_TEXT_WHERE} GROUP BY 1 ORDER BY 2`,
+      `SELECT id::int, payload->>'text' AS text FROM units WHERE ${BOOK_TEXT_WHERE} ORDER BY id`,
       [slug, books[slug]?.title ?? ''],
     );
-    return r.rows.map((row, idx) => ({
-      idx,
-      id: `ch-${idx + 1}`,
-      title: row.title ?? `Chapter ${idx + 1}`,
-      preview: (row.first_text ?? '').slice(0, 420),
-      previewTurnId: null,
-      previewStatus: 'none',
-      fullTurnIds: [],
-      fullStatus: 'none',
-      chars: Number(row.chars),
-      estSeconds: Math.round(Number(row.chars) / CHARS_PER_SECOND),
-    }));
+    if (!r.rows.length) return [];
+    const WORDS = ['one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty'];
+    const NUM = `\\d{1,3}|[IVXLCivxlc]{1,7}|${WORDS.join('|')}`;
+    const HEADING = new RegExp(`(?:^|[\\s"'])((chapter|part|section)\\s+(${NUM}))\\b[.:;,–—-]?\\s*`, 'gi');
+    const toInt = (s) => {
+      const t = s.toLowerCase();
+      if (/^\d+$/.test(t)) return Number(t);
+      const w = WORDS.indexOf(t);
+      if (w !== -1) return w + 1;
+      const rv = { i: 1, v: 5, x: 10, l: 50, c: 100 };
+      let n = 0;
+      for (let k = 0; k < t.length; k++) n += rv[t[k]] < (rv[t[k + 1]] ?? 0) ? -rv[t[k]] : rv[t[k]];
+      return n;
+    };
+    // Pass 1: every heading-shaped match, tagging TOC-ish units. A table of
+    // contents shows dot leaders or several headings in one unit; running page
+    // headers repeat an already-seen number. Both must not start chapters.
+    const all = []; // { unitIdx, heading, type, num, after }
+    for (let i = 0; i < r.rows.length; i++) {
+      const text = r.rows[i].text;
+      const inUnit = [...text.matchAll(HEADING)];
+      const isToc = inUnit.length >= 2 || /(\.\s*){5,}|…/.test(text);
+      if (isToc) continue;
+      for (const m of inUnit) {
+        all.push({ unitIdx: i, heading: m[1].trim(), type: m[2].toLowerCase(), num: toInt(m[3]), after: text.slice((m.index ?? 0) + m[0].length) });
+      }
+    }
+    // Pass 2: per type, accept only the strictly-sequential chain (1, 2, 3…).
+    // Running headers repeat the current number and cross-references cite
+    // arbitrary ones — both fail `num === expected` and drop out.
+    const expected = { chapter: 1, part: 1, section: 1 };
+    const chains = { chapter: [], part: [], section: [] };
+    for (const m of all) {
+      if (m.num === expected[m.type]) {
+        expected[m.type] += 1;
+        chains[m.type].push(m);
+      }
+    }
+    // Parts OVERLAY chapters (a part contains chapters), and a late stray
+    // "Part 1" in backmatter can swallow the book's tail — so when the
+    // chapter chain is strong, it alone defines the chapters.
+    const starts =
+      chains.chapter.length >= 3
+        ? chains.chapter
+        : [...chains.chapter, ...chains.part, ...chains.section].sort((a, b) => a.unitIdx - b.unitIdx);
+    const title = (t) => t.replace(/\s+/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
+    const mk = (idx, name, firstUnit, lastUnit, preview) => {
+      const chars = r.rows.slice(firstUnit, lastUnit + 1).reduce((n, row) => n + row.text.length, 0);
+      return {
+        idx,
+        id: `ch-${idx + 1}`,
+        title: name,
+        preview: preview.slice(0, 420),
+        previewTurnId: null,
+        previewStatus: 'none',
+        fullTurnIds: [],
+        fullStatus: 'none',
+        firstUnitId: r.rows[firstUnit].id,
+        lastUnitId: r.rows[lastUnit].id,
+        chars,
+        estSeconds: Math.round(chars / CHARS_PER_SECOND),
+      };
+    };
+    // Require a few headings before trusting the pattern — one stray
+    // "chapter twelve" mid-sentence must not split the book in two.
+    if (starts.length < 3) {
+      return [mk(0, books[slug]?.title ?? 'The book', 0, r.rows.length - 1, r.rows[0].text)];
+    }
+    const chapters = [];
+    if (starts[0].unitIdx > 0) {
+      chapters.push(mk(0, 'Opening', 0, starts[0].unitIdx - 1, r.rows[0].text));
+    }
+    for (let s = 0; s < starts.length; s++) {
+      const st = starts[s];
+      const lastUnit = s + 1 < starts.length ? Math.max(starts[s + 1].unitIdx - 1, st.unitIdx) : r.rows.length - 1;
+      const preview = st.after.length > 120 ? st.after : `${st.after} ${r.rows[st.unitIdx + 1]?.text ?? ''}`;
+      chapters.push(mk(chapters.length, title(st.heading), st.unitIdx, lastUnit, preview.trim()));
+    }
+    return chapters;
   }
 
   // ── rendering ─────────────────────────────────────────────────────────────
@@ -103,7 +171,7 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
     const book = books[slug];
     if (!book) throw new Error('unknown book');
     const voice = {
-      avatarId: book.avatarId ?? narrator.avatarId,
+      avatarId: book.authorAvatarId ?? narrator.avatarId,
       avatarOwnerUserId: book.avatarOwner ?? narrator.owner,
     };
     const chapters = await detectChapters(slug);

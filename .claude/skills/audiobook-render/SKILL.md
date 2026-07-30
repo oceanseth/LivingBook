@@ -52,19 +52,23 @@ Keep this file and `server/audiobook.mjs` in sync — this is the contract.
 
 1. **bible-kjv** — fixed canon: the 66 books, titles + summaries in
    `server/bible-structure.mjs`. Preview = the summary (test mode).
-2. **Generic uploaded book** — current fallback groups ingested units by
-   `source_title` (one chapter per uploaded document), preview = first unit's
-   text (≤420 chars).
-3. **Proper detection (do this when an author asks for real chapters):** work
-   from the ORIGINAL text, not the chunks. Heuristics, in order:
-   - explicit markers: lines matching `/^(chapter|book|part|section)\s+([0-9ivxlc]+|one|two…)/i`, markdown `#`/`##` headings, or PDF outline/TOC entries;
-   - typographic breaks: short (<60 char) title-case lines between blank lines;
-   - fallback: split every ~8–12k chars at a paragraph boundary, titles "Chapter N".
-   Chapter title = the marker line (cleaned); preview = the first full paragraph
-   AFTER the title (≥120 chars — skip epigraphs shorter than that). Save each
-   chapter's `chars` (sum of its text) and `estSeconds = chars / charsPerSecond`.
-   Persist via the structure doc — the ingestion side should also tag units
-   with `chapter_id` so full render can pull exact chapter text.
+2. **Generic uploaded book (implemented)** — scan the book's ordered unit
+   texts for inline headings `(chapter|part|section) + (number|roman|word)`
+   (chunking collapsed line breaks, so headings sit inline). A chapter starts
+   at the unit carrying the heading; preview = the prose right after it
+   (padded from the next unit when <120 chars, capped 420); units before the
+   first heading become an "Opening" chapter. Fewer than 3 headings → the
+   pattern isn't trusted (a stray "chapter twelve" mid-sentence must not split
+   the book) and the whole book is one chapter titled with the book's title.
+   Each chapter records `firstUnitId`/`lastUnitId` — the full render pulls
+   exact chapter text by that id range.
+3. **Improving detection** — the chunk scan cannot see typographic headings
+   (short title-case lines) because chunking erased line structure. When an
+   author needs those: re-ingest keeping the original text (or PDF outline) and
+   split there; markdown `#`/`##` headings and TOC entries beat regexes.
+   Preview `POST …/audiobook/render {dryRun:true}` shows detected chapters +
+   the estimate without creating a conversation or spending credits — always
+   dry-run before a paid render.
 
 ## Cost estimation (before the author pays)
 

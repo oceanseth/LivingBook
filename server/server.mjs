@@ -627,6 +627,14 @@ const server = createServer(async (req, res) => {
       }
       if (req.method === 'POST' && rest === '/render') {
         if (!author) return res.writeHead(403, headers).end('{"error":"author only"}');
+        if (data.dryRun) {
+          // Detection preview: what chapters WOULD render — no conversation,
+          // no turns, no credits spent.
+          const chapters = await audiobooks.detectChapters(slug);
+          return res.writeHead(200, headers).end(
+            JSON.stringify({ dryRun: true, chapters, estimate: await audiobooks.estimate(slug) }),
+          );
+        }
         // Payment: rendering spends the author's Masky credits. Today the
         // service avatar renders (bills the service account); per-author
         // billing arrives with the authors' own `generate`-scoped tokens.
