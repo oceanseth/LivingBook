@@ -130,6 +130,26 @@ Previews (`scope=preview`) are ALWAYS free — they are the marketing.
 a `tribe:member` claim in `/oauth/userinfo`; (2) user→user donation endpoint
 with a webhook or receipt we can verify server-side to auto-grant access.
 
+## Author tooling routes (all author-only, or x-admin-token for ownerless books)
+
+- `GET …/audiobook/sources` — what's ingested, grouped by source type/title.
+- `GET …/audiobook/units?q=substr|ids=1,2` — inspect stored unit text.
+- `POST …/audiobook/normalize` — retag filename-titled units as book text.
+- `POST …/audiobook/clean` — strip PDF page furniture from stored units
+  (page separators + running headers, patterns learned from the corpus; the
+  same stripping runs at ingest for new uploads). Re-render previews after.
+- `POST …/audiobook/patch-unit {id, find, replace}` — surgical repair of an
+  extraction artifact (e.g. a lost drop-cap letter). Exact-substring-guarded;
+  never for editing prose. Beware shell-quoting when scripting replacements —
+  derive exact strings from the stored text, verify after writing.
+- `POST …/audiobook/chapter/{idx}/rerender {output:"audio"|"video"}` —
+  re-render one chapter's preview (re-detects first so text repairs flow in),
+  or render a VIDEO take of the avatar reading it; video ready → the chapter
+  carries `videoLiveUrl` (Masky live player, embeds with `?autoplay=1`).
+- Known PDF pitfall: decorative drop-caps are separate text objects pdf-parse
+  loses — every chapter body may open missing its first letter. Scan chapter
+  openings for fragment words (dictionary check) and repair via patch-unit.
+
 ## Download
 
 `GET …/audiobook/download` (author-only) → manifest of fresh signed audio URLs

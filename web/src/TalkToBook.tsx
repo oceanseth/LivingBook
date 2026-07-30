@@ -135,6 +135,7 @@ export default function TalkToBook({
   return (
     <section className="panel">
       {!fixedSlug && <h2>Talk to a book or author</h2>}
+      {fixedSlug && <h2>💬 Talk to the author</h2>}
       {!fixedSlug && (
         <div className="askrow">
           <input

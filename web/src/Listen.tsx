@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { login, type MaskySession } from './lib/masky';
+import AvatarModal, { type PickedAvatar } from './AvatarModal';
 
 const API =
   ((window as unknown as { __API__?: string }).__API__ ??
@@ -12,8 +13,17 @@ interface Chapter {
   title: string;
   preview: string;
   previewStatus: string;
+  videoStatus: string;
+  videoLiveUrl: string | null;
   fullStatus: string;
   estSeconds: number;
+}
+interface MaskyAvatar {
+  avatarId: string;
+  avatarOwnerUserId: string;
+  displayName: string;
+  avatarImageUrl?: string;
+  imageUrl?: string;
 }
 interface Audiobook {
   slug: string;
@@ -29,12 +39,29 @@ interface Audiobook {
 // The Listen section of a living book: free chapter previews (the avatar
 // reading each chapter's opening), gated full-chapter audio, and — for the
 // author — the render/settings panel (estimate, release criteria, download).
-export default function Listen({ slug, session, isOwner }: { slug: string; session: MaskySession | null; isOwner: boolean }) {
+export default function Listen({
+  slug,
+  session,
+  isOwner,
+  bookAvatarImage,
+  bookTitle,
+}: {
+  slug: string;
+  session: MaskySession | null;
+  isOwner: boolean;
+  bookAvatarImage?: string | null;
+  bookTitle?: string;
+}) {
   const [ab, setAb] = useState<Audiobook | null | 'loading'>('loading');
   const [playing, setPlaying] = useState<number | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
+  const [sel, setSel] = useState(0);
+  const [tabClicked, setTabClicked] = useState(false);
+  const [avatars, setAvatars] = useState<MaskyAvatar[]>([]);
+  const [choosingAvatar, setChoosingAvatar] = useState(false);
+  const [picked, setPicked] = useState<PickedAvatar | null>(null);
+  const [avatarImage, setAvatarImage] = useState<string | null>(bookAvatarImage ?? null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const authHeaders: Record<string, string> = session ? { Authorization: `Bearer ${session.accessToken}` } : {};
@@ -49,6 +76,14 @@ export default function Listen({ slug, session, isOwner }: { slug: string; sessi
     reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
+
+  useEffect(() => {
+    if (!choosingAvatar || !session || avatars.length) return;
+    fetch('https://masky.ai/api/avatars', { headers: { Authorization: `Bearer ${session.accessToken}` } })
+      .then((r) => r.json())
+      .then((d) => setAvatars(d.avatars ?? []))
+      .catch(() => {});
+  }, [choosingAvatar, session, avatars.length]);
 
   // Keep polling while previews are still rendering.
   useEffect(() => {
@@ -166,6 +201,35 @@ export default function Listen({ slug, session, isOwner }: { slug: string; sessi
               at {ab.estimate.creditsPerSecond}/sec. {ab.test && 'This is a TEST render — previews only.'}
             </p>
           )}
+          <div className="listen-avatar">
+            {avatarImage && <img className="avatar" src={avatarImage} alt="book avatar" />}
+            <span className="sub">This avatar reads the book. Changes apply on the next render.</span>
+            <button className="ghost" onClick={() => setChoosingAvatar((v) => !v)}>
+              {choosingAvatar ? 'Cancel' : '👤 Change avatar'}
+            </button>
+          </div>
+          {choosingAvatar && (
+            <div className="avatargrid">
+              {avatars.map((av) => (
+                <button
+                  key={av.avatarId}
+                  className="avatarcard"
+                  onClick={() =>
+                    setPicked({
+                      avatarId: av.avatarId,
+                      avatarOwnerUserId: av.avatarOwnerUserId,
+                      displayName: av.displayName,
+                      imageUrl: av.avatarImageUrl ?? av.imageUrl ?? '',
+                    })
+                  }
+                >
+                  {(av.avatarImageUrl ?? av.imageUrl) && <img src={av.avatarImageUrl ?? av.imageUrl} alt={av.displayName} />}
+                  <span>{av.displayName}</span>
+                </button>
+              ))}
+              {!avatars.length && <span className="sub">Loading your Masky avatars…</span>}
+            </div>
+          )}
           <div className="listen-release">
             Who can hear full chapters?
             {(['free', 'tribe', 'donation'] as const).map((r) => (
@@ -189,6 +253,13 @@ export default function Listen({ slug, session, isOwner }: { slug: string; sessi
             />
           )}
           <div className="alertactions">
+            <button
+              className="ghost"
+              disabled={busy !== null}
+              onClick={() => authorPost('/render', { test: true, release: ab.release })}
+            >
+              {busy === '/render' ? 'Starting…' : '↻ Re-render all previews'}
+            </button>
             <button
               className="ghost"
               disabled={busy === 'download'}
@@ -217,9 +288,27 @@ export default function Listen({ slug, session, isOwner }: { slug: string; sessi
         </div>
       )}
 
-      <ol className="listen-chapters">
+      <div className="listen-tabs" role="tablist" aria-label="Chapters">
         {ab.chapters.map((ch) => (
-          <li key={ch.id} className={open ? '' : ch.idx > 9 ? 'listen-hidden' : ''}>
+          <button
+            key={ch.id}
+            role="tab"
+            aria-selected={sel === ch.idx}
+            className={sel === ch.idx ? 'listen-tab active' : 'listen-tab'}
+            onClick={() => {
+              stop();
+              setSel(ch.idx);
+              setTabClicked(true);
+            }}
+          >
+            {ch.title}
+          </button>
+        ))}
+      </div>
+      {ab.chapters[sel] && (() => {
+        const ch = ab.chapters[sel];
+        return (
+          <div className="listen-detail">
             <div className="listen-row">
               <h3 className="listen-chtitle">{ch.title}</h3>
               {ch.previewStatus === 'ready' ? (
@@ -238,18 +327,77 @@ export default function Listen({ slug, session, isOwner }: { slug: string; sessi
                   ▶ Full chapter
                 </button>
               )}
+              {ch.videoStatus === 'pending' && <span className="sub">video rendering…</span>}
+              {isOwner && (
+                <>
+                  <button
+                    className="ghost"
+                    disabled={busy !== null}
+                    title="Re-render this chapter's audio preview"
+                    onClick={() => authorPost(`/chapter/${ch.idx}/rerender`, { output: 'audio' })}
+                  >
+                    ↻
+                  </button>
+                  <button
+                    className="ghost"
+                    disabled={busy !== null || ch.videoStatus === 'pending'}
+                    title="Render this chapter's preview as avatar video"
+                    onClick={() => authorPost(`/chapter/${ch.idx}/rerender`, { output: 'video' })}
+                  >
+                    🎬
+                  </button>
+                </>
+              )}
             </div>
             <p className="listen-preview">{ch.preview}</p>
+            {ch.videoStatus === 'ready' && ch.videoLiveUrl && (
+              <iframe
+                key={`${ch.id}-${tabClicked ? 'auto' : 'still'}`}
+                className="player"
+                src={`${ch.videoLiveUrl}?autoplay=${tabClicked ? 1 : 0}`}
+                title={`${ch.title} — video`}
+                allow="autoplay"
+                allowFullScreen
+              />
+            )}
             {!ab.access.ok && gate(ab.access.why)}
-          </li>
-        ))}
-      </ol>
-      {ab.chapters.length > 10 && (
-        <button className="ghost" onClick={() => setOpen(!open)}>
-          {open ? 'Show fewer chapters' : `Show all ${ab.chapters.length} chapters`}
-        </button>
-      )}
+          </div>
+        );
+      })()}
       {error && <p className="error">{error}</p>}
+      {picked && session && (
+        <AvatarModal
+          session={session}
+          avatar={picked}
+          bookTitle={bookTitle ?? slug}
+          saving={busy !== null}
+          onClose={() => setPicked(null)}
+          onSave={async (imageUrl) => {
+            setBusy('avatar');
+            setError(null);
+            try {
+              const r = await fetch(`${API}/api/books/${slug}/avatar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...authHeaders },
+                body: JSON.stringify({
+                  avatarId: picked.avatarId,
+                  avatarOwnerUserId: picked.avatarOwnerUserId,
+                  avatarImage: imageUrl,
+                }),
+              });
+              const d = await r.json();
+              if (!r.ok) throw new Error(d.error ?? `HTTP ${r.status}`);
+              setAvatarImage(imageUrl);
+              setPicked(null);
+              setChoosingAvatar(false);
+            } catch (e) {
+              setError(e instanceof Error ? e.message : String(e));
+            } finally {
+              setBusy(null);
+            }
+          }}
+        />
+      )}
     </section>
   );
 }

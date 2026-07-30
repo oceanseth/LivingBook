@@ -10,6 +10,31 @@
 // fresh URLs from the conversation at play time.
 import { BIBLE_BOOKS } from './bible-structure.mjs';
 
+// PDF page furniture: extraction page separators plus running headers
+// (a repeated word + page number, or the book title + page number). The
+// word-list is learned empirically from the corpus — a token that precedes a
+// small number 8+ times is a running header, not prose. `(?!:)` protects
+// scripture-style refs ("John 3:16").
+export function pageFurniturePatterns(fullText, title) {
+  const pats = [/--\s*\d+\s+of\s+\d+\s*--/g];
+  const counts = {};
+  for (const m of fullText.matchAll(/\b([A-Z][a-z]{2,})\s+\d{1,3}\b(?!:)/g)) counts[m[1]] = (counts[m[1]] ?? 0) + 1;
+  const skip = new Set(['Figure', 'Table', 'Page', 'Chapter', 'Part', 'Section']);
+  for (const [w, n] of Object.entries(counts)) {
+    if (n >= 8 && !skip.has(w)) pats.push(new RegExp(`\\b${w}\\s+\\d{1,3}\\b(?!:)`, 'g'));
+  }
+  if (title) {
+    pats.push(new RegExp(`\\b${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+\\d{1,3}\\b(?!:)`, 'gi'));
+  }
+  return pats;
+}
+
+export function stripPageFurniture(text, patterns) {
+  let t = text;
+  for (const p of patterns) t = t.replace(p, ' ');
+  return t.replace(/\s{2,}/g, ' ').trim();
+}
+
 const MASKY = 'https://masky.ai/api';
 // Speech-rate + cost model for the estimate. Masky does not publish an audio
 // credits/sec figure (video is ~0.02–0.03/sec), so the rate is configurable
@@ -70,6 +95,9 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
         preview: summary,
         previewTurnId: null,
         previewStatus: 'none', // none | pending | ready | error
+        videoTurnId: null,
+        videoStatus: 'none',
+        videoSlug: null,
         fullTurnIds: [],
         fullStatus: 'none',
         chars: 0,
@@ -150,6 +178,9 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
         preview: preview.slice(0, 420),
         previewTurnId: null,
         previewStatus: 'none',
+        videoTurnId: null,
+        videoStatus: 'none',
+        videoSlug: null,
         fullTurnIds: [],
         fullStatus: 'none',
         firstUnitId: r.rows[firstUnit].id,
@@ -268,17 +299,26 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
   async function refresh(slug) {
     const ab = audiobooks[slug];
     if (!ab?.conversation?.shareSlug) return ab;
-    const pending = ab.chapters.some((c) => c.previewStatus === 'pending');
+    const pending = ab.chapters.some((c) => c.previewStatus === 'pending' || c.videoStatus === 'pending');
     if (!pending) return ab;
     const turns = await convTurns(ab.conversation.shareSlug);
     const byId = new Map(turns.map((t) => [t.id, t]));
     let changed = false;
     for (const ch of ab.chapters) {
-      if (ch.previewStatus !== 'pending' || !ch.previewTurnId) continue;
-      const t = byId.get(ch.previewTurnId);
-      if (!t) continue;
-      if (t.status === 'error') (ch.previewStatus = 'error'), (changed = true);
-      else if (t.audioUrl) (ch.previewStatus = 'ready'), (changed = true);
+      if (ch.previewStatus === 'pending' && ch.previewTurnId) {
+        const t = byId.get(ch.previewTurnId);
+        if (t?.status === 'error') (ch.previewStatus = 'error'), (changed = true);
+        else if (t?.audioUrl) (ch.previewStatus = 'ready'), (changed = true);
+      }
+      if (ch.videoStatus === 'pending' && ch.videoTurnId) {
+        const t = byId.get(ch.videoTurnId);
+        if (t?.status === 'error') (ch.videoStatus = 'error'), (changed = true);
+        else if (t?.videoUrl) {
+          ch.videoStatus = 'ready';
+          ch.videoSlug = t.shareSlug ?? null;
+          changed = true;
+        }
+      }
     }
     if (changed) {
       if (ab.chapters.every((c) => c.previewStatus === 'ready' || c.previewStatus === 'error')) ab.status = 'ready';
@@ -331,6 +371,8 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
         title: c.title,
         preview: c.preview,
         previewStatus: c.previewStatus,
+        videoStatus: c.videoStatus ?? 'none',
+        videoLiveUrl: c.videoSlug ? `https://masky.ai/live/t-${c.videoSlug}` : null,
         fullStatus: c.fullStatus,
         estSeconds: c.estSeconds,
       })),
@@ -338,8 +380,71 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
     };
   }
 
+  // Re-render ONE chapter — as audio (replacing its preview) or as a video
+  // take. Re-detects first so a text cleanup/patch flows into the new turn;
+  // stored chapter keeps its identity (turn ids) when detection still aligns.
+  async function rerenderChapter(slug, idx, output = 'audio') {
+    const ab = audiobooks[slug];
+    const ch = ab?.chapters[idx];
+    if (!ch) throw new Error('unknown chapter');
+    const fresh = await detectChapters(slug);
+    if (fresh.length === ab.chapters.length && fresh[idx]) {
+      ch.title = fresh[idx].title;
+      ch.preview = fresh[idx].preview;
+    }
+    const text = `${ch.title}. ${ch.preview}`.slice(0, TURN_TEXT_LIMIT);
+    const res = await fetch(`${MASKY}/conversations/${ab.conversation.id}/turn`, {
+      method: 'POST',
+      headers: maskyHeaders,
+      body: JSON.stringify({ userText: text, mode: 'speak', output }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.turn?.id) throw new Error(`turn failed: ${JSON.stringify(data).slice(0, 200)}`);
+    if (output === 'video') {
+      ch.videoTurnId = data.turn.id;
+      ch.videoStatus = 'pending';
+      ch.videoSlug = null;
+    } else {
+      ch.previewTurnId = data.turn.id;
+      ch.previewStatus = 'pending';
+    }
+    if (ab.status === 'ready') ab.status = 'previews';
+    ab.updatedAt = Date.now();
+    save();
+    return ab;
+  }
+
+  // Strip page furniture from every stored book-text unit (post-hoc twin of
+  // the at-ingest stripping). Patterns are learned corpus-wide, applied
+  // per unit. Returns counts; embeddings are left as-is (a few header tokens
+  // don't move a 700-char chunk's vector meaningfully).
+  async function cleanUnits(slug) {
+    const r = await pool.query(
+      `SELECT id::int, payload->>'text' AS text FROM units WHERE ${BOOK_TEXT_WHERE} ORDER BY id`,
+      [slug, books[slug]?.title ?? ''],
+    );
+    const corpus = r.rows.map((x) => x.text).join('\n');
+    const pats = pageFurniturePatterns(corpus, books[slug]?.title ?? '');
+    let changed = 0;
+    let removed = 0;
+    for (const row of r.rows) {
+      const next = stripPageFurniture(row.text, pats);
+      if (next !== row.text) {
+        await pool.query(
+          "UPDATE units SET payload = payload || jsonb_build_object('text', $3::text) WHERE book_slug=$1 AND id=$2",
+          [slug, row.id, next],
+        );
+        changed += 1;
+        removed += row.text.length - next.length;
+      }
+    }
+    return { units: r.rows.length, changed, removedChars: removed, patterns: pats.length };
+  }
+
   return {
     ready,
+    rerenderChapter,
+    cleanUnits,
     get: (slug) => audiobooks[slug] ?? null,
     estimate,
     detectChapters,

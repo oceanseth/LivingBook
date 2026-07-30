@@ -42,12 +42,14 @@ export default function BookPage({ slug, session }: { slug: string; session: Mas
             A living book. Ask it anything — it answers only with its author&rsquo;s exact words,
             drawn from the book and everything the author has attached to it.
           </p>
-          <TalkToBook session={session} fixedSlug={slug} />
           <Listen
             slug={slug}
             session={session}
             isOwner={Boolean(session && book.ownerSub && session.sub === book.ownerSub)}
+            bookAvatarImage={book.avatarImage}
+            bookTitle={book.title}
           />
+          <TalkToBook session={session} fixedSlug={slug} />
           <p className="bookpage-soon">
             Coming for authors: the whole book as a video book, scene by scene.
           </p>

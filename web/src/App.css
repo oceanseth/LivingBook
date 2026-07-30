@@ -1214,3 +1214,11 @@ a.notifreply:hover {
 .listen-tribeurl { width: 100%; max-width: 420px; padding: 7px 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); }
 .linklike { background: none; border: none; padding: 0; color: var(--accent); cursor: pointer; font: inherit; text-decoration: underline; }
 .listen-chtitle { margin: 0; font-size: 1.05rem; }
+.listen-avatar { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+.listen-avatar .avatar { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; }
+.listen .player { width: 100%; aspect-ratio: 16/10; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-top: 8px; }
+.listen-tabs { display: flex; flex-wrap: nowrap; gap: 6px; overflow-x: auto; padding: 6px 2px 10px; scrollbar-width: thin; }
+.listen-tab { flex: 0 0 auto; white-space: nowrap; padding: 6px 12px; border: 1px solid var(--border-strong); border-radius: 999px; background: var(--surface); color: var(--text); cursor: pointer; font-size: 0.85rem; }
+.listen-tab.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.listen-detail { border-top: 1px solid var(--border); padding-top: 12px; }
+.chat { max-height: 420px; overflow-y: auto; }

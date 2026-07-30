@@ -15,7 +15,7 @@ import { createServer } from 'node:http';
 import { createRequire } from 'node:module';
 import { pipeline } from '@xenova/transformers';
 import { createStore, createVectorStore } from './store.mjs';
-import { createAudiobooks } from './audiobook.mjs';
+import { createAudiobooks, pageFurniturePatterns, stripPageFurniture } from './audiobook.mjs';
 const { PDFParse } = createRequire(import.meta.url)('pdf-parse');
 
 const PORT = process.env.PORT ?? 8787;
@@ -616,6 +616,21 @@ const server = createServer(async (req, res) => {
         );
         return res.writeHead(200, headers).end(JSON.stringify({ normalized: r.rowCount }));
       }
+      if (req.method === 'POST' && rest === '/clean') {
+        // Strip page furniture from already-ingested book text (for uploads
+        // that predate at-ingest stripping). Re-render previews afterwards.
+        if (!author) return res.writeHead(403, headers).end('{"error":"author only"}');
+        return res.writeHead(200, headers).end(JSON.stringify(await audiobooks.cleanUnits(slug)));
+      }
+      const rerenderMatch = rest.match(/^\/chapter\/(\d+)\/rerender$/);
+      if (req.method === 'POST' && rerenderMatch) {
+        // Author tweak: re-render one chapter's preview (audio) or add a
+        // video take of the avatar reading it.
+        if (!author) return res.writeHead(403, headers).end('{"error":"author only"}');
+        const output = data.output === 'video' ? 'video' : 'audio';
+        const ab = await audiobooks.rerenderChapter(slug, Number(rerenderMatch[1]), output);
+        return res.writeHead(202, headers).end(JSON.stringify({ audiobook: audiobooks.publicView(ab, sub, true) }));
+      }
       if (req.method === 'POST' && rest === '/patch-unit') {
         // Surgical repair of a PDF-extraction artifact in ONE unit's text
         // (e.g. a drop-cap letter lost by the extractor). Exact-substring
@@ -741,7 +756,12 @@ const server = createServer(async (req, res) => {
       // A PDF (or file-named) upload IS the book text, whatever the dropdown
       // said — coerce so audiobook detection and framing treat it as the book.
       if (data.pdfBase64 || /\.(pdf|docx?|txt|md|epub)\s*$/i.test(title)) sourceType = 'book';
-      if (sourceType === 'book') title = book.title;
+      if (sourceType === 'book') {
+        title = book.title;
+        // Strip PDF page furniture (page separators, running headers) so the
+        // stored verbatim text — and any future audiobook render — is prose.
+        text = stripPageFurniture(text, pageFurniturePatterns(text, book.title));
+      }
       const chunks = chunkText(text, title);
       const points = [];
       for (const c of chunks) {
