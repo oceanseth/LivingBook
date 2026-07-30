@@ -116,19 +116,24 @@ token so Masky bills them — the 402 response (`requiredCredits` /
 `release` on the structure doc; enforced at `GET …/chapter/{idx}/audio?scope=full`:
 
 - `free` — anyone can play full chapters (author page marketing only).
-- `tribe` — only the author's Masky tribe members. **The Masky API has no tribe
-  membership endpoint yet** — until it does, access comes from the `grants`
-  map (`POST …/grant {sub}`) and everyone else sees the join-tribe CTA
-  (`tribeUrl`) on every chapter row.
-- `donation` — user must donate to the author on Masky. **No user→user
-  donation endpoint exists yet either** — same `grants` fallback; the CTA
-  explains donating unlocks the audiobook.
+- `tribe` — Masky tribe members, checked LIVE via the shipped Masky API
+  (masky.md § Tribes & credit gifts): the server calls
+  `GET /api/tribes/{book.avatarOwner}` with the READER's own bearer token —
+  `isMember` answers for the token holder. The gate CTA joins in-app:
+  `POST /api/tribes/{owner}/join` (charges joinCost; free for the creator's
+  Twitch subs).
+- `donation` — the author sets `donationMin` (credits) in settings; the server
+  totals the reader's gifts via `GET /api/donations/sent?to={owner}` (reader's
+  token) and grants at `total ≥ donationMin`. The CTA proposes a two-phase
+  gift (`POST /api/donations/intents` → user confirms on masky.ai in a popup
+  → poll the intent), then re-checks.
 
+A passing live check writes a `grants` entry so later checks skip the API;
+manual `POST …/grant {sub}` remains as an author override. Reader sessions
+need the `tribes` + `donations` OAuth scopes (in the web login SCOPES).
 Previews (`scope=preview`) are ALWAYS free — they are the marketing.
-
-**Masky dev asks (tell their team):** (1) `GET /api/tribes/{owner}/members` or
-a `tribe:member` claim in `/oauth/userinfo`; (2) user→user donation endpoint
-with a webhook or receipt we can verify server-side to auto-grant access.
+All API responses send `Cache-Control: no-store` — browsers heuristically
+cache header-less GETs, which made settings changes look unsaved.
 
 ## Author tooling routes (all author-only, or x-admin-token for ownerless books)
 

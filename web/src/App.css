@@ -1217,8 +1217,11 @@ a.notifreply:hover {
 .listen-avatar { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
 .listen-avatar .avatar { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; }
 .listen .player { width: 100%; aspect-ratio: 16/10; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-top: 8px; }
-.listen-tabs { display: flex; flex-wrap: nowrap; gap: 6px; overflow-x: auto; padding: 6px 2px 10px; scrollbar-width: thin; }
+.listen-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 2px 10px; }
 .listen-tab { flex: 0 0 auto; white-space: nowrap; padding: 6px 12px; border: 1px solid var(--border-strong); border-radius: 999px; background: var(--surface); color: var(--text); cursor: pointer; font-size: 0.85rem; }
 .listen-tab.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .listen-detail { border-top: 1px solid var(--border); padding-top: 12px; }
 .chat { max-height: 420px; overflow-y: auto; }
+.listen-playall { margin: 4px 0 2px; }
+.listen-donmin { display: block; margin: 8px 0; font-size: 0.9rem; }
+.listen-donmin input { width: 90px; padding: 5px 8px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); margin-left: 6px; }

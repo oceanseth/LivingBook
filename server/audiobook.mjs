@@ -341,10 +341,12 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
   }
 
   // ── access gating ─────────────────────────────────────────────────────────
-  // Tribe membership and user→user donations are NOT yet in the Masky API
-  // (masky.md has neither) — asked of the Masky devs. Until then the author
-  // grants access manually (POST …/grant) and the UI shows the join-tribe /
-  // donate marketing to everyone else.
+  // Tribe + donation checks use Masky's shipped API (masky.md § Tribes &
+  // credit gifts) with the READER's own token: GET /tribes/{owner} answers
+  // isMember for the token holder; GET /donations/sent?to={owner} totals the
+  // token holder's gifts to the author. The tribe owner identifier is the
+  // book's avatarOwner Masky uid. Manual grants remain as an override, and a
+  // passing live check writes a grant so later checks are instant.
   function canListenFull(ab, userSub, isOwner) {
     if (!ab) return { ok: false, why: 'none' };
     if (isOwner) return { ok: true, why: 'owner' };
@@ -353,14 +355,66 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
     return { ok: false, why: ab.release }; // 'tribe' | 'donation' → UI shows the matching CTA
   }
 
-  function publicView(ab, userSub, isOwner) {
+  const accessCache = new Map(); // `${slug}:${token.slice(-16)}` -> { at, result }
+  async function checkAccess(slug, userToken, userSub, isOwner) {
+    const ab = audiobooks[slug];
+    const base = canListenFull(ab, userSub, isOwner);
+    const tribeOwner = books[slug]?.avatarOwner ?? null;
+    const meta = ab
+      ? { release: ab.release, donationMin: ab.donationMin ?? null, tribeOwner }
+      : {};
+    if (base.ok || !userToken || !tribeOwner) return { ...base, ...meta };
+    const key = `${slug}:${userToken.slice(-16)}`;
+    const hit = accessCache.get(key);
+    if (hit && Date.now() - hit.at < 60000) return { ...hit.result, ...meta };
+    const result = { ...base };
+    try {
+      if (ab.release === 'tribe') {
+        const r = await fetch(`${MASKY}/tribes/${encodeURIComponent(tribeOwner)}`, {
+          headers: { Authorization: `Bearer ${userToken}` },
+        });
+        const d = r.ok ? await r.json() : null;
+        if (d?.isMember || d?.isOwner) {
+          result.ok = true;
+          result.why = 'tribe-member';
+          if (userSub) {
+            ab.grants[userSub] = { via: 'tribe', at: Date.now() };
+            save();
+          }
+        }
+      } else if (ab.release === 'donation') {
+        const min = Number(ab.donationMin ?? 0) || 0;
+        const r = await fetch(`${MASKY}/donations/sent?to=${encodeURIComponent(tribeOwner)}`, {
+          headers: { Authorization: `Bearer ${userToken}` },
+        });
+        const d = r.ok ? await r.json() : null;
+        result.donatedTotal = Number(d?.total ?? 0) || 0;
+        if (min > 0 && result.donatedTotal >= min) {
+          result.ok = true;
+          result.why = 'donation';
+          if (userSub) {
+            ab.grants[userSub] = { via: 'donation', at: Date.now() };
+            save();
+          }
+        }
+      }
+    } catch (e) {
+      console.error('access check failed', slug, e.message);
+    }
+    accessCache.set(key, { at: Date.now(), result });
+    return { ...result, ...meta };
+  }
+
+  function publicView(ab, userSub, isOwner, accessOverride) {
     if (!ab) return null;
-    const access = canListenFull(ab, userSub, isOwner);
+    const access = accessOverride ?? canListenFull(ab, userSub, isOwner);
     return {
       slug: ab.slug,
       status: ab.status,
       test: ab.test,
       release: ab.release,
+      donationMin: ab.donationMin ?? null,
+      tribeOwner: books[ab.slug]?.avatarOwner ?? null,
       tribeUrl: ab.tribeUrl,
       estimate: isOwner ? ab.estimate : undefined,
       conversation: isOwner ? ab.conversation : undefined,
@@ -453,7 +507,7 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
     chapterAudioUrl,
     canListenFull,
     publicView,
-    setSettings(slug, { release, tribeUrl }) {
+    setSettings(slug, { release, tribeUrl, donationMin }) {
       const ab = audiobooks[slug];
       if (!ab) throw new Error('no audiobook yet');
       if (release) {
@@ -461,10 +515,16 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
         ab.release = release;
       }
       if (tribeUrl !== undefined) ab.tribeUrl = tribeUrl;
+      if (donationMin !== undefined) {
+        const n = Number(donationMin);
+        if (!Number.isFinite(n) || n < 0) throw new Error('bad donationMin');
+        ab.donationMin = n;
+      }
       ab.updatedAt = Date.now();
       save();
       return ab;
     },
+    checkAccess,
     grant(slug, sub, via = 'manual') {
       const ab = audiobooks[slug];
       if (!ab) throw new Error('no audiobook yet');

@@ -495,6 +495,7 @@ async function audiobookAuthor(book, token, req) {
 const server = createServer(async (req, res) => {
   const headers = {
     'Content-Type': 'application/json',
+    'Cache-Control': 'no-store',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -598,7 +599,8 @@ const server = createServer(async (req, res) => {
 
       if (req.method === 'GET' && rest === '') {
         await audiobooks.refresh(slug).catch(() => {});
-        const view = audiobooks.publicView(audiobooks.get(slug), sub, Boolean(author));
+        const access = await audiobooks.checkAccess(slug, token, sub, Boolean(author));
+        const view = audiobooks.publicView(audiobooks.get(slug), sub, Boolean(author), access);
         return res.writeHead(200, headers).end(JSON.stringify({ audiobook: view }));
       }
       if (req.method === 'POST' && rest === '/estimate') {
@@ -699,7 +701,7 @@ const server = createServer(async (req, res) => {
       }
       if (req.method === 'POST' && rest === '/settings') {
         if (!author) return res.writeHead(403, headers).end('{"error":"author only"}');
-        const ab = audiobooks.setSettings(slug, { release: data.release, tribeUrl: data.tribeUrl });
+        const ab = audiobooks.setSettings(slug, { release: data.release, tribeUrl: data.tribeUrl, donationMin: data.donationMin });
         return res.writeHead(200, headers).end(JSON.stringify({ audiobook: audiobooks.publicView(ab, sub, true) }));
       }
       if (req.method === 'POST' && rest === '/grant') {
@@ -717,7 +719,7 @@ const server = createServer(async (req, res) => {
         const idx = Number(audioMatch[1]);
         const scope = (req.url.includes('scope=full') ? 'full' : 'preview');
         if (scope === 'full') {
-          const access = audiobooks.canListenFull(audiobooks.get(slug), sub, Boolean(author));
+          const access = await audiobooks.checkAccess(slug, token, sub, Boolean(author));
           if (!access.ok) return res.writeHead(403, headers).end(JSON.stringify({ error: 'no access', release: access.why }));
         }
         try {

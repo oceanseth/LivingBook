@@ -249,7 +249,7 @@ curl -s -X POST https://masky.ai/api/oauth/clients \
   -d '{"name":"My App","redirectDomains":["myapp.com"],"scopes":["profile","generate"]}'
 # -> { "clientId": "mkc_…", "clientSecret": "mks_…", … }   # secret shown ONCE
 ```
-Scopes: `profile` (identity via userinfo), `avatars:read`, `generate` (spend the user's credits on images/turns).
+Scopes: `profile` (identity via userinfo), `avatars:read`, `generate` (spend the user's credits on images/turns), `tribes` (tribe membership queries + credit-paid join), `donations` (propose user→user credit gifts; each needs the user's confirmation on masky.ai).
 
 **2. Send the user to consent.** Open in their browser:
 ```
@@ -295,6 +295,46 @@ curl -s -X POST https://masky.ai/api/oauth/token \
 ```
 
 The token behaves exactly like a user's SSO token: `/oauth/userinfo` returns a normal `ava_` sub with the avatar's name and picture, generation bills the client owner's credits, and the owner can revoke it from Connected apps. Tokens are long-lived — **request one and store it; don't mint a new token per call.**
+
+## Tribes & credit gifts (SSO)
+
+With an SSO token you can integrate a creator's **tribe** (their community with a credit-priced join) and send **credit gifts** between users. `{user}` params accept a Masky uid or twitchUsername. None of these are public: membership queries only answer for the token holder's own tribe or own membership.
+
+```bash
+# Tribe info (`tribes` scope) — name, join cost, member count, whether the token's user is a member
+curl -s https://masky.ai/api/tribes/<user> -H "Authorization: Bearer <access_token>"
+# -> { "user":"…", "tribeName":"…", "joinCost":10, "memberCount":42, "isMember":false, "isOwner":false }
+
+# Membership check — is <member> in <user>'s tribe? Caller must be one of the two.
+curl -s "https://masky.ai/api/tribes/<user>/membership?member=<other>" -H "Authorization: Bearer <access_token>"
+# -> { "tribeOwner":"…", "member":true, "joinedAt":1750000000000 }
+
+# Join — charges joinCost from the user's credits (free for the creator's active Twitch subs)
+curl -s -X POST https://masky.ai/api/tribes/<user>/join -H "Authorization: Bearer <access_token>"
+# -> { "success":true, "isSubscriber":false, "charged":10 }
+```
+
+Credit gifts are **two-phase** (`donations` scope): your token can only *propose* — the transfer executes only after the user confirms on a masky.ai page with their own session, so a delegated token can never move credits by itself.
+
+```bash
+# 1) Propose a gift
+curl -s -X POST https://masky.ai/api/donations/intents \
+  -H "Authorization: Bearer <access_token>" -H "Content-Type: application/json" \
+  -d '{"to":"<user>","amount":5,"note":"great stream!"}'
+# -> { "intentId":"…", "status":"pending", "confirmUrl":"https://masky.ai/donate-confirm.html?intent=…", "expiresAt":… }
+
+# 2) Open confirmUrl in a popup — the user clicks "Send credits" there.
+#    The page postMessages {type:"masky:gift", status, intentId} to the opener (a hint);
+#    poll for the authoritative status. Intents expire after 10 minutes.
+curl -s https://masky.ai/api/donations/intents/<intentId> -H "Authorization: Bearer <access_token>"
+# -> status: "pending" | "confirmed" | "cancelled" | "expired"
+
+# 3) Gifts this user has sent to someone (totals + history)
+curl -s "https://masky.ai/api/donations/sent?to=<user>" -H "Authorization: Bearer <access_token>"
+# -> { "to":"…", "total":12.5, "count":3, "gifts":[{ "amount":5, "note":"…", "createdAt":… }] }
+```
+
+Gifted credits arrive as global Masky credits. The sender's transferable balance excludes credits locked to a creator's page or already spent, so a propose/confirm can fail with `Insufficient transferable credits`.
 
 ## Notes
 

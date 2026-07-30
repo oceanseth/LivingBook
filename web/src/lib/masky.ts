@@ -5,7 +5,7 @@
 
 const MASKY_ORIGIN = 'https://masky.ai';
 const CLIENT_ID = import.meta.env.VITE_MASKY_CLIENT_ID as string | undefined;
-const SCOPES = 'profile avatars:read generate';
+const SCOPES = 'profile avatars:read generate tribes donations';
 
 const VERIFIER_KEY = 'masky_pkce_verifier';
 const STATE_KEY = 'masky_oauth_state';
