@@ -627,10 +627,14 @@ const server = createServer(async (req, res) => {
       const rerenderMatch = rest.match(/^\/chapter\/(\d+)\/rerender$/);
       if (req.method === 'POST' && rerenderMatch) {
         // Author tweak: re-render one chapter's preview (audio) or add a
-        // video take of the avatar reading it.
+        // video take of the avatar reading it. Optional {title, preview}
+        // carry the author's popup corrections and pin them permanently.
         if (!author) return res.writeHead(403, headers).end('{"error":"author only"}');
         const output = data.output === 'video' ? 'video' : 'audio';
-        const ab = await audiobooks.rerenderChapter(slug, Number(rerenderMatch[1]), output);
+        const ab = await audiobooks.rerenderChapter(slug, Number(rerenderMatch[1]), output, {
+          title: data.title,
+          preview: data.preview,
+        });
         return res.writeHead(202, headers).end(JSON.stringify({ audiobook: audiobooks.publicView(ab, sub, true) }));
       }
       if (req.method === 'POST' && rest === '/patch-unit') {

@@ -13,11 +13,22 @@ interface Chapter {
   id: string;
   title: string;
   preview: string;
+  titleEdited?: boolean;
+  previewEdited?: boolean;
   previewStatus: string;
   videoStatus: string;
   videoLiveUrl: string | null;
   fullStatus: string;
   estSeconds: number;
+}
+// Pre-render review state: what the ↻/🎬 popup edits before rendering.
+interface RerenderDraft {
+  idx: number;
+  output: 'audio' | 'video';
+  title: string;
+  preview: string;
+  initTitle: string;
+  initPreview: string;
 }
 interface MaskyAvatar {
   avatarId: string;
@@ -71,6 +82,7 @@ export default function Listen({
   const [picked, setPicked] = useState<PickedAvatar | null>(null);
   const [avatarImage, setAvatarImage] = useState<string | null>(bookAvatarImage ?? null);
   const [linkDraft, setLinkDraft] = useState<{ label: string; url: string }[] | null>(null);
+  const [rerenderDraft, setRerenderDraft] = useState<RerenderDraft | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playAllRef = useRef(false);
   const abRef = useRef<Audiobook | null>(null);
@@ -538,19 +550,40 @@ export default function Listen({
                 <button
                   className="ghost"
                   disabled={busy !== null}
-                  title="Re-render this chapter's audio preview"
-                  onClick={() => authorPost(`/chapter/${selCh.idx}/rerender`, { output: 'audio' })}
+                  title="Review & re-render this chapter's audio preview"
+                  onClick={() =>
+                    setRerenderDraft({
+                      idx: selCh.idx,
+                      output: 'audio',
+                      title: selCh.title,
+                      preview: selCh.preview,
+                      initTitle: selCh.title,
+                      initPreview: selCh.preview,
+                    })
+                  }
                 >
                   ↻
                 </button>
                 <button
                   className="ghost"
                   disabled={busy !== null || selCh.videoStatus === 'pending'}
-                  title="Render this chapter's preview as avatar video"
-                  onClick={() => authorPost(`/chapter/${selCh.idx}/rerender`, { output: 'video' })}
+                  title="Review & render this chapter's preview as avatar video"
+                  onClick={() =>
+                    setRerenderDraft({
+                      idx: selCh.idx,
+                      output: 'video',
+                      title: selCh.title,
+                      preview: selCh.preview,
+                      initTitle: selCh.title,
+                      initPreview: selCh.preview,
+                    })
+                  }
                 >
                   🎬
                 </button>
+                {(selCh.titleEdited || selCh.previewEdited) && (
+                  <span className="sub" title="You've hand-corrected this chapter — auto-detection won't overwrite it.">✎ edited</span>
+                )}
               </>
             )}
           </div>
@@ -597,6 +630,62 @@ export default function Listen({
       )}
       {notice && <p className="notice">{notice}</p>}
       {error && <p className="error">{error}</p>}
+      {rerenderDraft && (
+        <div className="modal-backdrop" onClick={() => setRerenderDraft(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-head">
+              <h3>{rerenderDraft.output === 'video' ? '🎬 Render video take' : '↻ Re-render preview'}</h3>
+              <button className="ghost" onClick={() => setRerenderDraft(null)}>✕</button>
+            </div>
+            <p className="sub">
+              This is exactly what the avatar will read. Chapter detection is automatic and can get
+              titles or opening text wrong (PDF page headers bleed into prose) — fix anything below
+              before rendering. Your corrections stick: auto-detection won&rsquo;t overwrite them.
+            </p>
+            <label className="listen-editfield">
+              Chapter title
+              <input
+                value={rerenderDraft.title}
+                maxLength={120}
+                onChange={(e) => setRerenderDraft({ ...rerenderDraft, title: e.target.value })}
+              />
+            </label>
+            <label className="listen-editfield">
+              Preview text ({rerenderDraft.preview.length}/420 chars)
+              <textarea
+                rows={7}
+                value={rerenderDraft.preview}
+                maxLength={420}
+                onChange={(e) => setRerenderDraft({ ...rerenderDraft, preview: e.target.value })}
+              />
+            </label>
+            <p className="sub">
+              Spoken as &ldquo;{rerenderDraft.title}. …&rdquo; — title + text beyond 499 characters
+              total is trimmed to keep one clean take.
+            </p>
+            <div className="modal-actions">
+              <button className="ghost" onClick={() => setRerenderDraft(null)}>Cancel</button>
+              <button
+                className="cta"
+                disabled={busy !== null || !rerenderDraft.title.trim() || !rerenderDraft.preview.trim()}
+                onClick={async () => {
+                  const d = rerenderDraft;
+                  // Only send fields the author actually changed — unchanged
+                  // fields stay un-pinned so detection improvements flow in.
+                  await authorPost(`/chapter/${d.idx}/rerender`, {
+                    output: d.output,
+                    ...(d.title.trim() !== d.initTitle ? { title: d.title.trim() } : {}),
+                    ...(d.preview.trim() !== d.initPreview ? { preview: d.preview.trim() } : {}),
+                  });
+                  setRerenderDraft(null);
+                }}
+              >
+                {busy ? 'Rendering…' : rerenderDraft.output === 'video' ? 'Render video' : 'Re-render audio'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {picked && session && (
         <AvatarModal
           session={session}

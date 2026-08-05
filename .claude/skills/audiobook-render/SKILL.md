@@ -41,6 +41,7 @@ Keep this file and `server/audiobook.mjs` in sync — this is the contract.
   "chapters": [{
     "idx": 0, "id": "genesis", "title": "Genesis",
     "preview": "first paragraph (or summary) text",
+    "titleEdited": false, "previewEdited": false,  // author-pinned via the rerender popup
     "previewTurnId": "…", "previewStatus": "none|pending|ready|error",
     "fullTurnIds": [], "fullStatus": "none|pending|ready|error",
     "chars": 0, "estSeconds": 0
@@ -54,21 +55,53 @@ Keep this file and `server/audiobook.mjs` in sync — this is the contract.
    `server/bible-structure.mjs`. Preview = the summary (test mode).
 2. **Generic uploaded book (implemented)** — scan the book's ordered unit
    texts for inline headings `(chapter|part|section) + (number|roman|word)`
-   (chunking collapsed line breaks, so headings sit inline). A chapter starts
-   at the unit carrying the heading; preview = the prose right after it
-   (padded from the next unit when <120 chars, capped 420); units before the
-   first heading become an "Opening" chapter. Fewer than 3 headings → the
-   pattern isn't trusted (a stray "chapter twelve" mid-sentence must not split
-   the book) and the whole book is one chapter titled with the book's title.
-   Each chapter records `firstUnitId`/`lastUnitId` — the full render pulls
-   exact chapter text by that id range.
-3. **Improving detection** — the chunk scan cannot see typographic headings
-   (short title-case lines) because chunking erased line structure. When an
-   author needs those: re-ingest keeping the original text (or PDF outline) and
-   split there; markdown `#`/`##` headings and TOC entries beat regexes.
-   Preview `POST …/audiobook/render {dryRun:true}` shows detected chapters +
-   the estimate without creating a conversation or spending credits — always
-   dry-run before a paid render.
+   (chunking collapsed line breaks, so headings sit inline). Selection rules,
+   each earned from a real failure (Out of Focus ch. 2 was the case study):
+   - **TOC-ish units are skipped** (dot leaders `……`, or **≥3** headings in
+     one unit — not 2: a true chapter start regularly shares its unit with a
+     cross-reference like "In Chapter 8, I discuss…"). TOC units instead feed
+     `tocNames` ("Chapter N: Name …. 42" harvesting).
+   - **Strictly-sequential chain, earliest occurrence wins.** Running page
+     headers repeat the current number and always sit DEEPER than the true
+     start; cross-references cite arbitrary numbers. Both fail the
+     expected-number walk. Do NOT prefer "sentence-boundary-shaped" matches —
+     page breaks fall at sentence ends, so glued running headers often look
+     boundary-clean while the true start doesn't.
+   - **Full title = longest common word-prefix** between the accepted start's
+     following text and any other same-number match. Running headers repeat
+     the FULL "Chapter N: Title" on every page — that common prefix beats the
+     TOC, whose own layout truncates long titles ("The History That Laid the
+     Groundwork…" vs the real "…of Mental Health Treatment in America").
+     TOC name is the fallback; derived must extend it and stay ≤90 chars.
+   - Preview = prose after the heading (padded from the next unit when <120
+     chars, capped 420) with the title stripped: as a prefix, as a leading
+     fragment that's a *suffix* of the title (body headings sometimes carry
+     only the tail), and — ≥3-word titles only — glued running-header
+     occurrences anywhere. Short titles ("Stigma") are real prose words and
+     are never stripped mid-text.
+   Units before the first heading become an "Opening" chapter; fewer than 3
+   headings total → the whole book is one chapter. Each chapter records
+   `firstUnitId`/`lastUnitId` — the full render pulls exact text by id range.
+3. **The author is the last-resort detector.** The ↻/🎬 buttons open a
+   review popup (title + preview text, pre-filled) BEFORE rendering; edited
+   fields POST as `{title, preview}` to the rerender route, are pinned via
+   `titleEdited`/`previewEdited` on the chapter, and survive both future
+   re-detections and full re-renders (carried over by idx). Never "improve"
+   detection by overwriting a pinned field. Residual artifacts the popup is
+   for: PDF drop-caps losing a chapter's first letter ("n the thick of"),
+   body sub-title variants ("The Rise of ASD & ADHD" under "…Autism and
+   ADHD"), previews that start mid-scene.
+4. **Improving detection further** — the chunk scan cannot see typographic
+   headings (short title-case lines) because chunking erased line structure.
+   When an author needs those: re-ingest keeping the original text (or PDF
+   outline) and split there; markdown `#`/`##` headings and TOC entries beat
+   regexes. Diagnose with `…/audiobook/units?q=substr` before touching
+   heuristics — the real corpus always beats theory (the ch. 2 bug had three
+   plausible wrong explanations before the units showed the true start being
+   discarded as TOC-ish). Test changes offline against fetched units (stub
+   the pg pool) before deploying. Preview `POST …/audiobook/render
+   {dryRun:true}` shows detected chapters + the estimate without creating a
+   conversation or spending credits — always dry-run before a paid render.
 
 ## Cost estimation (before the author pays)
 
@@ -147,10 +180,15 @@ cache header-less GETs, which made settings changes look unsaved.
   extraction artifact (e.g. a lost drop-cap letter). Exact-substring-guarded;
   never for editing prose. Beware shell-quoting when scripting replacements —
   derive exact strings from the stored text, verify after writing.
-- `POST …/audiobook/chapter/{idx}/rerender {output:"audio"|"video"}` —
-  re-render one chapter's preview (re-detects first so text repairs flow in),
-  or render a VIDEO take of the avatar reading it; video ready → the chapter
-  carries `videoLiveUrl` (Masky live player, embeds with `?autoplay=1`).
+- `POST …/audiobook/chapter/{idx}/rerender {output:"audio"|"video", title?,
+  preview?}` — re-render one chapter's preview (re-detects first so text
+  repairs flow in), or render a VIDEO take of the avatar reading it; video
+  ready → the chapter carries `videoLiveUrl` (Masky live player, embeds with
+  `?autoplay=1`). Optional `title`/`preview` are the author's corrections
+  from the pre-render popup: they replace the detected values AND pin them
+  (`titleEdited`/`previewEdited`) so re-detection and full re-renders never
+  clobber them. The UI sends only fields the author actually changed, so an
+  untouched field keeps receiving detection improvements.
 - Known PDF pitfall: decorative drop-caps are separate text objects pdf-parse
   loses — every chapter body may open missing its first letter. Scan chapter
   openings for fragment words (dictionary check) and repair via patch-unit.

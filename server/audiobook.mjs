@@ -135,7 +135,10 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
     for (let i = 0; i < r.rows.length; i++) {
       const text = r.rows[i].text;
       const inUnit = [...text.matchAll(HEADING)];
-      const isToc = inUnit.length >= 2 || /(\.\s*){5,}|…/.test(text);
+      // TOC test: dot leaders, or MANY headings in one unit. Threshold 3, not
+      // 2 — a real chapter start regularly shares its unit with one
+      // cross-reference ("In Chapter 8, I discuss…") and must not be dropped.
+      const isToc = inUnit.length >= 3 || /(\.\s*){5,}|…/.test(text);
       if (isToc) {
         // Harvest "Chapter N: Name ....… 42" entries — the TOC is the one
         // place the PDF states chapter names explicitly.
@@ -152,7 +155,9 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
     }
     // Pass 2: per type, accept only the strictly-sequential chain (1, 2, 3…).
     // Running headers repeat the current number and cross-references cite
-    // arbitrary ones — both fail `num === expected` and drop out.
+    // arbitrary ones — both fail `num === expected` and drop out. The earliest
+    // occurrence of the expected number wins: running headers always sit
+    // DEEPER in the chapter than its true start.
     const expected = { chapter: 1, part: 1, section: 1 };
     const chains = { chapter: [], part: [], section: [] };
     for (const m of all) {
@@ -202,13 +207,57 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
       const st = starts[s];
       const lastUnit = s + 1 < starts.length ? Math.max(starts[s + 1].unitIdx - 1, st.unitIdx) : r.rows.length - 1;
       let preview = (st.after.length > 120 ? st.after : `${st.after} ${r.rows[st.unitIdx + 1]?.text ?? ''}`).trim();
-      // TOC gave us the real name → "Chapter 1: Our Stories"; and when the
-      // body text opens by repeating that name, strip it so the preview is
-      // prose, not the title again.
-      const name = st.type === 'chapter' ? tocNames[st.num] : null;
+      // The chapter's display name, best evidence first:
+      // 1. Running headers repeat "Chapter N: Full Title" on every page — the
+      //    longest common word-prefix across all same-number matches IS the
+      //    full title (books' own TOC layouts often truncate long titles).
+      // 2. The TOC entry ("Chapter N: Name .... 42").
+      const siblings = all.filter((m) => m.type === st.type && m.num === st.num && m !== st);
+      let derived = null;
+      {
+        // Longest common word-prefix between the ACCEPTED start and any other
+        // same-number match (running headers repeat the full title; unrelated
+        // cross-references share nothing and simply score 0).
+        const tok = (x) => x.trim().split(/\s+/).slice(0, 14);
+        const mine = tok(st.after);
+        let best = [];
+        for (const sib of siblings) {
+          const t = tok(sib.after);
+          let k = 0;
+          while (k < mine.length && k < t.length && mine[k] === t[k]) k += 1;
+          if (k > best.length) best = mine.slice(0, k);
+        }
+        if (best.length >= 2) derived = best.join(' ').replace(/[\s.,;:–—-]+$/, '');
+      }
+      let name = st.type === 'chapter' ? tocNames[st.num] ?? null : null;
+      if (derived && derived.length <= 90 && (!name || derived.toLowerCase().startsWith(name.toLowerCase()))) name = derived;
       const chTitle = name ? `${title(st.heading)}: ${name}` : title(st.heading);
-      if (name && preview.toLowerCase().startsWith(name.toLowerCase())) {
-        preview = preview.slice(name.length).replace(/^[\s.:–—-]+/, '');
+      if (name) {
+        // Strip the title out of the preview: as a prefix (body text opens by
+        // repeating the name) and — for long multi-word titles only — anywhere
+        // it was glued in as a running page header. Short titles ("Stigma")
+        // are real prose words and must never be stripped mid-text.
+        if (preview.toLowerCase().startsWith(name.toLowerCase())) {
+          preview = preview.slice(name.length).replace(/^[\s.:–—-]+/, '');
+        } else {
+          // Body headings sometimes carry only the tail of the full title
+          // ("Chapter 10: Disparities" vs TOC's "Systemic Bias and
+          // Disparities") — strip a leading fragment that is a suffix of it.
+          const pw = preview.split(/\s+/);
+          for (let k = Math.min(6, pw.length); k >= 1; k--) {
+            if (name.toLowerCase().endsWith(pw.slice(0, k).join(' ').toLowerCase())) {
+              preview = pw.slice(k).join(' ');
+              break;
+            }
+          }
+        }
+        if (name.split(/\s+/).length >= 3) {
+          const esc = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          preview = preview
+            .replace(new RegExp(`\\s*(?:chapter\\s+\\w+\\s*[:.]?\\s*)?${esc}\\s*`, 'gi'), ' ')
+            .replace(/\s{2,}/g, ' ')
+            .trim();
+        }
       }
       chapters.push(mk(chapters.length, chTitle, st.unitIdx, lastUnit, preview));
     }
@@ -225,6 +274,22 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
     };
     const chapters = await detectChapters(slug);
     if (!chapters.length) throw new Error('no book text ingested — upload the book first');
+    // Author-pinned titles/previews survive a full re-render (matched by idx
+    // when the chapter count is unchanged).
+    const prev = audiobooks[slug];
+    if (prev?.chapters?.length === chapters.length) {
+      for (const ch of chapters) {
+        const old = prev.chapters[ch.idx];
+        if (old?.titleEdited) {
+          ch.title = old.title;
+          ch.titleEdited = true;
+        }
+        if (old?.previewEdited) {
+          ch.preview = old.preview;
+          ch.previewEdited = true;
+        }
+      }
+    }
     const conv = await fetch(`${MASKY}/conversations`, {
       method: 'POST',
       headers: maskyHeaders,
@@ -425,6 +490,8 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
         id: c.id,
         title: c.title,
         preview: c.preview,
+        titleEdited: Boolean(c.titleEdited),
+        previewEdited: Boolean(c.previewEdited),
         previewStatus: c.previewStatus,
         videoStatus: c.videoStatus ?? 'none',
         videoLiveUrl: c.videoSlug ? `https://masky.ai/live/t-${c.videoSlug}` : null,
@@ -438,14 +505,25 @@ export function createAudiobooks({ store, vectors, books, serviceToken, narrator
   // Re-render ONE chapter — as audio (replacing its preview) or as a video
   // take. Re-detects first so a text cleanup/patch flows into the new turn;
   // stored chapter keeps its identity (turn ids) when detection still aligns.
-  async function rerenderChapter(slug, idx, output = 'audio') {
+  // `edits` carries author corrections from the pre-render popup — once set,
+  // a field is pinned (`titleEdited`/`previewEdited`) and re-detection never
+  // clobbers it again.
+  async function rerenderChapter(slug, idx, output = 'audio', edits = {}) {
     const ab = audiobooks[slug];
     const ch = ab?.chapters[idx];
     if (!ch) throw new Error('unknown chapter');
     const fresh = await detectChapters(slug);
     if (fresh.length === ab.chapters.length && fresh[idx]) {
-      ch.title = fresh[idx].title;
-      ch.preview = fresh[idx].preview;
+      if (!ch.titleEdited) ch.title = fresh[idx].title;
+      if (!ch.previewEdited) ch.preview = fresh[idx].preview;
+    }
+    if (typeof edits.title === 'string' && edits.title.trim()) {
+      ch.title = edits.title.trim().replace(/\s+/g, ' ').slice(0, 120);
+      ch.titleEdited = true;
+    }
+    if (typeof edits.preview === 'string' && edits.preview.trim()) {
+      ch.preview = edits.preview.trim().slice(0, 420);
+      ch.previewEdited = true;
     }
     const text = `${ch.title}. ${ch.preview}`.slice(0, TURN_TEXT_LIMIT);
     const res = await fetch(`${MASKY}/conversations/${ab.conversation.id}/turn`, {

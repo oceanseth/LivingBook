@@ -1225,6 +1225,13 @@ a.notifreply:hover {
 .listen-playall { margin: 4px 0 2px; }
 .listen-donmin { display: block; margin: 8px 0; font-size: 0.9rem; }
 .listen-donmin input { width: 90px; padding: 5px 8px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); margin-left: 6px; }
+.listen-editfield { display: block; margin: 10px 0; font-size: 0.9rem; font-weight: 600; }
+.listen-editfield input,
+.listen-editfield textarea {
+  display: block; width: 100%; box-sizing: border-box; margin-top: 4px; padding: 8px 10px;
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  font: inherit; font-weight: 400; resize: vertical; background: var(--bg); color: inherit;
+}
 .listen-buylinks-edit { margin: 12px 0; }
 .listen-buylinks-edit h4 { margin: 0 0 2px; }
 .listen-buyit { border-top: 1px solid var(--border); margin-top: 14px; padding-top: 12px; }
