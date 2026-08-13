@@ -73,6 +73,18 @@ curl -s https://masky.ai/api/avatars -H "Authorization: Bearer $MASKY_API_KEY"
 # -> { "avatars": [ { "avatarId": "...", "avatarOwnerUserId": "twitch:123", "displayName": "...", ... } ] }
 ```
 
+### Avatar image variants — list looks, then render with one
+An avatar isn't a single picture: it has a primary portrait plus any number of stored image variants (its Images tab / assets). **When a user wants to choose how the avatar looks in a render, list the existing variants and let them pick — don't generate or edit a new image for that.**
+```bash
+# List the avatar's image variants (own avatars; or any publiclyRenderable one via ?avatarOwnerUserId=)
+curl -s https://masky.ai/api/avatars/$AVATAR_ID/images -H "Authorization: Bearer $MASKY_API_KEY"
+# -> { "avatarId":"…", "primary":"https://…", "images":[ { "url":"https://…", "assetId":null, "isPrimary":true },
+#                                                        { "url":"https://…", "assetId":"…", "createdAt":… } ] }
+```
+Using a chosen `url`:
+- **One-shot speak** — pass it as `avatarImageUrl` on `POST /avatars/{avatarId}/speak`; the video renders with that still. Any URL not in this list is rejected (400).
+- **Conversations** — the conversation pins an image at create time; switch it with `POST /conversations/{conversationId}/avatar-image {"avatarImageUrl":"<url from the list>"}` (owner only). Later video turns render with the new look.
+
 ### Create an avatar
 ```bash
 curl -s -X POST https://masky.ai/api/avatars \
@@ -295,6 +307,19 @@ curl -s -X POST https://masky.ai/api/oauth/token \
 ```
 
 The token behaves exactly like a user's SSO token: `/oauth/userinfo` returns a normal `ava_` sub with the avatar's name and picture, generation bills the client owner's credits, and the owner can revoke it from Connected apps. Tokens are long-lived — **request one and store it; don't mint a new token per call.**
+
+## Conversation visibility (from /api/docs — not yet in skill.md)
+
+```bash
+# Make a conversation public — its live URL then needs NO viewer token:
+curl -s -X POST https://masky.ai/api/conversations/<conversationId>/visibility \
+  -H "Authorization: Bearer $MASKY_API_KEY" -H "Content-Type: application/json" \
+  -d '{"isPublic":true}'
+# -> { "ok":true, "isPublic":true, "liveUrl":"https://masky.ai/live/c-YY-MM-XXXX" }
+```
+Public conversations are readable by slug without auth; private ones require the
+owner (or the `?token=` viewer token). LivingBook flips share-bound conversations
+public (server.mjs `publicLiveUrl`) so posted links are short and tokenless.
 
 ## Tribes & credit gifts (SSO)
 

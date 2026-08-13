@@ -492,6 +492,29 @@ async function audiobookAuthor(book, token, req) {
   return null;
 }
 
+
+// Share flows publish conversation links outward (social posts, alert
+// replies, embeds). Flip the conversation public first — public conversations
+// are readable by slug without auth — and share the short tokenless URL.
+// Falls back to the tokened liveUrl if the flip fails.
+async function publicLiveUrl(conv, bearer) {
+  try {
+    const r = await fetch(`${MASKY}/conversations/${conv.conversationId}/visibility`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${bearer}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isPublic: true }),
+    });
+    if (r.ok) {
+      const d = await r.json().catch(() => ({}));
+      return d.liveUrl ?? conv.liveUrl.split('?')[0];
+    }
+    console.error('visibility flip rejected', r.status, (await r.text()).slice(0, 120));
+  } catch (e) {
+    console.error('visibility flip failed', e.message);
+  }
+  return conv.liveUrl;
+}
+
 const server = createServer(async (req, res) => {
   const headers = {
     'Content-Type': 'application/json',
@@ -883,9 +906,9 @@ const server = createServer(async (req, res) => {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ userText: turn.text.slice(0, 499), mode: 'speak', output: 'video' }),
       });
-      turn.renderUrl = conv.liveUrl;
+      turn.renderUrl = await publicLiveUrl(conv, token);
       saveConvos();
-      return res.writeHead(200, headers).end(JSON.stringify({ liveUrl: conv.liveUrl }));
+      return res.writeHead(200, headers).end(JSON.stringify({ liveUrl: turn.renderUrl }));
     }
     if (req.method === 'POST' && url === '/api/talk/render') {
       const user = await maskyUser(token);
@@ -920,9 +943,9 @@ const server = createServer(async (req, res) => {
           }),
         });
       }
-      convo.visitorRenderUrl = conv.liveUrl;
+      convo.visitorRenderUrl = await publicLiveUrl(conv, token);
       saveConvos();
-      return res.writeHead(200, headers).end(JSON.stringify({ liveUrl: conv.liveUrl, shareSlug: conv.shareSlug }));
+      return res.writeHead(200, headers).end(JSON.stringify({ liveUrl: convo.visitorRenderUrl, shareSlug: conv.shareSlug }));
     }
 
     // Owner inbox: incoming conversations with their books (text-only until rendered).
@@ -965,9 +988,9 @@ const server = createServer(async (req, res) => {
           }),
         });
       }
-      convo.renderedUrl = conv.liveUrl;
+      convo.renderedUrl = await publicLiveUrl(conv, token);
       saveConvos();
-      return res.writeHead(200, headers).end(JSON.stringify({ liveUrl: conv.liveUrl, shareSlug: conv.shareSlug }));
+      return res.writeHead(200, headers).end(JSON.stringify({ liveUrl: convo.renderedUrl, shareSlug: conv.shareSlug }));
     }
 
     if (req.method === 'POST' && url === '/api/scout/run') {
@@ -990,6 +1013,31 @@ const server = createServer(async (req, res) => {
       const alert = alerts[oneAlert[1]];
       if (!alert) return res.writeHead(404, headers).end('{"error":"unknown alert"}');
       return res.writeHead(200, headers).end(JSON.stringify({ alert }));
+    }
+    const publicizeMatch = url.match(/^\/api\/alerts\/([a-z0-9_]+)\/publicize$/);
+    if (req.method === 'POST' && publicizeMatch) {
+      // Retro-fix an already-approved alert: flip its rendered conversation
+      // public and strip the viewer token from the stored share URLs.
+      if (!(ADMIN_TOKEN && req.headers['x-admin-token'] === ADMIN_TOKEN)) {
+        return res.writeHead(403, headers).end('{"error":"admin only"}');
+      }
+      const alert = alerts[publicizeMatch[1]];
+      if (!alert?.turnLiveUrl) return res.writeHead(404, headers).end('{"error":"no rendered conversation on this alert"}');
+      const slugMatch = alert.turnLiveUrl.match(/\/live\/(c-[a-z0-9-]+)/i);
+      if (!slugMatch) return res.writeHead(409, headers).end('{"error":"unrecognized live url"}');
+      const convData = await fetch(`${MASKY}/conversations/by-slug/${slugMatch[1]}`, {
+        headers: { Authorization: `Bearer ${SERVICE_TOKEN}` },
+      }).then((r) => r.json());
+      if (!convData.conversationId) return res.writeHead(409, headers).end('{"error":"conversation lookup failed"}');
+      const shareUrl = await publicLiveUrl(
+        { conversationId: convData.conversationId, liveUrl: alert.turnLiveUrl },
+        SERVICE_TOKEN,
+      );
+      if (shareUrl.includes('?token=')) return res.writeHead(502, headers).end('{"error":"visibility flip failed"}');
+      alert.turnLiveUrl = shareUrl;
+      if (alert.finalReply) alert.finalReply = alert.finalReply.replace(/https:\/\/masky\.ai\/live\/[^\s·]+/, shareUrl);
+      saveAlerts();
+      return res.writeHead(200, headers).end(JSON.stringify({ turnLiveUrl: shareUrl, finalReply: alert.finalReply ?? null }));
     }
     const dismissMatch = url.match(/^\/api\/alerts\/([a-z0-9_]+)\/dismiss$/);
     if (req.method === 'POST' && dismissMatch) {
@@ -1027,10 +1075,11 @@ const server = createServer(async (req, res) => {
         body: JSON.stringify({ userText: spoken.slice(0, 499), mode: 'speak', output: 'video' }),
       });
       alert.status = 'approved';
-      alert.finalReply = `${(data.reply ?? alert.suggestedReply).trim()} — hear my book answer: ${conv.liveUrl} · ask it anything: https://livingbook.masky.ai`;
-      alert.turnLiveUrl = conv.liveUrl;
+      const shareUrl = await publicLiveUrl(conv, t);
+      alert.finalReply = `${(data.reply ?? alert.suggestedReply).trim()} — hear my book answer: ${shareUrl} · ask it anything: https://livingbook.masky.ai`;
+      alert.turnLiveUrl = shareUrl;
       saveAlerts();
-      return res.writeHead(200, headers).end(JSON.stringify({ finalReply: alert.finalReply, turnLiveUrl: conv.liveUrl }));
+      return res.writeHead(200, headers).end(JSON.stringify({ finalReply: alert.finalReply, turnLiveUrl: shareUrl }));
     }
 
     const askMatch = url.match(/^\/api\/books\/([a-z0-9-]+)\/ask$/);
