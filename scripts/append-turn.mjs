@@ -8,8 +8,9 @@
 // Optional: -x "<summary of tool activity>" on model turns.
 import { appendFileSync } from 'node:fs';
 import { randomBytes } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 
-const HISTORY = new URL('../llm-turn-history.jsonl', import.meta.url).pathname;
+const HISTORY = fileURLToPath(new URL('../llm-turn-history.jsonl', import.meta.url));
 const B32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
 function ulid(now = Date.now()) {
