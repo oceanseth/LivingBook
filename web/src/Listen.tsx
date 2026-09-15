@@ -165,13 +165,18 @@ export default function Listen({
 
   function playAll() {
     const chapters = abRef.current?.chapters ?? [];
-    const first = chapters.find((c) => c.previewStatus === 'ready');
-    if (!first) return;
+    // Start from the currently selected chapter (or the next ready one after
+    // it); fall back to the beginning only when nothing at/after it is ready.
+    const from = typeof sel === 'number' ? sel : 0;
+    const start =
+      chapters.find((c) => c.idx >= from && c.previewStatus === 'ready') ??
+      chapters.find((c) => c.previewStatus === 'ready');
+    if (!start) return;
     playAllRef.current = true;
     setPlayingAll(true);
-    setSel(first.idx);
+    setSel(start.idx);
     setTabClicked(false);
-    void playChapter(first.idx, 'preview');
+    void playChapter(start.idx, 'preview');
   }
 
   async function authorPost(path: string, body?: object) {
