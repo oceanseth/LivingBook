@@ -12,6 +12,7 @@ import TalkToBook from './TalkToBook';
 import Books from './Books';
 import News from './News';
 import BookPage from './BookPage';
+import SharePage from './SharePage';
 import AlertPage from './AlertPage';
 import About from './About';
 import './App.css';
@@ -120,6 +121,8 @@ export default function App() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  const shareMatch = window.location.pathname.match(/^\/b\/([a-z0-9-]+)\/share\/?$/);
+  if (shareMatch) return <SharePage slug={shareMatch[1]} />;
   const bookMatch = window.location.pathname.match(/^\/b\/([a-z0-9-]+)\/?$/);
   if (bookMatch) return <BookPage slug={bookMatch[1]} session={session} />;
   const alertMatch = window.location.pathname.match(/^\/alerts\/([a-z0-9_]+)\/?$/);

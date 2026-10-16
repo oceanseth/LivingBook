@@ -20,6 +20,8 @@ export interface Book {
   title: string;
   author: string;
   units: number;
+  bookIcon?: string | null;
+  avatarImage?: string | null;
 }
 
 export interface Passage {
