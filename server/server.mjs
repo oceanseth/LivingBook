@@ -3,6 +3,7 @@
 //
 //   GET  /api/books                       list books
 //   POST /api/books {title}               create a book (Masky SSO bearer = author)
+//   POST /api/books/:slug                 owner update {title, author, bookIcon}
 //   POST /api/books/:slug/content         upload content {title, sourceType, text}
 //   POST /api/books/:slug/ask {question}  verbatim passages + spoken frame
 //   POST /api/ask {question}              legacy: bible-kjv ask
@@ -56,6 +57,9 @@ const books = await store.load('books', {
   },
 });
 for (const b of Object.values(books)) b.visibility ??= 'public';
+if (books['out-of-focus'] && !books['out-of-focus'].bookIcon) {
+  books['out-of-focus'].bookIcon = '/book-icons/out-of-focus.jpg';
+}
 const saveBooks = () => store.save('books', books);
 saveBooks();
 
@@ -536,8 +540,8 @@ const server = createServer(async (req, res) => {
       const mine = user ? (follows[user.sub] ?? []) : [];
       const list = Object.values(books)
         .filter((b) => b.visibility !== 'private' || (user && b.ownerSub === user.sub))
-        .map(({ slug, title, author, units, authorAvatarId, avatarImage, ownerSub, visibility }) => ({
-          slug, title, author, units, authorAvatarId, avatarImage, ownerSub, visibility,
+        .map(({ slug, title, author, units, authorAvatarId, avatarImage, bookIcon, ownerSub, visibility }) => ({
+          slug, title, author, units, authorAvatarId, avatarImage, bookIcon: bookIcon ?? null, ownerSub, visibility,
           followed: mine.includes(slug),
         }));
       return res.writeHead(200, headers).end(JSON.stringify({ books: list }));
@@ -578,6 +582,34 @@ const server = createServer(async (req, res) => {
       if (data.avatarName) book.author = data.avatarName;
       saveBooks();
       return res.writeHead(200, headers).end(JSON.stringify({ ok: true, book: { slug: book.slug, authorAvatarId: book.authorAvatarId } }));
+    }
+    const metaMatch = url.match(/^\/api\/books\/([a-z0-9-]+)$/);
+    if (req.method === 'POST' && metaMatch) {
+      const book = books[metaMatch[1]];
+      if (!book) return res.writeHead(404, headers).end('{"error":"unknown book"}');
+      const user = await maskyUser(token);
+      if (!user || (book.ownerSub && user.sub !== book.ownerSub)) {
+        return res.writeHead(403, headers).end('{"error":"not your book"}');
+      }
+      if (typeof data.title === 'string' && data.title.trim()) book.title = data.title.trim().slice(0, 200);
+      if (typeof data.author === 'string' && data.author.trim()) book.author = data.author.trim().slice(0, 120);
+      if (data.bookIcon === null || data.bookIcon === '') {
+        book.bookIcon = null;
+      } else if (typeof data.bookIcon === 'string') {
+        const icon = data.bookIcon.trim();
+        if (!/^(https?:\/\/|\/|data:image\/)/i.test(icon)) {
+          return res.writeHead(400, headers).end('{"error":"bookIcon must be a URL or image"}');
+        }
+        if (icon.startsWith('data:') && icon.length > 1_500_000) {
+          return res.writeHead(400, headers).end('{"error":"book icon too large"}');
+        }
+        book.bookIcon = icon;
+      }
+      saveBooks();
+      return res.writeHead(200, headers).end(JSON.stringify({
+        ok: true,
+        book: { slug: book.slug, title: book.title, author: book.author, bookIcon: book.bookIcon ?? null },
+      }));
     }
     if (req.method === 'GET' && url === '/api/news') {
       return res.writeHead(200, headers).end(JSON.stringify({ stories: await news() }));
