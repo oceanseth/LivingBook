@@ -1,0 +1,69 @@
+name: Deploy web
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - ".github/workflows/deploy-web.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-web
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-1
+      BUCKET: s3://livingbook.masky.ai
+      DISTRIBUTION_ID: E2DGNXZJVOM8A
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Build
+        working-directory: web
+        run: npm run build
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Sync to S3
+        # api-config.js/.json are runtime config, auto-managed in the bucket by
+        # scripts/tunnel-watchdog.sh — exclude them so this sync neither
+        # overwrites the live values with the repo defaults nor deletes them.
+        run: |
+          aws s3 sync web/dist "$BUCKET" --delete \
+            --exclude "api-config.js" --exclude "api-config.json"
+
+      - name: No-cache on HTML entrypoint
+        # index.html references content-hashed chunks; a browser-cached copy
+        # would point at chunks the --delete above just removed.
+        run: |
+          aws s3 cp "$BUCKET/index.html" "$BUCKET/index.html" \
+            --content-type "text/html; charset=utf-8" \
+            --cache-control "no-cache" \
+            --metadata-directive REPLACE
+
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "$DISTRIBUTION_ID" --paths "/*"
