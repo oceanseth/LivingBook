@@ -6,6 +6,10 @@
 //   POST /api/books/:slug                 owner update {title, author, bookIcon}
 //   POST /api/books/:slug/content         upload content {title, sourceType, text}
 //   POST /api/books/:slug/ask {question}  verbatim passages + spoken frame
+//        (with x-livingbook-service-key: uncovered answers include the
+//         author's phone number so the Masky call-center runtime can text her)
+//   GET  /api/me/settings                 account settings (Masky SSO bearer)
+//   POST /api/me/settings                 update {authorName, phoneNumber}
 //   POST /api/ask {question}              legacy: bible-kjv ask
 //   POST /api/render                      render answer via narrator (speak mode)
 //   GET  /api/news                        cached top headlines
@@ -44,6 +48,22 @@ const voicecertSessions = new Map();
 const pairCodes = new Map();
 const follows = await store.load('follows', {});
 const saveFollows = () => store.save('follows', follows);
+
+// Per-user account settings (author name, incoming phone number). The phone
+// number is never public: it is released only to callers presenting the
+// shared service key (the Masky call-center runtime), and only when a book
+// ask comes back uncovered.
+const userSettings = await store.load('userSettings', {});
+const saveUserSettings = () => store.save('userSettings', userSettings);
+const SERVICE_KEY = process.env.LIVINGBOOK_SERVICE_KEY;
+
+function normalizePhone(raw) {
+  const s = String(raw ?? '').replace(/[^\d+]/g, '');
+  if (/^\+\d{8,15}$/.test(s)) return s;
+  if (/^1\d{10}$/.test(s)) return `+${s}`;
+  if (/^\d{10}$/.test(s)) return `+1${s}`;
+  return null;
+}
 
 const books = await store.load('books', {
   'bible-kjv': {
@@ -546,6 +566,30 @@ const server = createServer(async (req, res) => {
         }));
       return res.writeHead(200, headers).end(JSON.stringify({ books: list }));
     }
+    if (url === '/api/me/settings') {
+      const user = await maskyUser(token);
+      if (!user) return res.writeHead(401, headers).end('{"error":"Login with Masky required"}');
+      if (req.method === 'GET') {
+        return res.writeHead(200, headers).end(JSON.stringify({ settings: userSettings[user.sub] ?? {} }));
+      }
+      if (req.method === 'POST') {
+        const authorName = String(data.authorName ?? '').trim().slice(0, 80);
+        const phoneRaw = String(data.phoneNumber ?? '').trim();
+        const phoneNumber = phoneRaw ? normalizePhone(phoneRaw) : '';
+        if (phoneRaw && !phoneNumber) {
+          return res.writeHead(400, headers).end('{"error":"phoneNumber must be a valid number, e.g. +18055551234"}');
+        }
+        userSettings[user.sub] = { ...(userSettings[user.sub] ?? {}), authorName, phoneNumber };
+        saveUserSettings();
+        if (authorName) {
+          for (const b of Object.values(books)) {
+            if (b.ownerSub === user.sub) b.author = authorName;
+          }
+          saveBooks();
+        }
+        return res.writeHead(200, headers).end(JSON.stringify({ settings: userSettings[user.sub] }));
+      }
+    }
     const followMatch = url.match(/^\/api\/books\/([a-z0-9-]+)\/follow$/);
     if (req.method === 'POST' && followMatch) {
       const user = await maskyUser(token);
@@ -630,7 +674,7 @@ const server = createServer(async (req, res) => {
       books[slug] = {
         slug,
         title,
-        author: data.authorName?.trim() || user.name,
+        author: data.authorName?.trim() || userSettings[user.sub]?.authorName || user.name,
         ownerSub: user.sub,
         authorAvatarId: data.avatarId ?? user.avatar_id ?? null,
         avatarOwner: data.avatarOwnerUserId ?? null,
@@ -1118,6 +1162,13 @@ const server = createServer(async (req, res) => {
     if (req.method === 'POST' && (askMatch || url === '/api/ask')) {
       const slug = askMatch ? askMatch[1] : 'bible-kjv';
       const answer = await ask(slug, data.question);
+      // The Masky call-center runtime (and only it — shared service key) gets
+      // the author's phone number on uncovered asks, so the caller's question
+      // can be texted to her from the call center's number.
+      if (!answer.covered && SERVICE_KEY && req.headers['x-livingbook-service-key'] === SERVICE_KEY) {
+        const phone = userSettings[books[slug]?.ownerSub]?.phoneNumber;
+        if (phone) answer.authorPhone = phone;
+      }
       return res.writeHead(200, headers).end(JSON.stringify(answer));
     }
     if (req.method === 'POST' && url === '/api/render') {
