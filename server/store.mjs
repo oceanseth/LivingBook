@@ -24,7 +24,7 @@ async function pgPool() {
     password: process.env.PGPASSWORD,
     database: process.env.PGDATABASE ?? 'livingbook',
     max: 5,
-    ssl: { rejectUnauthorized: false },
+    ssl: process.env.PGSSL === 'off' ? false : { rejectUnauthorized: false },
   });
   await pool.query('SELECT 1');
   return pool;

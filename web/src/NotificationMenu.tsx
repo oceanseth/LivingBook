@@ -17,12 +17,111 @@ interface Alert {
   turnLiveUrl?: string;
 }
 
+interface Settings {
+  authorName?: string;
+  phoneNumber?: string;
+}
+
+// Account settings editor (author name + incoming phone number). The phone
+// number is where call-center flows text unanswered reader questions; it is
+// stored server-side and never exposed publicly.
+function SettingsModal({ session, onClose }: { session: MaskySession; onClose: () => void }) {
+  const [authorName, setAuthorName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [state, setState] = useState<'loading' | 'ready' | 'saving' | 'saved' | 'error'>('loading');
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch(`${API}/api/me/settings`, { headers: { Authorization: `Bearer ${session.accessToken}` } })
+      .then((r) => r.json())
+      .then((d: { settings?: Settings }) => {
+        setAuthorName(d.settings?.authorName ?? '');
+        setPhoneNumber(d.settings?.phoneNumber ?? '');
+        setState('ready');
+      })
+      .catch(() => setState('ready'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function save() {
+    setState('saving');
+    setError(null);
+    try {
+      const r = await fetch(`${API}/api/me/settings`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ authorName, phoneNumber }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error ?? 'Save failed');
+      setAuthorName(d.settings?.authorName ?? '');
+      setPhoneNumber(d.settings?.phoneNumber ?? '');
+      setState('saved');
+      setTimeout(onClose, 700);
+    } catch (e) {
+      setError((e as Error).message);
+      setState('error');
+    }
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-head">
+          <h3>⚙ Account settings</h3>
+          <button className="ghost small" onClick={onClose}>
+            ✕
+          </button>
+        </div>
+        <div className="settingsform">
+          <label>
+            Author name
+            <input
+              value={authorName}
+              maxLength={80}
+              placeholder="Shown on your books"
+              onChange={(e) => setAuthorName(e.target.value)}
+              disabled={state === 'loading' || state === 'saving'}
+            />
+          </label>
+          <label>
+            Incoming phone number
+            <input
+              value={phoneNumber}
+              maxLength={20}
+              type="tel"
+              placeholder="+1 805 555 1234"
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              disabled={state === 'loading' || state === 'saving'}
+            />
+          </label>
+          <p className="sub">
+            When a call-center caller asks something your book doesn’t cover, their question is texted
+            to this number — reply by SMS and your digital twin reads it to them. Never shown publicly.
+          </p>
+          {error && <p className="sub settingserror">{error}</p>}
+        </div>
+        <div className="modal-actions">
+          <button className="ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="ghost deep" onClick={save} disabled={state === 'loading' || state === 'saving'}>
+            {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : 'Save'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Header bell: the user's avatar carries a pending-alert badge; clicking opens
-// a dropdown of scout notifications (mentions + related signals), with inline
-// approve that renders the book's turn and produces the shareable reply.
+// a dropdown with account settings on top, then scout notifications (mentions
+// + related signals), with inline approve that renders the book's turn and
+// produces the shareable reply.
 export default function NotificationMenu({ session }: { session: MaskySession }) {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [open, setOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -75,6 +174,18 @@ export default function NotificationMenu({ session }: { session: MaskySession })
       </button>
       {open && (
         <div className="notifmenu">
+          <button
+            className="notifsettings"
+            onClick={() => {
+              setSettingsOpen(true);
+              setOpen(false);
+            }}
+          >
+            <span className="notifgear" aria-hidden>
+              ⚙
+            </span>
+            Settings
+          </button>
           <p className="notifhead">
             Your books are watching — {pending > 0 ? `${pending} waiting` : 'all clear'}
           </p>
@@ -117,6 +228,7 @@ export default function NotificationMenu({ session }: { session: MaskySession })
           ))}
         </div>
       )}
+      {settingsOpen && <SettingsModal session={session} onClose={() => setSettingsOpen(false)} />}
     </div>
   );
 }

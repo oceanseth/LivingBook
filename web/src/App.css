@@ -1067,6 +1067,61 @@ button:disabled {
   }
 }
 
+.notifsettings {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: inherit;
+  padding: 0.2rem 0 0.55rem;
+  margin: 0 0 0.45rem;
+  border-bottom: 1px solid #9993;
+  text-align: left;
+}
+
+.notifsettings:hover {
+  color: #7c3aed;
+}
+
+.notifgear {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.settingsform {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0.9rem 0 0;
+}
+
+.settingsform label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.settingsform input {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border-strong, #9996);
+  border-radius: 10px;
+  font: inherit;
+  background: inherit;
+  color: inherit;
+}
+
+.settingserror {
+  color: #dc2626;
+}
+
 .notifhead {
   font-weight: 700;
   font-size: 0.9rem;
